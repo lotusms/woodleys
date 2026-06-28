@@ -36,14 +36,23 @@ function DropdownLink({ href, children, className = "", close }) {
  * }} props
  */
 function DesktopNavDropdownPanel({ item, open, close }) {
+  const pathname = usePathname();
   const buttonRef = useRef(/** @type {HTMLButtonElement | null} */ (null));
   const panelRef = useRef(/** @type {HTMLDivElement | null} */ (null));
-  const active = isNavItemActive(usePathname(), item);
+  const active = isNavItemActive(pathname, item);
   const hasGroups = Array.isArray(item.groups) && item.groups.length > 0;
   const links = item.children ?? [];
+  const pathnameRef = useRef(pathname);
 
   const containerRefs = useRef([buttonRef, panelRef]);
   useDismissOnOutsidePress(open, close, containerRefs.current);
+
+  useEffect(() => {
+    if (pathnameRef.current !== pathname) {
+      pathnameRef.current = pathname;
+      close();
+    }
+  }, [pathname, close]);
 
   const panelClassName =
     "z-[120] w-max min-w-[14rem] max-w-[min(90vw,28rem)] rounded-sm border border-stone-200/80 bg-white/95 p-4 shadow-lg shadow-stone-900/8 backdrop-blur-sm transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in";
@@ -138,21 +147,11 @@ function DesktopNavDropdownPanel({ item, open, close }) {
  * @param {import("@/config/navigation").NavItem} item
  */
 export default function DesktopNavDropdown({ item }) {
-  const pathname = usePathname();
-  const closeRef = useRef(/** @type {(() => void) | null} */ (null));
-
-  useEffect(() => {
-    closeRef.current?.();
-  }, [pathname]);
-
   return (
     <Popover className="relative">
-      {({ open, close }) => {
-        closeRef.current = close;
-        return (
-          <DesktopNavDropdownPanel item={item} open={open} close={close} />
-        );
-      }}
+      {({ open, close }) => (
+        <DesktopNavDropdownPanel item={item} open={open} close={close} />
+      )}
     </Popover>
   );
 }

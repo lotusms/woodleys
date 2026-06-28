@@ -17,6 +17,7 @@ import {
 import { doc, onSnapshot } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb } from "@firebase/client";
 import { signInWithGoogle as googleSignIn } from "@/lib/google-auth";
+import { clearAdminPortalSession } from "@/lib/auth-routing";
 import { ensureUserAccountDocIfMissing } from "@/lib/ensure-user-account";
 import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 
@@ -154,6 +155,7 @@ export function AuthProvider({ children }) {
 
   const signOut = useCallback(async () => {
     setSigningOut(true);
+    clearAdminPortalSession();
     try {
       const auth = getFirebaseAuth();
       await firebaseSignOut(auth);

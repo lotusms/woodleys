@@ -4,6 +4,7 @@ import Link from "next/link";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
 import { getFirebaseAuth } from "@firebase/client";
+import { siteBelowHeaderMinHeightClass } from "@/config";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
@@ -55,7 +56,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center px-6 py-16">
+    <div className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center px-6 py-16`}>
       <div className={overlayChrome.authCardPanel(light)}>
         <p className={overlayChrome.authTitle(light)}>Forgot password</p>
         <p className={overlayChrome.authSubtitle(light)}>

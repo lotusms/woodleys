@@ -1,36 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import AuthOrDivider from "@/components/auth/AuthOrDivider";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import RegisterAccountForm from "@/components/auth/RegisterAccountForm";
 import { useAuth } from "@/context/AuthContext";
+import { usePostAuthRedirect } from "@/hooks/usePostAuthRedirect";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
-import { formatAuthError } from "@/lib/auth-errors";
+import { siteBelowHeaderMinHeightClass } from "@/config";
+import { openAdminDashboard } from "@/lib/auth-routing";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
 
 export default function RegisterPage() {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
-  const router = useRouter();
   const { user, loading, accountLoading, isAdmin, signInWithGoogle } = useAuth();
   const [googleBusy, setGoogleBusy] = useState(false);
   const [googleError, setGoogleError] = useState("");
+  const [authPending, setAuthPending] = useState(false);
+  const clearAuthPending = useCallback(() => setAuthPending(false), []);
 
-  useEffect(() => {
-    if (loading) return;
-    if (!user || accountLoading) return;
-    router.replace(isAdmin ? "/dashboard" : "/account");
-  }, [user, loading, accountLoading, isAdmin, router]);
+  usePostAuthRedirect(authPending, clearAuthPending);
 
   async function handleGoogleSignIn() {
     setGoogleError("");
     setGoogleBusy(true);
     try {
       await signInWithGoogle();
+      setAuthPending(true);
     } catch (err) {
       setGoogleError(formatAuthError(err));
     } finally {
@@ -42,18 +41,18 @@ export default function RegisterPage() {
 
   if (loading) {
     return (
-      <div className={`flex min-h-dvh items-center justify-center ${muted}`}>
+      <div className={`flex ${siteBelowHeaderMinHeightClass} items-center justify-center ${muted}`}>
         <p className="text-sm">Loading…</p>
       </div>
     );
   }
 
-  if (user && accountLoading) {
+  if ((user && accountLoading) || authPending) {
     return (
       <div
-        className={`flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center ${muted}`}
+        className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center gap-4 px-6 text-center ${muted}`}
       >
-        <p className="text-sm tracking-wide">Loading your account…</p>
+        <p className="text-sm tracking-wide">Setting up your account…</p>
       </div>
     );
   }
@@ -61,29 +60,42 @@ export default function RegisterPage() {
   if (user) {
     return (
       <div
-        className={`flex min-h-dvh flex-col items-center justify-center gap-6 px-6 text-center ${muted}`}
+        className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center gap-6 px-6 text-center ${muted}`}
       >
-        <p className="text-sm tracking-wide">
-          Opening {isAdmin ? "the portal" : "your account"}…
-        </p>
-        <Link
-          href={isAdmin ? "/dashboard" : "/account"}
-          className={overlayChrome.authLinkAccent(light)}
-        >
-          Continue
-        </Link>
+        <p className="text-sm tracking-wide">You are already signed in.</p>
+        <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => openAdminDashboard({ force: true })}
+              className={overlayChrome.authLinkAccent(light)}
+            >
+              Open portal
+            </button>
+          ) : (
+            <Link href="/account" className={overlayChrome.authLinkAccent(light)}>
+              Go to My Account
+            </Link>
+          )}
+          <Link href="/" className={overlayChrome.authLinkAccent(light)}>
+            Back to site
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-dvh flex-col px-4 py-10 sm:px-6 sm:py-14">
+    <main
+      id="main-content"
+      className={`flex ${siteBelowHeaderMinHeightClass} flex-col px-4 py-10 sm:px-6 sm:py-14`}
+    >
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col pt-8">
-        <div className="shrink-0 text-center sm:text-left">
-          <p className={overlayChrome.registerHeroTitle(light)}>Create account</p>
+        <header className="shrink-0 text-center sm:text-left">
+          <h1 className={overlayChrome.registerHeroTitle(light)}>Create account</h1>
           <p className={overlayChrome.registerHeroBody(light)}>
-            Set up your collector profile with contact details and a default
-            shipping address. You can update these anytime in My Account.
+            Create your member profile with contact details and a default shipping
+            address. You can update these anytime in My Account.
           </p>
           <p className={overlayChrome.registerHeroMeta(light)}>
             Already registered?{" "}
@@ -91,7 +103,7 @@ export default function RegisterPage() {
               Sign in
             </Link>
           </p>
-        </div>
+        </header>
 
         <div className="mx-auto mt-8 w-full max-w-md shrink-0">
           {googleError ? (
@@ -114,10 +126,10 @@ export default function RegisterPage() {
         <div className={overlayChrome.registerFormShell(light)}>
           <RegisterAccountForm
             variant="page"
-            onRegistered={() => router.replace("/account")}
+            onRegistered={() => setAuthPending(true)}
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

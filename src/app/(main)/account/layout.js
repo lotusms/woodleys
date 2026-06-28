@@ -1,5 +1,5 @@
 import AccountAuthGate from "@/components/account/AccountAuthGate";
-import AccountShell from "@/components/account/AccountShell";
+import MemberAccountLayout from "@/components/account/MemberAccountLayout";
 import { sitePageTitle } from "@/config";
 
 export const metadata = {
@@ -10,7 +10,7 @@ export const metadata = {
 export default function AccountLayout({ children }) {
   return (
     <AccountAuthGate>
-      <AccountShell>{children}</AccountShell>
+      <MemberAccountLayout>{children}</MemberAccountLayout>
     </AccountAuthGate>
   );
 }

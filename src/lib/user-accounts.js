@@ -21,8 +21,8 @@ export const USER_ACCOUNTS_COLLECTION = "useraccounts";
  * @typedef {Object} UserAccountDoc
  * @property {string} uid — same as Auth uid / document id
  * @property {string} email
- * @property {boolean} [admin] — when true, user may access the shop dashboard; defaults false for customers
- * @property {boolean} [guest] — when true, profile has no Firebase Auth user (guest checkout only); false for registered customers and admins
+ * @property {boolean} [admin] — when true, user has the admin role (dashboard access). Set only via Firebase Console or Admin SDK scripts; never via the app UI.
+ * @property {boolean} [guest] — when true, profile has no Firebase Auth user (guest checkout only). Members and admins use `guest: false`.
  * @property {string} firstName
  * @property {string} lastName
  * @property {string} [phone] — digits-only or formatted; optional

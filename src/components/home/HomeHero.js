@@ -17,7 +17,7 @@ export default function HomeHero() {
         </h1>
         <p className="mt-6 text-lg leading-relaxed text-site-secondary">
           Family-owned fine jewelry since {orgEstablished}. Engagement rings,
-          diamonds, custom design, watches, and expert care—presented with quiet
+          diamonds, custom design, watches, and expert care, presented with a quiet
           confidence in {orgLocation}.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">

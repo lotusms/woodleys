@@ -20,6 +20,12 @@ export const siteHeaderTopOffset = "4.5rem";
 /** Additional secondary nav row on xl+ viewports. */
 export const siteHeaderNavOffset = "3rem";
 
+/** Tailwind classes — clear fixed header on main-site pages. */
+export const siteHeaderClearanceClass = "pt-[4.5rem] xl:pt-[7.5rem]";
+/** Full-height content area below the fixed header. */
+export const siteBelowHeaderMinHeightClass =
+  "min-h-[calc(100dvh-4.5rem)] xl:min-h-[calc(100dvh-7.5rem)]";
+
 /**
  * @param {string} segment Page title segment (e.g. "Engagement & Wedding")
  * @returns {string} e.g. "Engagement & Wedding | Woodley's Jewelers"

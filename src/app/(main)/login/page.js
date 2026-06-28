@@ -1,36 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import AuthOrDivider from "@/components/auth/AuthOrDivider";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-import { orgName } from "@/config";
+import { orgName, siteBelowHeaderMinHeightClass } from "@/config";
+import { usePostAuthRedirect } from "@/hooks/usePostAuthRedirect";
 import { formatAuthError } from "@/lib/auth-errors";
+import { openAdminDashboard } from "@/lib/auth-routing";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className={`flex ${siteBelowHeaderMinHeightClass} items-center justify-center text-sm text-site-secondary`}>
+          Loading…
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
+  const searchParams = useSearchParams();
+  const memberPath = searchParams.get("next") || "/account";
   const { user, loading, accountLoading, isAdmin, signIn, signInWithGoogle } =
     useAuth();
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [authPending, setAuthPending] = useState(false);
+  const clearAuthPending = useCallback(() => setAuthPending(false), []);
 
-  useEffect(() => {
-    if (loading) return;
-    if (!user || accountLoading) return;
-    router.replace(isAdmin ? "/dashboard" : "/account");
-  }, [user, loading, accountLoading, isAdmin, router]);
+  usePostAuthRedirect(authPending, clearAuthPending, memberPath);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -38,6 +53,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await signIn(email, password);
+      setAuthPending(true);
     } catch (err) {
       setError(
         formatAuthError(err, "Sign-in failed. Check Email/Password in Firebase Console."),
@@ -52,6 +68,7 @@ export default function LoginPage() {
     setGoogleBusy(true);
     try {
       await signInWithGoogle();
+      setAuthPending(true);
     } catch (err) {
       setError(formatAuthError(err));
     } finally {
@@ -63,18 +80,18 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className={`flex min-h-dvh items-center justify-center ${muted}`}>
+      <div className={`flex ${siteBelowHeaderMinHeightClass} items-center justify-center ${muted}`}>
         <p className="text-sm">Loading…</p>
       </div>
     );
   }
 
-  if (user && accountLoading) {
+  if ((user && accountLoading) || authPending) {
     return (
       <div
-        className={`flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center ${muted}`}
+        className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center gap-4 px-6 text-center ${muted}`}
       >
-        <p className="text-sm tracking-wide">Loading your account…</p>
+        <p className="text-sm tracking-wide">Signing you in…</p>
       </div>
     );
   }
@@ -82,29 +99,24 @@ export default function LoginPage() {
   if (user) {
     return (
       <div
-        className={`flex min-h-dvh flex-col items-center justify-center gap-6 px-6 text-center ${muted}`}
+        className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center gap-6 px-6 text-center ${muted}`}
       >
-        <p className="text-sm tracking-wide">
-          Opening {isAdmin ? "the portal" : "your account"}…
-        </p>
-        <p className="max-w-sm text-xs text-stone-500">
-          Stuck here? Continue manually:
-        </p>
+        <p className="text-sm tracking-wide">You are already signed in.</p>
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-          <Link
-            href={isAdmin ? "/dashboard" : "/account"}
-            className={overlayChrome.authLinkAccent(light)}
-          >
-            {isAdmin ? "Go to portal" : "Go to My Account"}
-          </Link>
-          <Link
-            href="/"
-            className={
-              light
-                ? "text-stone-600 transition hover:text-stone-900"
-                : "text-stone-500 transition hover:text-stone-300"
-            }
-          >
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => openAdminDashboard({ force: true })}
+              className={overlayChrome.authLinkAccent(light)}
+            >
+              Open portal
+            </button>
+          ) : (
+            <Link href="/account" className={overlayChrome.authLinkAccent(light)}>
+              Go to My Account
+            </Link>
+          )}
+          <Link href="/" className={overlayChrome.authLinkAccent(light)}>
             Back to site
           </Link>
         </div>
@@ -113,12 +125,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center px-6 py-16">
+    <main
+      id="main-content"
+      className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center px-6 py-16`}
+    >
       <div className={overlayChrome.authCardPanel(light)}>
-        <p className={overlayChrome.authTitle(light)}>Sign in</p>
+        <h1 className={overlayChrome.authTitle(light)}>Sign in</h1>
         <p className={overlayChrome.authSubtitle(light)}>
           Sign in with Google or use the email and password for your {orgName}{" "}
-          account.
+          member account.
         </p>
 
         {error ? (
@@ -138,7 +153,7 @@ export default function LoginPage() {
 
         <AuthOrDivider light={light} />
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
           <div>
             <label
               htmlFor="login-email"
@@ -201,6 +216,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }

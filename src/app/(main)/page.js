@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <main className="pt-[4.5rem] xl:pt-[7.5rem]">
+    <main>
       <HomeHero />
       <HomeHeritage />
       <HomeFeaturedCategories />

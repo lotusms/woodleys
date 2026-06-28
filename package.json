@@ -10,7 +10,9 @@
     "dev": "open http://localhost:3002 >/dev/null 2>&1 || true; WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true next dev --port 3002 --webpack",
     "build": "next build",
     "start": "next start --port 3002",
-    "lint": "eslint"
+    "lint": "eslint",
+    "set:admin": "node scripts/set-admin-role.mjs",
+    "seed:admin": "node scripts/seed-admin-firestore.mjs"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

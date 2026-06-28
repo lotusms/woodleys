@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
@@ -30,14 +30,25 @@ export default function DashboardAuthGate({ children }) {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const muted = overlayChrome.pageMutedText(light);
+  const redirectedRef = useRef(false);
+
+  useEffect(() => {
+    if (!user) {
+      redirectedRef.current = false;
+    }
+  }, [user]);
 
   useEffect(() => {
     if (loading || accountLoading) return;
     if (!user && !signingOut) {
+      if (redirectedRef.current) return;
+      redirectedRef.current = true;
       router.replace("/login");
       return;
     }
     if (user && !isAdmin) {
+      if (redirectedRef.current) return;
+      redirectedRef.current = true;
       router.replace("/account");
     }
   }, [user, loading, accountLoading, isAdmin, signingOut, router]);

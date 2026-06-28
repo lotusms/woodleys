@@ -22,7 +22,7 @@ export default function SiteFooter() {
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-site-secondary">
             A family-owned fine jeweler in {orgLocation}, trusted since{" "}
             {orgEstablished}. Engagement rings, diamonds, custom design, watches,
-            and expert care—presented with quiet confidence.
+            and expert care, presented with a quiet confidence in {orgLocation}.
           </p>
         </div>
 

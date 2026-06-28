@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import SiteLogo from "@/components/brand/SiteLogo";
+import AccountAuthMenu from "@/components/auth/AccountAuthMenu";
 import DesktopNavDropdown from "@/components/navigation/DesktopNavDropdown";
 import { PopoverGroup } from "@headlessui/react";
 import {
@@ -197,6 +198,7 @@ export default function SiteHeader() {
             >
               Book Visit
             </Link>
+            <AccountAuthMenu onNavigate={close} />
             <button
               type="button"
               className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-stone-300/80 bg-white text-site-fg xl:hidden"
@@ -266,6 +268,9 @@ export default function SiteHeader() {
           >
             Request an Appointment
           </Link>
+          <div className="mt-6 border-t border-stone-200/80 pt-6">
+            <AccountAuthMenu onNavigate={close} className="w-full [&_button]:w-full [&_button]:justify-center" />
+          </div>
         </div>
       </div>
     </>

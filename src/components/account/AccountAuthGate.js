@@ -2,21 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-function GateEscapeBar() {
+function GateMessage({ children }) {
   return (
-    <div className="pointer-events-auto fixed left-0 right-0 top-0 z-[9999] flex justify-end gap-4 border-b border-white/[0.06] bg-slate-950/95 px-4 py-2 text-xs backdrop-blur-md">
-      <Link
-        href="/"
-        className="font-medium text-amber-200/95 transition hover:text-amber-100"
-      >
-        Home
-      </Link>
-      <Link href="/login" className="text-stone-500 transition hover:text-stone-300">
-        Sign in
-      </Link>
+    <div className="flex min-h-[50vh] items-center justify-center px-6 text-center text-site-secondary">
+      <p className="text-sm tracking-wide">{children}</p>
     </div>
   );
 }
@@ -24,70 +16,51 @@ function GateEscapeBar() {
 export default function AccountAuthGate({ children }) {
   const { user, loading, accountLoading, isAdmin, signingOut } = useAuth();
   const router = useRouter();
+  const adminRedirectedRef = useRef(false);
+
+  useEffect(() => {
+    if (!user) {
+      adminRedirectedRef.current = false;
+    }
+  }, [user]);
 
   useEffect(() => {
     if (loading || accountLoading) return;
     if (!user && !signingOut) {
-      router.replace("/login");
+      router.replace("/login?next=/account");
       return;
     }
-    if (user && isAdmin) {
-      router.replace("/dashboard");
+    if (user && isAdmin && !adminRedirectedRef.current) {
+      adminRedirectedRef.current = true;
+      router.replace("/");
     }
   }, [user, loading, accountLoading, isAdmin, signingOut, router]);
 
   if (loading) {
-    return (
-      <>
-        <GateEscapeBar />
-        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm tracking-wide">Loading…</p>
-        </div>
-      </>
-    );
+    return <GateMessage>Loading…</GateMessage>;
   }
 
   if (!user && signingOut) {
-    return (
-      <>
-        <GateEscapeBar />
-        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm tracking-wide">Signing out…</p>
-        </div>
-      </>
-    );
+    return <GateMessage>Signing out…</GateMessage>;
   }
 
   if (!user) {
-    return (
-      <>
-        <GateEscapeBar />
-        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm tracking-wide">Redirecting to sign in…</p>
-        </div>
-      </>
-    );
+    return <GateMessage>Redirecting to sign in…</GateMessage>;
   }
 
   if (accountLoading) {
-    return (
-      <>
-        <GateEscapeBar />
-        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm tracking-wide">Loading your account…</p>
-        </div>
-      </>
-    );
+    return <GateMessage>Loading your account…</GateMessage>;
   }
 
   if (isAdmin) {
     return (
-      <>
-        <GateEscapeBar />
-        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm tracking-wide">Opening the portal…</p>
-        </div>
-      </>
+      <GateMessage>
+        The member account area is for customers.{" "}
+        <Link href="/" className="text-warm-gold-dark underline underline-offset-4">
+          Return to the site
+        </Link>
+        .
+      </GateMessage>
     );
   }
 
