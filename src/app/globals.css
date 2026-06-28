@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, monospace;
+
+  --color-ivory: #faf8f4;
+  --color-champagne: #f5efe6;
+  --color-warm-gold: #9a7b4f;
+  --color-warm-gold-dark: #7a6040;
+  --color-neutral-warm: #6b6560;
+
+  --color-site-primary: var(--color-warm-gold);
+  --color-site-secondary: var(--color-neutral-warm);
+  --color-site-tertiary: #c4a574;
+  --color-site-bg: var(--color-ivory);
+  --color-site-fg: #2c2825;
+
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+[data-card-surface="light"] {
+  --color-site-fg: #2c2825;
+  --site-fg: var(--color-site-fg);
+}
+
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-warm-gold-dark);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes mobile-nav-item-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@layer utilities {
+  .fabric-texture {
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+      linear-gradient(180deg, #fdfbf7, #f7f4ef);
+  }
+
+  .product-image-scrim-card {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0.85;
+    background-image: linear-gradient(
+      to top,
+      color-mix(in oklch, #2c2825 72%, transparent) 0%,
+      transparent 100%
+    );
+  }
+
+  .product-image-scrim-inner {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background-image: linear-gradient(
+      to top,
+      color-mix(in oklch, #2c2825 55%, transparent) 0%,
+      transparent 100%
+    );
+  }
+
+  .mobile-nav-item {
+    opacity: 0;
+  }
+
+  .mobile-nav-panel--open .mobile-nav-item {
+    animation: mobile-nav-item-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    .mobile-nav-panel--open .mobile-nav-item {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

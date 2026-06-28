@@ -1,0 +1,17 @@
+{
+  "name": "Woodley's Jewelers",
+  "short_name": "Woodley's",
+  "description": "Family-owned fine jewelry in Beaumont, California since 1948.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f4",
+  "theme_color": "#9a7b4f",
+  "icons": [
+    {
+      "src": "/images/logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

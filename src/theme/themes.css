@@ -1,0 +1,82 @@
+/*
+ * Woodley's Jewelers — ivory, champagne, warm gold editorial theme.
+ */
+
+html[data-theme="woodleys"] {
+  --color-site-primary: #9a7b4f;
+  --color-site-secondary: #6b6560;
+  --color-site-tertiary: #c4a574;
+  --color-site-bg: #faf8f4;
+  --color-site-fg: #2c2825;
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="woodleys"] body {
+  background-color: var(--color-site-bg);
+  background-image:
+    radial-gradient(
+      circle at 12% 8%,
+      color-mix(in oklch, #f5efe6 85%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 88% 18%,
+      color-mix(in oklch, #ede4d4 70%, transparent),
+      transparent 38%
+    ),
+    linear-gradient(180deg, #fdfbf7 0%, #faf8f4 48%, #f7f4ef 100%);
+}
+
+html[data-theme="woodleys"] [data-card-surface="light"] {
+  --color-site-fg: #2c2825;
+  --site-fg: var(--color-site-fg);
+}
+
+/* Light theme scrims for product/editorial images */
+html[data-theme="woodleys"] .product-image-scrim-card {
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklch, #2c2825 72%, transparent) 0%,
+    color-mix(in oklch, #2c2825 18%, transparent) 45%,
+    transparent 100%
+  );
+}
+
+html[data-theme="woodleys"] .product-image-scrim-inner {
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklch, #2c2825 58%, transparent) 0%,
+    color-mix(in oklch, #2c2825 12%, transparent) 52%,
+    transparent 100%
+  );
+}
+
+html[data-theme="woodleys"] .text-gradient-hero {
+  background-image: linear-gradient(
+    118deg,
+    #2c2825 0%,
+    #4a433c 35%,
+    #6b6560 65%,
+    #2c2825 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: none;
+}
+
+html[data-theme="woodleys"] .text-gradient-hero-subtle {
+  background-image: linear-gradient(
+    105deg,
+    #4a433c 0%,
+    #6b6560 55%,
+    #8a8278 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
