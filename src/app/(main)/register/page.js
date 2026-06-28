@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import AuthOrDivider from "@/components/auth/AuthOrDivider";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import RegisterAccountForm from "@/components/auth/RegisterAccountForm";
 import { useAuth } from "@/context/AuthContext";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import { formatAuthError } from "@/lib/auth-errors";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
 
@@ -13,13 +16,27 @@ export default function RegisterPage() {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const router = useRouter();
-  const { user, loading, accountLoading, isAdmin } = useAuth();
+  const { user, loading, accountLoading, isAdmin, signInWithGoogle } = useAuth();
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleError, setGoogleError] = useState("");
 
   useEffect(() => {
     if (loading) return;
     if (!user || accountLoading) return;
     router.replace(isAdmin ? "/dashboard" : "/account");
   }, [user, loading, accountLoading, isAdmin, router]);
+
+  async function handleGoogleSignIn() {
+    setGoogleError("");
+    setGoogleBusy(true);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setGoogleError(formatAuthError(err));
+    } finally {
+      setGoogleBusy(false);
+    }
+  }
 
   const muted = overlayChrome.pageMutedText(light);
 
@@ -73,6 +90,24 @@ export default function RegisterPage() {
             <Link href="/login" className={overlayChrome.authLinkAccent(light)}>
               Sign in
             </Link>
+          </p>
+        </div>
+
+        <div className="mx-auto mt-8 w-full max-w-md shrink-0">
+          {googleError ? (
+            <p className={overlayChrome.authInlineError(light)} role="alert">
+              {googleError}
+            </p>
+          ) : null}
+          <GoogleSignInButton
+            light={light}
+            busy={googleBusy}
+            onClick={handleGoogleSignIn}
+            className={googleError ? "mt-3" : ""}
+          />
+          <AuthOrDivider light={light} />
+          <p className={`text-center text-sm ${overlayChrome.authFooterMuted(light)}`}>
+            Or register with email below
           </p>
         </div>
 

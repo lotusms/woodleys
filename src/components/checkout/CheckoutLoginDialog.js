@@ -8,10 +8,14 @@ import {
 } from "@headlessui/react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useEffect, useState } from "react";
+import AuthOrDivider from "@/components/auth/AuthOrDivider";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { getFirebaseAuth } from "@firebase/client";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { useAuth } from "@/context/AuthContext";
 import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import { formatAuthError } from "@/lib/auth-errors";
 import * as overlayChrome from "@/lib/overlayChrome";
 
 /**
@@ -19,10 +23,12 @@ import * as overlayChrome from "@/lib/overlayChrome";
  */
 export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
   const { light } = useOverlayChrome();
+  const { signInWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -41,20 +47,23 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
       onClose();
       onSignedIn?.();
     } catch (err) {
-      const code = err?.code;
-      const msg =
-        code === "auth/invalid-credential" || code === "auth/wrong-password"
-          ? "Email or password is incorrect."
-          : code === "auth/user-not-found"
-            ? "No account found for that email."
-            : code === "auth/too-many-requests"
-              ? "Too many attempts. Try again shortly."
-              : err instanceof Error
-                ? err.message
-                : "Could not sign in.";
-      setError(msg);
+      setError(formatAuthError(err));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setError("");
+    setGoogleBusy(true);
+    try {
+      await signInWithGoogle();
+      onClose();
+      onSignedIn?.();
+    } catch (err) {
+      setError(formatAuthError(err));
+    } finally {
+      setGoogleBusy(false);
     }
   }
 
@@ -79,7 +88,27 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
             paying.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          {error ? (
+            <p
+              className={light ? "mt-4 text-sm text-rose-700" : "mt-4 text-sm text-rose-300"}
+              role="alert"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          <div className="mt-6">
+            <GoogleSignInButton
+              light={light}
+              busy={googleBusy}
+              disabled={busy}
+              onClick={handleGoogleSignIn}
+            />
+          </div>
+
+          <AuthOrDivider light={light} className="my-5" />
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
                 htmlFor="checkout-login-email"
@@ -108,18 +137,10 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
               labelClassName={overlayChrome.checkoutLabelUppercase(light)}
               inputClassName={overlayChrome.checkoutPasswordInputClass(light)}
             />
-            {error ? (
-              <p
-                className={light ? "text-sm text-rose-700" : "text-sm text-rose-300"}
-                role="alert"
-              >
-                {error}
-              </p>
-            ) : null}
             <div className="flex flex-wrap gap-3 pt-2">
               <PrimaryButton
                 type="submit"
-                disabled={busy}
+                disabled={busy || googleBusy}
                 className="min-w-[8rem] justify-center px-6"
               >
                 {busy ? "Signing in…" : "Sign in"}

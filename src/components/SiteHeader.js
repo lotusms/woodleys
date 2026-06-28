@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import SiteLogo from "@/components/brand/SiteLogo";
 import DesktopNavDropdown from "@/components/navigation/DesktopNavDropdown";
-import { mainNav, isNavItemActive } from "@/config";
+import { PopoverGroup } from "@headlessui/react";
+import {
+  mainNav,
+  isNavItemActive,
+  orgPhone,
+  orgPhoneTel,
+  siteHeaderTopOffset,
+} from "@/config";
 
 function NavLink({ href, label, prefix, onNavigate, className = "" }) {
   const pathname = usePathname();
@@ -23,6 +30,31 @@ function NavLink({ href, label, prefix, onNavigate, className = "" }) {
     >
       {label}
     </Link>
+  );
+}
+
+function DesktopMainNav() {
+  return (
+    <PopoverGroup className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 xl:gap-x-6">
+      {mainNav.map((item) => {
+        const hasDropdown =
+          (item.children && item.children.length > 0) ||
+          (item.groups && item.groups.length > 0);
+
+        if (hasDropdown) {
+          return <DesktopNavDropdown key={item.href} item={item} />;
+        }
+
+        return (
+          <NavLink
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            prefix={item.prefix}
+          />
+        );
+      })}
+    </PopoverGroup>
   );
 }
 
@@ -152,40 +184,22 @@ export default function SiteHeader() {
         <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
           <SiteLogo variant="default" />
 
-          <nav
-            aria-label="Main"
-            className="hidden items-center gap-5 xl:flex xl:gap-6"
-          >
-            {mainNav.map((item) => {
-              const hasDropdown =
-                (item.children && item.children.length > 0) ||
-                (item.groups && item.groups.length > 0);
-
-              if (hasDropdown) {
-                return <DesktopNavDropdown key={item.href} item={item} />;
-              }
-
-              return (
-                <NavLink
-                  key={item.href}
-                  href={item.href}
-                  label={item.label}
-                  prefix={item.prefix}
-                />
-              );
-            })}
-          </nav>
-
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <a
+              href={`tel:${orgPhoneTel}`}
+              className="whitespace-nowrap text-[0.62rem] font-medium uppercase tracking-[0.16em] text-site-fg transition hover:text-warm-gold-dark sm:text-[0.65rem] sm:tracking-[0.18em]"
+            >
+              {orgPhone}
+            </a>
             <Link
               href="/appointments"
-              className="hidden rounded-full border border-stone-300/80 bg-white px-4 py-2 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-site-fg transition hover:border-warm-gold hover:bg-champagne sm:inline-flex"
+              className="inline-flex shrink-0 rounded-full border border-stone-300/80 bg-white px-3 py-2 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-site-fg transition hover:border-warm-gold hover:bg-champagne sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]"
             >
               Book Visit
             </Link>
             <button
               type="button"
-              className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-full border border-stone-300/80 bg-white text-site-fg xl:hidden"
+              className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-stone-300/80 bg-white text-site-fg xl:hidden"
               aria-expanded={open}
               aria-controls={panelId}
               aria-label={open ? "Close menu" : "Open menu"}
@@ -209,6 +223,14 @@ export default function SiteHeader() {
             </button>
           </div>
         </div>
+
+        <div className="hidden border-t border-stone-200/60 xl:block">
+          <div className="mx-auto flex min-h-12 max-w-7xl items-center justify-center px-5 py-2.5 sm:px-8 lg:px-10">
+            <nav aria-label="Main" className="flex flex-wrap items-center justify-center">
+              <DesktopMainNav />
+            </nav>
+          </div>
+        </div>
       </header>
 
       <div
@@ -217,8 +239,11 @@ export default function SiteHeader() {
         aria-modal="true"
         aria-label="Site navigation"
         aria-hidden={!open}
-        className={`mobile-nav-panel fixed inset-0 z-[100] flex flex-col bg-ivory pt-[4.5rem] xl:hidden ${
-          open ? "mobile-nav-panel--open visible opacity-100" : "invisible pointer-events-none opacity-0"
+        style={{ paddingTop: siteHeaderTopOffset }}
+        className={`mobile-nav-panel fixed inset-0 z-[100] flex flex-col bg-ivory xl:hidden ${
+          open
+            ? "mobile-nav-panel--open visible opacity-100"
+            : "invisible pointer-events-none opacity-0"
         }`}
       >
         <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-8">

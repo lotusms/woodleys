@@ -12,7 +12,7 @@ export default function PageLayout({
   const layoutWidth = "max-w-7xl";
 
   return (
-    <main className="relative z-10 w-full min-w-0 pt-[4.5rem]">
+    <main className="relative z-10 w-full min-w-0 pt-[4.5rem] xl:pt-[7.5rem]">
       {heroImage ? (
         <div className="relative mx-auto mb-10 max-w-7xl px-6 sm:px-10 lg:px-12">
           <div className="relative aspect-[21/9] overflow-hidden rounded-sm bg-champagne">

@@ -16,6 +16,7 @@ import {
 } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb } from "@firebase/client";
+import { signInWithGoogle as googleSignIn } from "@/lib/google-auth";
 import { ensureUserAccountDocIfMissing } from "@/lib/ensure-user-account";
 import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 
@@ -147,6 +148,10 @@ export function AuthProvider({ children }) {
     await signInWithEmailAndPassword(auth, email.trim(), password);
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    await googleSignIn();
+  }, []);
+
   const signOut = useCallback(async () => {
     setSigningOut(true);
     try {
@@ -172,6 +177,7 @@ export function AuthProvider({ children }) {
       loading,
       signingOut,
       signIn,
+      signInWithGoogle,
       signOut,
       userAccount: resolvedAccount,
       accountLoading,
@@ -182,6 +188,7 @@ export function AuthProvider({ children }) {
       loading,
       signingOut,
       signIn,
+      signInWithGoogle,
       signOut,
       resolvedAccount,
       accountLoading,

@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import AuthOrDivider from "@/components/auth/AuthOrDivider";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { orgName } from "@/config";
+import { formatAuthError } from "@/lib/auth-errors";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
@@ -14,12 +17,14 @@ import { isLightThemeId } from "@/theme";
 export default function LoginPage() {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
-  const { user, loading, accountLoading, isAdmin, signIn } = useAuth();
+  const { user, loading, accountLoading, isAdmin, signIn, signInWithGoogle } =
+    useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -34,13 +39,23 @@ export default function LoginPage() {
     try {
       await signIn(email, password);
     } catch (err) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Sign-in failed. Check Email/Password in Firebase Console.";
-      setError(msg);
+      setError(
+        formatAuthError(err, "Sign-in failed. Check Email/Password in Firebase Console."),
+      );
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setError("");
+    setGoogleBusy(true);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(formatAuthError(err));
+    } finally {
+      setGoogleBusy(false);
     }
   }
 
@@ -102,10 +117,28 @@ export default function LoginPage() {
       <div className={overlayChrome.authCardPanel(light)}>
         <p className={overlayChrome.authTitle(light)}>Sign in</p>
         <p className={overlayChrome.authSubtitle(light)}>
-          Use the email and password for your {orgName} account.
+          Sign in with Google or use the email and password for your {orgName}{" "}
+          account.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+        {error ? (
+          <p className={`mt-4 ${overlayChrome.authInlineError(light)}`} role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <div className="mt-8">
+          <GoogleSignInButton
+            light={light}
+            busy={googleBusy}
+            disabled={submitting}
+            onClick={handleGoogleSignIn}
+          />
+        </div>
+
+        <AuthOrDivider light={light} />
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label
               htmlFor="login-email"
@@ -137,15 +170,9 @@ export default function LoginPage() {
             inputClassName={overlayChrome.authPasswordInputOverride(light)}
           />
 
-          {error ? (
-            <p className={overlayChrome.authInlineError(light)} role="alert">
-              {error}
-            </p>
-          ) : null}
-
           <PrimaryButton
             type="submit"
-            disabled={submitting}
+            disabled={submitting || googleBusy}
             className="mt-2 w-full justify-center"
           >
             {submitting ? "Signing in…" : "Sign in"}

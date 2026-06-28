@@ -2,49 +2,89 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import { useEffect, useRef } from "react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+} from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { isNavItemActive } from "@/config";
+import { useDismissOnOutsidePress } from "@/hooks/useDismissOnOutsidePress";
 
 /**
- * @param {import("@/config/navigation").NavItem} item
+ * @param {{
+ *   href: string;
+ *   children: import("react").ReactNode;
+ *   className?: string;
+ *   close: () => void;
+ * }} props
  */
-export default function DesktopNavDropdown({ item }) {
-  const pathname = usePathname();
-  const active = isNavItemActive(pathname, item);
+function DropdownLink({ href, children, className = "", close }) {
+  return (
+    <Link href={href} onClick={() => close()} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+/**
+ * @param {{
+ *   item: import("@/config/navigation").NavItem;
+ *   open: boolean;
+ *   close: () => void;
+ * }} props
+ */
+function DesktopNavDropdownPanel({ item, open, close }) {
+  const buttonRef = useRef(/** @type {HTMLButtonElement | null} */ (null));
+  const panelRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+  const active = isNavItemActive(usePathname(), item);
   const hasGroups = Array.isArray(item.groups) && item.groups.length > 0;
   const links = item.children ?? [];
 
-  return (
-    <Popover className="relative">
-      {({ open, close }) => (
-        <>
-          <PopoverButton
-            className={`inline-flex items-center gap-1 border-b-2 pb-0.5 text-[0.68rem] font-medium uppercase tracking-[0.22em] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-site-bg ${
-              active || open
-                ? "border-warm-gold text-site-fg"
-                : "border-transparent text-site-secondary hover:border-stone-300 hover:text-site-fg"
-            }`}
-          >
-            <span>{item.label}</span>
-            <ChevronDownIcon
-              className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
-              aria-hidden
-            />
-          </PopoverButton>
+  const containerRefs = useRef([buttonRef, panelRef]);
+  useDismissOnOutsidePress(open, close, containerRefs.current);
 
-          <PopoverPanel
-            transition
-            className="absolute left-1/2 z-50 mt-3 w-max min-w-[14rem] max-w-[min(90vw,28rem)] -translate-x-1/2 rounded-sm border border-stone-200/80 bg-white/95 p-4 shadow-lg shadow-stone-900/8 backdrop-blur-sm transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
-          >
+  const panelClassName =
+    "z-[120] w-max min-w-[14rem] max-w-[min(90vw,28rem)] rounded-sm border border-stone-200/80 bg-white/95 p-4 shadow-lg shadow-stone-900/8 backdrop-blur-sm transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in";
+
+  const linkClassName =
+    "block rounded px-1 py-1 text-sm text-site-fg transition hover:bg-champagne/80 hover:text-warm-gold-dark focus-visible:bg-champagne/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-1";
+
+  return (
+    <>
+      <PopoverButton
+        ref={buttonRef}
+        className={`inline-flex items-center gap-1 border-b-2 pb-0.5 text-[0.68rem] font-medium uppercase tracking-[0.22em] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-site-bg ${
+          active || open
+            ? "border-warm-gold text-site-fg"
+            : "border-transparent text-site-secondary hover:border-stone-300 hover:text-site-fg"
+        }`}
+      >
+        <span>{item.label}</span>
+        <ChevronDownIcon
+          className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </PopoverButton>
+
+      <PopoverPanel
+        ref={panelRef}
+        focus
+        transition
+        anchor={{ to: "bottom", gap: 12, padding: 16 }}
+        className={panelClassName}
+      >
+        {({ close: closePanel }) => (
+          <nav aria-label={`${item.label} menu`}>
             <div className="mb-3 border-b border-stone-100 pb-3">
-              <Link
+              <DropdownLink
                 href={item.href}
-                onClick={() => close()}
-                className="font-serif text-base text-site-fg transition hover:text-warm-gold-dark"
+                close={closePanel}
+                className="font-serif text-base text-site-fg transition hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2"
               >
                 View all {item.label}
-              </Link>
+              </DropdownLink>
             </div>
 
             {hasGroups ? (
@@ -59,13 +99,13 @@ export default function DesktopNavDropdown({ item }) {
                     <ul className="space-y-1.5" role="list">
                       {group.links.map((link) => (
                         <li key={link.href}>
-                          <Link
+                          <DropdownLink
                             href={link.href}
-                            onClick={() => close()}
-                            className="block rounded px-1 py-1 text-sm text-site-fg transition hover:bg-champagne/80 hover:text-warm-gold-dark focus-visible:bg-champagne/80"
+                            close={closePanel}
+                            className={linkClassName}
                           >
                             {link.label}
-                          </Link>
+                          </DropdownLink>
                         </li>
                       ))}
                     </ul>
@@ -76,20 +116,43 @@ export default function DesktopNavDropdown({ item }) {
               <ul className="space-y-1.5" role="list">
                 {links.map((link) => (
                   <li key={link.href}>
-                    <Link
+                    <DropdownLink
                       href={link.href}
-                      onClick={() => close()}
-                      className="block rounded px-1 py-1 text-sm text-site-fg transition hover:bg-champagne/80 hover:text-warm-gold-dark focus-visible:bg-champagne/80"
+                      close={closePanel}
+                      className={linkClassName}
                     >
                       {link.label}
-                    </Link>
+                    </DropdownLink>
                   </li>
                 ))}
               </ul>
             )}
-          </PopoverPanel>
-        </>
-      )}
+          </nav>
+        )}
+      </PopoverPanel>
+    </>
+  );
+}
+
+/**
+ * @param {import("@/config/navigation").NavItem} item
+ */
+export default function DesktopNavDropdown({ item }) {
+  const pathname = usePathname();
+  const closeRef = useRef(/** @type {(() => void) | null} */ (null));
+
+  useEffect(() => {
+    closeRef.current?.();
+  }, [pathname]);
+
+  return (
+    <Popover className="relative">
+      {({ open, close }) => {
+        closeRef.current = close;
+        return (
+          <DesktopNavDropdownPanel item={item} open={open} close={close} />
+        );
+      }}
     </Popover>
   );
 }

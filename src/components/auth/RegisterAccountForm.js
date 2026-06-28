@@ -9,6 +9,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import SelectListbox from "@/components/ui/SelectListbox";
 import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import { formatAuthError } from "@/lib/auth-errors";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { validateAccountRegistration } from "@/lib/account-registration";
 import {
@@ -150,16 +151,7 @@ export default function RegisterAccountForm({
         country,
       });
     } catch (err) {
-      const code = err?.code;
-      const msg =
-        code === "auth/email-already-in-use"
-          ? "That email is already registered. Try signing in instead."
-          : code === "auth/weak-password"
-            ? "Password is too weak. Use at least 6 characters."
-            : err instanceof Error
-              ? err.message
-              : "Could not create account.";
-      setError(msg);
+      setError(formatAuthError(err, "Could not create account."));
     } finally {
       setBusy(false);
     }

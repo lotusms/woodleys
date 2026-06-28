@@ -7,7 +7,7 @@ const heroImage =
 
 export default function HomeHero() {
   return (
-    <section className="relative z-10 mx-auto grid min-h-[calc(100vh-4.5rem)] w-full max-w-7xl items-center gap-12 px-6 py-16 sm:px-10 lg:grid-cols-2 lg:px-12">
+    <section className="relative z-10 mx-auto grid min-h-[calc(100vh-4.5rem)] w-full max-w-7xl items-center gap-12 px-6 py-16 sm:px-10 lg:grid-cols-2 lg:px-12 xl:min-h-[calc(100vh-7.5rem)]">
       <div className="max-w-xl">
         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-site-secondary">
           Beaumont, California · Est. {orgEstablished}
