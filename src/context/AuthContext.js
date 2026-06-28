@@ -23,7 +23,7 @@ import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 
 const AuthContext = createContext(null);
 
-/** @typedef {{ status: 'idle' | 'loading' | 'ready', admin: boolean, guest: boolean, firstName: string, lastName: string }} UserAccountState */
+/** @typedef {{ uid?: string, status: 'idle' | 'loading' | 'ready', admin: boolean, guest: boolean, firstName: string, lastName: string }} UserAccountState */
 
 const idleAccount = /** @type {UserAccountState} */ ({
   status: "idle",
@@ -82,10 +82,14 @@ export function AuthProvider({ children }) {
 
   /* Firestore listener: set loading before first snapshot; snapshot/error callbacks update state. */
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setUserAccount(idleAccount);
+      return;
+    }
 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- bootstrap listener + loading UI before first snapshot
     setUserAccount({
+      uid: user.uid,
       status: "loading",
       admin: false,
       guest: false,
@@ -100,6 +104,7 @@ export function AuthProvider({ children }) {
       (snap) => {
         if (!snap.exists()) {
           setUserAccount({
+            uid: user.uid,
             status: "ready",
             admin: false,
             guest: false,
@@ -110,6 +115,7 @@ export function AuthProvider({ children }) {
         }
         const d = snap.data();
         setUserAccount({
+          uid: user.uid,
           status: "ready",
           admin: Boolean(d.admin),
           guest: Boolean(d.guest),
@@ -120,6 +126,7 @@ export function AuthProvider({ children }) {
       (err) => {
         console.error("[auth] userAccount", err);
         setUserAccount({
+          uid: user.uid,
           status: "ready",
           admin: false,
           guest: false,
@@ -167,8 +174,16 @@ export function AuthProvider({ children }) {
   }, [router]);
 
   const resolvedAccount = user ? userAccount : idleAccount;
-  const accountLoading = Boolean(user && resolvedAccount.status === "loading");
+  const accountBelongsToUser =
+    !user || resolvedAccount.uid === user.uid || resolvedAccount.status === "idle";
+  const accountLoading = Boolean(
+    user &&
+      (!accountBelongsToUser ||
+        resolvedAccount.status === "loading" ||
+        resolvedAccount.status === "idle"),
+  );
   const isAdmin =
+    accountBelongsToUser &&
     resolvedAccount.status === "ready" &&
     resolvedAccount.admin === true &&
     resolvedAccount.guest !== true;

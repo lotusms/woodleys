@@ -6,7 +6,7 @@ import {
   orgPhone,
   orgEmail,
 } from "@/config";
-import { mainNav } from "@/config";
+import { footerPageLinks, mainNav } from "@/config";
 
 const legalLinks = [
   { href: "/privacy-policy", label: "Privacy Policy" },
@@ -49,12 +49,17 @@ export default function SiteFooter() {
               </a>
             </p>
           </address>
-          <Link
-            href="/appointments"
-            className="mt-5 inline-flex text-sm font-medium text-warm-gold-dark underline-offset-4 transition hover:underline"
-          >
-            Request an appointment
-          </Link>
+          <nav aria-label="Footer pages" className="mt-5 flex flex-col gap-2">
+            {footerPageLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-warm-gold-dark underline-offset-4 transition hover:underline"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
         <div>
@@ -63,7 +68,7 @@ export default function SiteFooter() {
           </h2>
           <nav aria-label="Footer collections" className="mt-4">
             <ul className="grid gap-2 sm:grid-cols-2" role="list">
-              {mainNav.slice(0, 6).map((item) => (
+              {mainNav.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}

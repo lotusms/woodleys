@@ -25,7 +25,7 @@ function GateEscapeBar() {
 }
 
 export default function DashboardAuthGate({ children }) {
-  const { user, loading, accountLoading, isAdmin, signingOut } = useAuth();
+  const { user, loading, accountLoading, isAdmin, userAccount, signingOut } = useAuth();
   const router = useRouter();
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
@@ -46,12 +46,12 @@ export default function DashboardAuthGate({ children }) {
       router.replace("/login");
       return;
     }
-    if (user && !isAdmin) {
+    if (user && userAccount.status === "ready" && !isAdmin) {
       if (redirectedRef.current) return;
       redirectedRef.current = true;
       router.replace("/account");
     }
-  }, [user, loading, accountLoading, isAdmin, signingOut, router]);
+  }, [user, loading, accountLoading, isAdmin, userAccount.status, signingOut, router]);
 
   if (loading || accountLoading) {
     return (
@@ -86,7 +86,7 @@ export default function DashboardAuthGate({ children }) {
     );
   }
 
-  if (!isAdmin) {
+  if (userAccount.status === "ready" && !isAdmin) {
     return (
       <>
         <GateEscapeBar />

@@ -17,7 +17,7 @@ import {
  */
 export function usePostAuthRedirect(pending, onComplete, memberPath = "/account") {
   const router = useRouter();
-  const { user, loading, accountLoading, isAdmin } = useAuth();
+  const { user, loading, accountLoading, isAdmin, userAccount } = useAuth();
   const onCompleteRef = useRef(onComplete);
   const postAuthHandledRef = useRef(false);
   const visitorHandledRef = useRef(false);
@@ -35,6 +35,7 @@ export function usePostAuthRedirect(pending, onComplete, memberPath = "/account"
 
   useEffect(() => {
     if (!pending || loading || accountLoading || !user) return;
+    if (userAccount.status !== "ready") return;
     if (postAuthHandledRef.current) return;
     postAuthHandledRef.current = true;
 
@@ -44,12 +45,22 @@ export function usePostAuthRedirect(pending, onComplete, memberPath = "/account"
       onCompleteRef.current?.();
     }, 0);
     return () => window.clearTimeout(id);
-  }, [pending, loading, accountLoading, user, isAdmin, router, memberPath]);
+  }, [
+    pending,
+    loading,
+    accountLoading,
+    user,
+    isAdmin,
+    userAccount.status,
+    router,
+    memberPath,
+  ]);
 
   useEffect(() => {
     if (pending || loading || accountLoading || !user) return;
+    if (userAccount.status !== "ready") return;
     if (visitorHandledRef.current) return;
     visitorHandledRef.current = true;
     redirectSignedInVisitor({ isAdmin, router });
-  }, [pending, loading, accountLoading, user, isAdmin, router]);
+  }, [pending, loading, accountLoading, user, isAdmin, userAccount.status, router]);
 }

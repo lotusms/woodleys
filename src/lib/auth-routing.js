@@ -3,25 +3,33 @@
  * Admins open the dashboard in a new tab on sign-in; members stay in the main site UI.
  */
 
-const ADMIN_PORTAL_AUTO_OPEN_KEY = "woodleys:admin-portal-auto-opened";
+/** Named target so repeat opens focus the same tab instead of spawning new ones. */
+const ADMIN_PORTAL_WINDOW_NAME = "woodleys-admin-portal";
 
-/** Clears the auto-open guard (call on sign-out). */
+/** @type {Window | null} */
+let adminPortalWindow = null;
+
+/** Resets the cached portal window reference (call on sign-out). */
 export function clearAdminPortalSession() {
-  if (typeof window === "undefined") return;
-  sessionStorage.removeItem(ADMIN_PORTAL_AUTO_OPEN_KEY);
+  adminPortalWindow = null;
 }
 
 /**
- * Opens the admin dashboard in a new browser tab.
- * @param {{ force?: boolean }} [opts] — pass force:true for explicit user clicks (menu, login link).
+ * Opens the admin dashboard in a new tab, or focuses and navigates an existing portal tab.
+ * @returns {boolean} true when a separate tab/window was opened or reused
  */
-export function openAdminDashboard({ force = false } = {}) {
-  if (typeof window === "undefined") return;
-  if (!force && sessionStorage.getItem(ADMIN_PORTAL_AUTO_OPEN_KEY)) return;
-  if (!force) {
-    sessionStorage.setItem(ADMIN_PORTAL_AUTO_OPEN_KEY, "1");
+export function openAdminDashboard() {
+  if (typeof window === "undefined") return false;
+
+  const opened = window.open("/dashboard", ADMIN_PORTAL_WINDOW_NAME);
+
+  if (opened) {
+    adminPortalWindow = opened;
+    opened.focus();
+    return true;
   }
-  window.open("/dashboard", "_blank", "noopener,noreferrer");
+
+  return false;
 }
 
 /**
@@ -29,8 +37,8 @@ export function openAdminDashboard({ force = false } = {}) {
  */
 export function completePostAuthNavigation({ isAdmin, router, memberPath = "/account" }) {
   if (isAdmin) {
-    openAdminDashboard();
-    router.replace("/");
+    const openedInNewTab = openAdminDashboard();
+    router.replace(openedInNewTab ? "/" : "/dashboard");
     return;
   }
   const safe =
@@ -47,4 +55,13 @@ export function completePostAuthNavigation({ isAdmin, router, memberPath = "/acc
  */
 export function redirectSignedInVisitor({ isAdmin, router }) {
   router.replace(isAdmin ? "/" : "/account");
+}
+
+/**
+ * Opens the portal in a new tab when possible; otherwise navigates the current tab.
+ * @param {import("next/navigation").AppRouterInstance} router
+ */
+export function openAdminDashboardOrNavigate(router) {
+  if (openAdminDashboard()) return;
+  router.push("/dashboard");
 }

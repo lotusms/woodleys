@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import AuthOrDivider from "@/components/auth/AuthOrDivider";
@@ -11,7 +11,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import { orgName, siteBelowHeaderMinHeightClass } from "@/config";
 import { usePostAuthRedirect } from "@/hooks/usePostAuthRedirect";
 import { formatAuthError } from "@/lib/auth-errors";
-import { openAdminDashboard } from "@/lib/auth-routing";
+import { openAdminDashboardOrNavigate } from "@/lib/auth-routing";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
@@ -31,6 +31,7 @@ export default function LoginPage() {
 }
 
 function LoginPageContent() {
+  const router = useRouter();
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const searchParams = useSearchParams();
@@ -106,7 +107,7 @@ function LoginPageContent() {
           {isAdmin ? (
             <button
               type="button"
-              onClick={() => openAdminDashboard({ force: true })}
+              onClick={() => openAdminDashboardOrNavigate(router)}
               className={overlayChrome.authLinkAccent(light)}
             >
               Open portal

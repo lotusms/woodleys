@@ -3,7 +3,7 @@ import AppointmentForm from "@/components/appointments/AppointmentForm";
 import { orgLocation, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: sitePageTitle("Appointments"),
+  title: sitePageTitle("Contact us"),
   description:
     "Request a private appointment at Woodley's Jewelers in Beaumont, California for engagement selections, custom design, repairs, and more.",
 };
@@ -12,7 +12,7 @@ export default function AppointmentsPage() {
   return (
     <PageLayout
       eyebrow="Visit"
-      title="Appointments"
+      title="Contact us"
       subtitle={`Schedule time with our team in ${orgLocation}. We keep the process simple, unhurried, and focused on what you need.`}
     >
       <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">

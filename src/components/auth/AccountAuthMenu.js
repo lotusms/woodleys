@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Menu,
   MenuButton,
@@ -9,7 +10,7 @@ import {
 } from "@headlessui/react";
 import { UserIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
-import { openAdminDashboard } from "@/lib/auth-routing";
+import { openAdminDashboardOrNavigate } from "@/lib/auth-routing";
 
 const menuButtonClass =
   "inline-flex items-center gap-2 rounded-full border border-stone-300/80 bg-white px-3 py-2 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-site-fg transition hover:border-warm-gold hover:bg-champagne focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-ivory sm:px-4 sm:text-[0.65rem] sm:tracking-[0.18em]";
@@ -25,6 +26,7 @@ const menuItemClass =
  * @param {{ onNavigate?: () => void, className?: string }} props
  */
 export default function AccountAuthMenu({ onNavigate, className = "" }) {
+  const router = useRouter();
   const { user, loading, accountLoading, isAdmin, signOut } = useAuth();
 
   if (loading) {
@@ -94,7 +96,7 @@ export default function AccountAuthMenu({ onNavigate, className = "" }) {
               className={menuItemClass}
               onClick={() => {
                 onNavigate?.();
-                openAdminDashboard({ force: true });
+                openAdminDashboardOrNavigate(router);
               }}
             >
               Open portal

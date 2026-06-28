@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import AuthOrDivider from "@/components/auth/AuthOrDivider";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
@@ -9,11 +10,12 @@ import { useAuth } from "@/context/AuthContext";
 import { usePostAuthRedirect } from "@/hooks/usePostAuthRedirect";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import { siteBelowHeaderMinHeightClass } from "@/config";
-import { openAdminDashboard } from "@/lib/auth-routing";
+import { openAdminDashboardOrNavigate } from "@/lib/auth-routing";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const { user, loading, accountLoading, isAdmin, signInWithGoogle } = useAuth();
@@ -67,7 +69,7 @@ export default function RegisterPage() {
           {isAdmin ? (
             <button
               type="button"
-              onClick={() => openAdminDashboard({ force: true })}
+              onClick={() => openAdminDashboardOrNavigate(router)}
               className={overlayChrome.authLinkAccent(light)}
             >
               Open portal

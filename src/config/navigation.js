@@ -6,6 +6,7 @@
 
 /** @type {NavItem[]} */
 export const mainNav = [
+  { label: "Shop All", href: "/shop-all", prefix: true },
   {
     label: "Engagement & Wedding",
     href: "/engagement-wedding",
@@ -96,9 +97,12 @@ export const mainNav = [
       { label: "Appraisals", href: "/services/appraisals" },
     ],
   },
-  { label: "Appointments", href: "/appointments" },
+];
+
+/** Footer-only links removed from the header nav. */
+export const footerPageLinks = [
   { label: "About", href: "/about" },
-  { label: "Shop All", href: "/shop-all", prefix: true },
+  { label: "Contact us", href: "/appointments" },
 ];
 
 /** Flatten all nav links for mobile menus and sitemaps. */
