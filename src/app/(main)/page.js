@@ -1,7 +1,6 @@
 import HomeHero from "@/components/home/HomeHero";
 import HomeHeritage from "@/components/home/HomeHeritage";
 import HomeFeaturedCategories from "@/components/home/HomeFeaturedCategories";
-import HomeCta from "@/components/home/HomeCta";
 import { defaultMetadata } from "@/config";
 
 export const metadata = {
@@ -15,7 +14,6 @@ export default function Home() {
       <HomeHero />
       <HomeHeritage />
       <HomeFeaturedCategories />
-      <HomeCta />
     </main>
   );
 }

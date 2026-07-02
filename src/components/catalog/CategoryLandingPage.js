@@ -1,13 +1,17 @@
-import Link from "next/link";
-import PageLayout from "@/components/PageLayout";
+import CategoryPageLayout from "@/components/catalog/CategoryPageLayout";
+import CatalogProductSection from "@/components/catalog/CatalogProductSection";
 import CategoryGrid from "@/components/catalog/CategoryGrid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { sitePageTitle } from "@/config";
 
 /**
- * @param {{ sectionKey: string; section: import("@/lib/catalog/categories").CATALOG_SECTIONS[string] }} props
+ * @param {{
+ *   sectionKey: string;
+ *   section: import("@/lib/catalog/categories").CATALOG_SECTIONS[string];
+ *   products: import("@/lib/catalog/product-types").CatalogProduct[];
+ * }} props
  */
-export default function CategoryLandingPage({ sectionKey, section }) {
+export default function CategoryLandingPage({ sectionKey, section, products }) {
   const items = section.children.map((child) => ({
     title: child.title,
     description: child.description,
@@ -16,26 +20,44 @@ export default function CategoryLandingPage({ sectionKey, section }) {
     alt: child.image?.alt,
   }));
 
+  const emptyMessage = `No products in ${section.title} yet.`;
+  const heroImage = section.children[0]?.image;
+
   return (
-    <PageLayout
+    <CategoryPageLayout
       eyebrow={section.eyebrow}
       title={section.title}
       subtitle={section.description}
-      buttonArea={<PrimaryButton href="/shop-all">Shop All</PrimaryButton>}
+      heroImage={heroImage}
+      breadcrumbs={[{ label: "Shop All", href: "/shop-all" }, { label: section.title }]}
+      actions={<PrimaryButton href="/shop-all">Shop All</PrimaryButton>}
     >
-      <p>{section.intro}</p>
-      <CategoryGrid items={items} />
-      <p className="border-l-2 border-warm-gold/30 pl-6 text-sm leading-7 text-site-secondary">
-        Prefer guidance in person?{" "}
-        <Link
-          href="/appointments"
-          className="font-medium text-warm-gold-dark underline-offset-4 hover:underline"
-        >
-          Request a private appointment
-        </Link>{" "}
-        at our Beaumont showroom.
+      <p className="max-w-3xl text-lg leading-relaxed text-site-secondary">
+        {section.intro}
       </p>
-    </PageLayout>
+
+      <div className="mt-16">
+        <CatalogProductSection
+          label={section.title}
+          products={products}
+          emptyMessage={emptyMessage}
+        />
+      </div>
+
+      <div className="mt-20">
+        <div className="border-b border-stone-200/80 pb-8">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-site-secondary">
+            Browse by style
+          </p>
+          <h2 className="mt-3 font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
+            Within {section.title}
+          </h2>
+        </div>
+        <div className="mt-10">
+          <CategoryGrid items={items} />
+        </div>
+      </div>
+    </CategoryPageLayout>
   );
 }
 

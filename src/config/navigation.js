@@ -102,7 +102,7 @@ export const mainNav = [
 /** Footer-only links removed from the header nav. */
 export const footerPageLinks = [
   { label: "About", href: "/about" },
-  { label: "Contact us", href: "/appointments" },
+  { label: "Contact us", href: "/contact" },
 ];
 
 /** Flatten all nav links for mobile menus and sitemaps. */

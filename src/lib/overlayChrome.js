@@ -34,6 +34,20 @@ export function listboxCheckIcon(light) {
     : "absolute inset-y-0 right-0 flex items-center pr-4 text-amber-400/90 group-[:not([data-selected])]:hidden group-data-focus:text-amber-200";
 }
 
+/**
+ * Faint blur overlay for dialogs, drawers, and panels — keeps page details visible behind.
+ * Prefer this over dark `bg-black/*` backdrops site-wide.
+ */
+export const FAINT_BLUR_BACKDROP_CLASS =
+  "fixed inset-0 bg-ivory/25 backdrop-blur-[5px] backdrop-saturate-[1.04] transition duration-300 data-closed:opacity-0";
+
+/** @param {boolean} light */
+export function catalogDialogPanel(light) {
+  return light
+    ? "w-full max-w-lg overflow-hidden rounded-2xl border border-stone-200/80 bg-ivory/95 shadow-2xl shadow-stone-900/10 ring-1 ring-stone-200/50 transition data-closed:scale-[0.98] data-closed:opacity-0 sm:max-w-2xl"
+    : "w-full max-w-lg overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-950/95 shadow-2xl transition data-closed:scale-[0.98] data-closed:opacity-0 sm:max-w-2xl";
+}
+
 /** @param {boolean} light */
 export function checkoutDialogModalPanel(light) {
   return light

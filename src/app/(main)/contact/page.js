@@ -1,43 +1,34 @@
-import ContactEmailCta from "@/components/contact/ContactEmailCta";
-import ContactHelpfulDetailsCard from "@/components/contact/ContactHelpfulDetailsCard";
 import PageLayout from "@/components/PageLayout";
-import { orgName, sitePageTitle } from "@/config";
+import AppointmentForm from "@/components/appointments/AppointmentForm";
+import { orgLocation, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: sitePageTitle("Contact"),
-  description: `Inquire about original artwork, canvas prints, and special requests at ${orgName}.`,
+  title: sitePageTitle("Contact us"),
+  description:
+    "Request a private appointment at Woodley's Jewelers in Beaumont, California for engagement selections, custom design, repairs, and more.",
 };
-
-const checklist = [
-  "The artwork title or a screenshot of the piece",
-  "Whether you are interested in a canvas or a print",
-  "Your shipping location",
-  "Your timeline or any special requests",
-];
 
 export default function ContactPage() {
   return (
     <PageLayout
-      eyebrow="Art Inquiries"
-      title={`Contact ${orgName}`}
-      subtitle=""
-      width="full"
+      eyebrow="Visit"
+      title="Contact us"
+      subtitle={`Schedule time with our team in ${orgLocation}. We keep the process simple, unhurried, and focused on what you need.`}
     >
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-12 w-full">
-        <div className="min-w-0 flex-11 space-y-6">
-          <p className="leading-relaxed text-stone-200/95 sm:leading-8">
-            Get in touch with {orgName} for questions about original artwork, canvas prints, special requests, availability, or shipping. We welcome inquiries from collectors, gift buyers, and anyone interested in learning more about the artist’s work.
-            <br />
-            <br />
-            As an online art studio, all contact is handled by email so we can keep artwork details, reference images, pricing, and shipping information in one place. Every message is reviewed with care, and we do our best to respond as promptly as possible.
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        <div className="space-y-5 text-site-secondary">
+          <p>
+            Whether you are choosing an engagement ring, beginning a custom
+            design, or bringing in a piece for repair, an appointment ensures
+            we can give you our full attention.
           </p>
-          <ContactEmailCta />
-          <p className="text-sm leading-7 text-stone-400">
-            Typical response: <span className="text-stone-300">2–4 business days</span>. For time-sensitive inquiries, please include that in your subject line.
+          <p>
+            Complete the form and your email client will open with your details
+            ready to send. We will follow up to confirm a time that works for
+            you.
           </p>
         </div>
-
-        <ContactHelpfulDetailsCard lines={checklist} />
+        <AppointmentForm />
       </div>
     </PageLayout>
   );

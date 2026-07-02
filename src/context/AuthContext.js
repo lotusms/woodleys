@@ -50,7 +50,11 @@ export function AuthProvider({ children }) {
     (async () => {
       try {
         const auth = getFirebaseAuth();
-        await auth.authStateReady();
+        const ready = auth.authStateReady();
+        const timeout = new Promise((resolve) => {
+          window.setTimeout(resolve, 4000);
+        });
+        await Promise.race([ready, timeout]);
         if (cancelled) return;
         setUser(auth.currentUser ?? null);
         setLoading(false);

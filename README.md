@@ -23,7 +23,7 @@ Opens at [http://localhost:3002](http://localhost:3002).
 Copy `.env.example` to `.env.local` and configure:
 
 - `NEXT_PUBLIC_FIREBASE_*` — client auth (email, Google sign-in)
-- `SHOPIFY_STORE_DOMAIN` + `SHOPIFY_STOREFRONT_ACCESS_TOKEN` for Shopify catalog/checkout
+- `SHOPIFY_STORE_DOMAIN` + `SHOPIFY_STOREFRONT_ACCESS_TOKEN` for Shopify catalog/checkout ([setup guide](docs/SHOPIFY_DEV_SETUP.md))
 - `NEXT_PUBLIC_STULLER_EMBED_URL` for the Stuller catalog on Shop All
 
 ## Authentication & roles

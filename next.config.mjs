@@ -31,7 +31,7 @@ const nextConfig = {
   async redirects() {
     return [
       { source: "/shop", destination: "/shop-all", permanent: true },
-      { source: "/contact", destination: "/appointments", permanent: false },
+      { source: "/appointments", destination: "/contact", permanent: true },
       { source: "/work", destination: "/", permanent: true },
     ];
   },

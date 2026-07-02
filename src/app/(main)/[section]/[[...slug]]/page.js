@@ -6,6 +6,9 @@ import CategoryDetailPage, {
   buildEntryMetadata,
 } from "@/components/catalog/CategoryDetailPage";
 import { getCatalogSection, getCatalogEntry } from "@/lib/catalog/categories";
+import { getCollectionProducts } from "@/lib/catalog/products";
+
+export const revalidate = 60;
 
 const SECTION_KEYS = [
   "engagement-wedding",
@@ -53,17 +56,35 @@ export default async function CatalogSectionPage({ params }) {
   if (!section) notFound();
 
   if (!slug) {
-    return <CategoryLandingPage sectionKey={sectionKey} section={section} />;
+    const products = await getCollectionProducts(section.shopifyHandle, {
+      title: section.title,
+      description: section.intro || section.description,
+      image: section.children[0]?.image,
+    });
+    return (
+      <CategoryLandingPage
+        sectionKey={sectionKey}
+        section={section}
+        products={products}
+      />
+    );
   }
 
   const entry = getCatalogEntry(sectionKey, slug);
   if (!entry) notFound();
+
+  const products = await getCollectionProducts(entry.shopifyHandle, {
+    title: entry.title,
+    description: entry.description,
+    image: entry.image,
+  });
 
   return (
     <CategoryDetailPage
       sectionKey={sectionKey}
       section={section}
       entry={entry}
+      products={products}
     />
   );
 }

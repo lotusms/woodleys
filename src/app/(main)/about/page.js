@@ -36,7 +36,7 @@ export default function AboutPage() {
       eyebrow="Heritage"
       title={`About ${orgName}`}
       subtitle={`Trusted in ${orgLocation} since ${orgEstablished}. A family-owned fine jeweler devoted to relationships that last as long as the jewelry we create and care for.`}
-      buttonArea={<PrimaryButton href="/appointments">Visit us</PrimaryButton>}
+      buttonArea={<PrimaryButton href="/contact">Visit us</PrimaryButton>}
     >
       <p>
         Woodley&apos;s Jewelers has devotedly served Beaumont and surrounding

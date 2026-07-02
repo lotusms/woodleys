@@ -44,6 +44,7 @@ function SelectListboxPanel({
   disabled,
   showCheck,
   anchor,
+  compact,
 }) {
   const prevOpen = useRef(false);
   const openRef = useRef(false);
@@ -74,12 +75,22 @@ function SelectListboxPanel({
             });
           }}
         >
-          <span className="col-start-1 row-start-1 truncate pr-6">
+          <span
+            className={
+              compact
+                ? "whitespace-nowrap"
+                : "col-start-1 row-start-1 truncate pr-6"
+            }
+          >
             {selected ? selected[labelKey] : placeholder}
           </span>
           <ChevronUpDownIcon
             aria-hidden="true"
-            className={chevronClassName}
+            className={
+              compact
+                ? "size-4 shrink-0 text-site-secondary"
+                : chevronClassName
+            }
           />
         </ListboxButton>
 
@@ -135,6 +146,7 @@ export default function SelectListbox({
   disabled = false,
   showCheck = true,
   anchor,
+  compact = false,
 }) {
   const compareBy = by ?? valueKey;
   const useFloating = anchor !== false;
@@ -167,6 +179,10 @@ export default function SelectListbox({
   const resolvedOptionClassName = overlayChrome.listboxOption(light);
   const resolvedCheckClassName = overlayChrome.listboxCheckIcon(light);
 
+  const buttonLayout = compact
+    ? "inline-flex w-auto min-w-0 items-center gap-2"
+    : "grid w-full grid-cols-1";
+
   return (
     <Listbox
       value={selected}
@@ -186,7 +202,7 @@ export default function SelectListbox({
           valueKey={valueKey}
           labelKey={labelKey}
           selected={selected}
-          buttonClassName={`grid w-full cursor-default grid-cols-1 text-left ${buttonClassName}`}
+          buttonClassName={`${buttonLayout} cursor-default text-left ${buttonClassName}`}
           optionsClassName={resolvedOptionsClassName}
           labelClassName={resolvedLabelClassName}
           chevronClassName={resolvedChevronClassName}
@@ -197,6 +213,7 @@ export default function SelectListbox({
           disabled={disabled}
           showCheck={showCheck}
           anchor={resolvedAnchor}
+          compact={compact}
         />
       )}
     </Listbox>

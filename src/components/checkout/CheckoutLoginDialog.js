@@ -71,10 +71,7 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-[200]">
-      <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition data-closed:opacity-0"
-      />
+      <DialogBackdrop transition className={overlayChrome.FAINT_BLUR_BACKDROP_CLASS} />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
           transition

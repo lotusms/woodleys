@@ -376,6 +376,33 @@ export function getAllCatalogPaths() {
   );
 }
 
+/**
+ * @param {string} shopifyHandle
+ * @returns {{ title: string; description: string; image?: { src: string; alt: string } }}
+ */
+export function getCatalogMetaByShopifyHandle(shopifyHandle) {
+  for (const section of Object.values(CATALOG_SECTIONS)) {
+    if (section.shopifyHandle === shopifyHandle) {
+      const image = section.children[0]?.image;
+      return {
+        title: section.title,
+        description: section.intro || section.description,
+        image,
+      };
+    }
+    for (const child of section.children) {
+      if (child.shopifyHandle === shopifyHandle) {
+        return {
+          title: child.title,
+          description: child.description,
+          image: child.image,
+        };
+      }
+    }
+  }
+  return { title: "Collection", description: "" };
+}
+
 export const HOME_FEATURED_CATEGORIES = [
   {
     title: "Engagement & Wedding",
