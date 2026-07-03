@@ -2,16 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { formatUsd } from "@/lib/money";
+import { formatProductPriceLabel } from "@/lib/catalog/product-price";
 import CoverImageFrame from "@/components/ui/CoverImageFrame";
 
 function formatProductPrice(product) {
-  const min = Number(product?.minPriceUsd);
-  const max = Number(product?.maxPriceUsd);
-  if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
-  }
-  return formatUsd(product.priceUsd);
+  return formatProductPriceLabel(product);
 }
 
 function ProductCard({ product }) {

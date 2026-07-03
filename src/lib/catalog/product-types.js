@@ -9,7 +9,10 @@
  *   handle: string;
  *   description: string;
  *   priceUsd: number;
- *   maxPriceUsd: number;
+ *   /** Optional sale price — must be lower than priceUsd when set. */
+ *   salePriceUsd?: number;
+ *   /** @deprecated Use salePriceUsd. Kept for legacy payloads. */
+ *   maxPriceUsd?: number;
  *   image?: { src: string; alt: string };
  *   availableForSale: boolean;
  *   source: CatalogProductSource;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { pickRecentCatalogProducts } from "@/lib/catalogSort";
 import { orgName } from "@/config";
-import { formatUsd } from "@/lib/money";
+import { formatProductPriceLabel } from "@/lib/catalog/product-price";
 import CoverImageFrame from "@/components/ui/CoverImageFrame";
 import { linkButtonClasses, linkButtonClassesLight } from "@/components/ui/LinkButton";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
@@ -13,12 +13,7 @@ import { isLightThemeId } from "@/theme";
 const PREVIEW_LIMIT = 6;
 
 function formatCardPrice(product) {
-  const min = Number(product?.minPriceUsd);
-  const max = Number(product?.maxPriceUsd);
-  if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
-  }
-  return formatUsd(product?.priceUsd ?? 0);
+  return formatProductPriceLabel(product);
 }
 
 /** @param {{ imageWidth?: number; imageHeight?: number }} product */
