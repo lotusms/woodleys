@@ -1,7 +1,7 @@
 import { isShopifyConfigured } from "./config";
 import { shopifyStorefrontQuery } from "./storefront";
 
-/** @typedef {{ id: string; title: string; handle: string; description: string; priceUsd: number; maxPriceUsd: number; image?: { src: string; alt: string }; availableForSale: boolean }} CatalogProduct */
+/** @typedef {{ id: string; title: string; handle: string; description: string; priceUsd: number; salePriceUsd: number; image?: { src: string; alt: string }; availableForSale: boolean }} CatalogProduct */
 
 const COLLECTION_PRODUCTS_QUERY = `
   query CollectionProducts($handle: String!, $first: Int!) {
@@ -19,6 +19,10 @@ const COLLECTION_PRODUCTS_QUERY = `
             altText
           }
           priceRange {
+            minVariantPrice { amount }
+            maxVariantPrice { amount }
+          }
+          compareAtPriceRange {
             minVariantPrice { amount }
             maxVariantPrice { amount }
           }
@@ -59,6 +63,10 @@ const PRODUCT_BY_HANDLE_QUERY = `
         minVariantPrice { amount }
         maxVariantPrice { amount }
       }
+      compareAtPriceRange {
+        minVariantPrice { amount }
+        maxVariantPrice { amount }
+      }
     }
   }
 `;
@@ -70,16 +78,19 @@ const PRODUCT_BY_HANDLE_QUERY = `
 function normalizeProduct(node) {
   if (!node) return null;
 
-  const min = Number(node.priceRange?.minVariantPrice?.amount ?? 0);
-  const max = Number(node.priceRange?.maxVariantPrice?.amount ?? min);
+  const current = Number(node.priceRange?.minVariantPrice?.amount ?? 0);
+  const compareAt = Number(
+    node.compareAtPriceRange?.minVariantPrice?.amount ?? 0,
+  );
+  const onSale = compareAt > current && current > 0;
 
   return {
     id: node.id,
     title: node.title,
     handle: node.handle,
     description: node.description || "",
-    priceUsd: min,
-    maxPriceUsd: max,
+    priceUsd: onSale ? compareAt : current,
+    salePriceUsd: onSale ? current : 0,
     availableForSale: Boolean(node.availableForSale),
     image: node.featuredImage?.url
       ? {

@@ -9,8 +9,11 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import ProductPrice from "@/components/catalog/ProductPrice";
 import { useCart } from "@/context/CartContext";
-import { formatUsd } from "@/lib/money";
+import {
+  getEffectivePriceUsd,
+} from "@/lib/catalog/product-price";
 import {
   catalogDialogPanel,
   FAINT_BLUR_BACKDROP_CLASS,
@@ -37,12 +40,7 @@ export default function ProductPreviewDialog({ product, open, onClose }) {
 
   if (!product) return null;
 
-  const min = product.priceUsd;
-  const max = product.maxPriceUsd;
-  const hasRange = max > min && min > 0;
-  const priceLabel = hasRange
-    ? `${formatUsd(min)} – ${formatUsd(max)}`
-    : formatUsd(min);
+  const effectivePrice = getEffectivePriceUsd(product);
   const isSoldOut = !product.availableForSale;
 
   function handleAddToCart() {
@@ -54,7 +52,7 @@ export default function ProductPreviewDialog({ product, open, onClose }) {
         slug: product.handle,
         title: product.title,
         artist: "Woodley's Jewelers",
-        priceUsd: min,
+        priceUsd: effectivePrice,
         image: product.image?.src ?? "",
         originalImage: product.image?.src ?? "",
         variantId: product.id,
@@ -102,9 +100,9 @@ export default function ProductPreviewDialog({ product, open, onClose }) {
               {product.title}
             </DialogTitle>
 
-            <p className="mt-2 text-lg font-medium tabular-nums tracking-wide text-warm-gold-dark sm:text-xl">
-              {priceLabel}
-            </p>
+            <div className="mt-2 text-lg sm:text-xl">
+              <ProductPrice product={product} />
+            </div>
 
             {product.description ? (
               <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-site-secondary">

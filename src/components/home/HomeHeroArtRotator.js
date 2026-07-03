@@ -8,20 +8,16 @@ import LinkButton from "@/components/ui/LinkButton";
 import { orgName } from "@/config";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import { formatUsd } from "@/lib/money";
+import { formatProductPriceLabel } from "@/lib/catalog/product-price";
 import { isLightThemeId } from "@/theme";
 
 const ROTATE_MS = 8000;
 /** Crossfade between slides (opacity on overlapping layers). */
 const SLIDE_FADE_MS = 2500;
 
-/** Display price: range when available, else single price. */
+/** Display price: sale when available, else single price. */
 function heroPriceLabel(product) {
-  const min = Number(product?.minPriceUsd);
-  const max = Number(product?.maxPriceUsd);
-  if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
-  }
-  return formatUsd(product?.priceUsd ?? 0);
+  return formatProductPriceLabel(product);
 }
 
 /** Rich alt for hero mockups: title, category, medium, size, price, artist, brand. */

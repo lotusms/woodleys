@@ -1,5 +1,7 @@
 /** @typedef {import("./product-types").CatalogProduct} CatalogProduct */
 
+import { getEffectivePriceUsd } from "./product-price";
+
 /** @typedef {'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'newest' | 'popular'} CatalogSortKey */
 
 export const CATALOG_SORT_OPTIONS = [
@@ -52,9 +54,13 @@ export function sortCatalogProducts(products, sortKey) {
     case "name-desc":
       return list.sort((a, b) => b.title.localeCompare(a.title));
     case "price-asc":
-      return list.sort((a, b) => a.priceUsd - b.priceUsd);
+      return list.sort(
+        (a, b) => getEffectivePriceUsd(a) - getEffectivePriceUsd(b),
+      );
     case "price-desc":
-      return list.sort((a, b) => b.priceUsd - a.priceUsd);
+      return list.sort(
+        (a, b) => getEffectivePriceUsd(b) - getEffectivePriceUsd(a),
+      );
     case "newest":
       return list.sort((a, b) => createdAtMs(b) - createdAtMs(a));
     case "popular":

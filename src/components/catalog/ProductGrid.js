@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ProductPreviewDialog from "@/components/catalog/ProductPreviewDialog";
+import ProductPrice from "@/components/catalog/ProductPrice";
 import { useFlipAnimation } from "@/hooks/useFlipAnimation";
-import { formatUsd } from "@/lib/money";
+import { formatProductPriceLabel } from "@/lib/catalog/product-price";
 
 /**
  * @param {{
@@ -15,12 +16,7 @@ import { formatUsd } from "@/lib/money";
  * }} props
  */
 function ProductCard({ product, onPreview, itemRef }) {
-  const min = product.priceUsd;
-  const max = product.maxPriceUsd;
-  const hasRange = max > min && min > 0;
-  const priceLabel = hasRange
-    ? `${formatUsd(min)} – ${formatUsd(max)}`
-    : formatUsd(min);
+  const priceLabel = formatProductPriceLabel(product);
   const isPreview = product.source === "mock";
   const isSoldOut = !product.availableForSale;
   const productUrl = `/products/${product.handle}`;
@@ -78,8 +74,8 @@ function ProductCard({ product, onPreview, itemRef }) {
             )}
 
             {!isPreview || isSoldOut ? (
-              <span className="ml-auto rounded-full border border-white/25 bg-stone-950/50 px-3 py-1.5 text-xs font-medium tabular-nums tracking-wide text-white backdrop-blur-sm">
-                {priceLabel}
+              <span className="ml-auto rounded-full border border-white/25 bg-stone-950/50 px-3 py-1.5 text-xs font-medium backdrop-blur-sm">
+                <ProductPrice product={product} variant="onDark" />
               </span>
             ) : null}
           </div>
@@ -96,9 +92,7 @@ function ProductCard({ product, onPreview, itemRef }) {
             ) : null}
 
             <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/15 pt-4">
-              <p className="text-sm font-medium tabular-nums tracking-wide text-amber-100/95">
-                {priceLabel}
-              </p>
+              <ProductPrice product={product} variant="onDark" className="text-sm" />
               <span className="inline-flex shrink-0 items-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/90 transition duration-300 group-hover:text-white">
                 View
                 <span

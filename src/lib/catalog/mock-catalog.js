@@ -111,7 +111,8 @@ export function buildMockProductsForCollection({
         : `${style} ${collectionTitle}`,
       description: desc,
       priceUsd: price,
-      maxPriceUsd: service ? price : price + (index % 2 === 0 ? 400 : 0),
+      salePriceUsd:
+        service || index % 2 !== 0 ? 0 : Math.max(1, Math.round(price * 0.85)),
       availableForSale: index < names.length - 1,
       createdAt: new Date(Date.UTC(2024, 5, 1 + index * 9)).toISOString(),
       popularity: names.length - index,

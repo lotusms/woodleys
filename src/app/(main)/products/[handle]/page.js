@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageLayout from "@/components/PageLayout";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import ProductPrice from "@/components/catalog/ProductPrice";
 import { sitePageTitle } from "@/config";
-import { formatUsd } from "@/lib/money";
 import { getCatalogProductByHandle } from "@/lib/catalog/products";
 
 export const revalidate = 60;
@@ -24,13 +24,6 @@ export default async function ProductPage({ params }) {
   if (!product) notFound();
 
   const isPreview = product.source === "mock";
-
-  const min = product.priceUsd;
-  const max = product.maxPriceUsd;
-  const priceLabel =
-    max > min && min > 0
-      ? `${formatUsd(min)} to ${formatUsd(max)}`
-      : formatUsd(min);
 
   const shopDomain = isPreview
     ? ""
@@ -70,8 +63,8 @@ export default async function ProductPage({ params }) {
     >
       <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
         <div>
-          <p className="text-2xl font-medium tabular-nums text-warm-gold-dark">
-            {priceLabel}
+          <p className="text-2xl">
+            <ProductPrice product={product} className="text-2xl" />
           </p>
           {isPreview ? (
             <p className="mt-3 rounded-sm border border-stone-200/80 bg-champagne/40 px-4 py-3 text-sm text-site-secondary">

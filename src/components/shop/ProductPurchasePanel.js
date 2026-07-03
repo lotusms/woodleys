@@ -7,6 +7,10 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { formatUsd } from "@/lib/money";
+import {
+  formatProductPriceLabel,
+  getEffectivePriceUsd,
+} from "@/lib/catalog/product-price";
 import { isLightThemeId } from "@/theme";
 
 function variantKey(variant, index) {
@@ -15,12 +19,7 @@ function variantKey(variant, index) {
 
 function displayPrice(product, selectedVariant) {
   if (selectedVariant?.priceUsd > 0) return formatUsd(selectedVariant.priceUsd);
-  const min = Number(product?.minPriceUsd);
-  const max = Number(product?.maxPriceUsd);
-  if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
-  }
-  return formatUsd(product.priceUsd);
+  return formatProductPriceLabel(product);
 }
 
 export default function ProductPurchasePanel({ product }) {
@@ -71,7 +70,7 @@ export default function ProductPurchasePanel({ product }) {
       priceUsd:
         Number.isFinite(Number(selectedVariant.priceUsd)) && Number(selectedVariant.priceUsd) > 0
           ? Number(selectedVariant.priceUsd)
-          : product.priceUsd,
+          : getEffectivePriceUsd(product),
       dimensions: selectedVariant.name || product.dimensions,
     };
   }, [product, selectedVariant]);
