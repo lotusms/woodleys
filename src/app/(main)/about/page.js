@@ -16,7 +16,7 @@ const values = [
   {
     title: "Family-owned since 1948",
     body:
-      "Three generations of jewelers serving Beaumont and surrounding communities with the same values that opened our doors—honesty, patience, and respect.",
+      "Three generations of jewelers serving Beaumont and surrounding communities with the same values that opened our doors: honesty, patience, and respect.",
   },
   {
     title: "Guidance without pressure",
@@ -41,7 +41,7 @@ export default function AboutPage() {
       <p>
         Woodley&apos;s Jewelers has devotedly served Beaumont and surrounding
         areas since {orgEstablished}. As a family-owned business, we believe
-        that family is defined by actions—not words. With your trust, we take
+        that family is defined by actions, not words. With your trust, we take
         pride in guiding you toward jewelry that feels genuinely yours.
       </p>
 

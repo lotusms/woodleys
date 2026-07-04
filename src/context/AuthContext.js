@@ -23,7 +23,7 @@ import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 
 const AuthContext = createContext(null);
 
-/** @typedef {{ uid?: string, status: 'idle' | 'loading' | 'ready', admin: boolean, guest: boolean, firstName: string, lastName: string }} UserAccountState */
+/** @typedef {{ uid?: string, status: 'idle' | 'loading' | 'ready', admin: boolean, guest: boolean, firstName: string, lastName: string, phone: string, shippingAddress: Record<string, unknown> | null, billingAddress: Record<string, unknown> | null, billingSameAsShipping: boolean }} UserAccountState */
 
 const idleAccount = /** @type {UserAccountState} */ ({
   status: "idle",
@@ -31,6 +31,10 @@ const idleAccount = /** @type {UserAccountState} */ ({
   guest: false,
   firstName: "",
   lastName: "",
+  phone: "",
+  shippingAddress: null,
+  billingAddress: null,
+  billingSameAsShipping: true,
 });
 
 export function AuthProvider({ children }) {
@@ -99,6 +103,10 @@ export function AuthProvider({ children }) {
       guest: false,
       firstName: "",
       lastName: "",
+      phone: "",
+      shippingAddress: null,
+      billingAddress: null,
+      billingSameAsShipping: true,
     });
 
     const db = getFirebaseDb();
@@ -114,6 +122,10 @@ export function AuthProvider({ children }) {
             guest: false,
             firstName: "",
             lastName: "",
+            phone: "",
+            shippingAddress: null,
+            billingAddress: null,
+            billingSameAsShipping: true,
           });
           return;
         }
@@ -125,6 +137,16 @@ export function AuthProvider({ children }) {
           guest: Boolean(d.guest),
           firstName: typeof d.firstName === "string" ? d.firstName : "",
           lastName: typeof d.lastName === "string" ? d.lastName : "",
+          phone: typeof d.phone === "string" ? d.phone : "",
+          shippingAddress:
+            d.shippingAddress && typeof d.shippingAddress === "object"
+              ? /** @type {Record<string, unknown>} */ (d.shippingAddress)
+              : null,
+          billingAddress:
+            d.billingAddress && typeof d.billingAddress === "object"
+              ? /** @type {Record<string, unknown>} */ (d.billingAddress)
+              : null,
+          billingSameAsShipping: d.billingSameAsShipping !== false,
         });
       },
       (err) => {
@@ -136,6 +158,10 @@ export function AuthProvider({ children }) {
           guest: false,
           firstName: "",
           lastName: "",
+          phone: "",
+          shippingAddress: null,
+          billingAddress: null,
+          billingSameAsShipping: true,
         });
       },
     );

@@ -88,6 +88,8 @@ export async function registerUserWithProfile({
   lastName,
   phone,
   shippingAddress,
+  billingSameAsShipping = true,
+  billingAddress,
 }) {
   const auth = getFirebaseAuth();
   const trimmedEmail = email.trim();
@@ -117,6 +119,30 @@ export async function registerUserWithProfile({
     shippingAddress.fullName?.trim() ||
     [firstName, lastName].filter(Boolean).join(" ").trim();
 
+  const normalizedShipping = {
+    fullName: fullShippingName,
+    address1: shippingAddress.address1.trim(),
+    address2: (shippingAddress.address2 || "").trim(),
+    city: shippingAddress.city.trim(),
+    state: shippingAddress.state.trim(),
+    postalCode: shippingAddress.postalCode.trim(),
+    country: shippingAddress.country,
+  };
+
+  const sameBilling = billingSameAsShipping !== false;
+  const normalizedBilling = sameBilling
+    ? { ...normalizedShipping }
+    : {
+        fullName:
+          billingAddress?.fullName?.trim() || fullShippingName,
+        address1: String(billingAddress?.address1 || "").trim(),
+        address2: String(billingAddress?.address2 || "").trim(),
+        city: String(billingAddress?.city || "").trim(),
+        state: String(billingAddress?.state || "").trim(),
+        postalCode: String(billingAddress?.postalCode || "").trim(),
+        country: billingAddress?.country || shippingAddress.country,
+      };
+
   await setDoc(
     doc(db, USER_ACCOUNTS_COLLECTION, uid),
     {
@@ -129,15 +155,9 @@ export async function registerUserWithProfile({
       guest: false,
       orderHistory: [],
       orderDetails: {},
-      shippingAddress: {
-        fullName: fullShippingName,
-        address1: shippingAddress.address1.trim(),
-        address2: (shippingAddress.address2 || "").trim(),
-        city: shippingAddress.city.trim(),
-        state: shippingAddress.state.trim(),
-        postalCode: shippingAddress.postalCode.trim(),
-        country: shippingAddress.country,
-      },
+      shippingAddress: normalizedShipping,
+      billingSameAsShipping: sameBilling,
+      billingAddress: normalizedBilling,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     },

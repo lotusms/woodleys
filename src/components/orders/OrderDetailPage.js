@@ -10,6 +10,7 @@ import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { fetchOrderByIdForCurrentUser } from "@/lib/orders-queries";
+import { getSampleOrderById, isSampleOrder } from "@/lib/orders-sample-data";
 import { formatUsd } from "@/lib/money";
 import { isLightThemeId } from "@/theme";
 
@@ -50,7 +51,7 @@ export default function OrderDetailPage({
 
   async function handleResendOrderEmail(e) {
     e.preventDefault();
-    if (!isAdmin || !order?.id) return;
+    if (!isAdmin || !order?.id || isSampleOrder(order)) return;
     setResendState({
       orderId: order.id,
       loading: true,
@@ -97,8 +98,8 @@ export default function OrderDetailPage({
   }
 
   useEffect(() => {
-    if (authLoading || !user || !orderId) {
-      if (!authLoading && !user) setLoading(false);
+    if (!orderId) {
+      setLoading(false);
       return;
     }
 
@@ -107,6 +108,21 @@ export default function OrderDetailPage({
       setLoading(true);
       setError("");
       try {
+        const sample = getSampleOrderById(orderId);
+        if (sample) {
+          if (!cancelled) setOrder(sample);
+          return;
+        }
+
+        if (authLoading) return;
+        if (!user) {
+          if (!cancelled) {
+            setOrder(null);
+            setError("Sign in to view this order.");
+          }
+          return;
+        }
+
         const o = await fetchOrderByIdForCurrentUser(orderId);
         if (!cancelled) {
           if (!o) {
@@ -138,9 +154,9 @@ export default function OrderDetailPage({
     };
   }, [user, authLoading, orderId]);
 
-  if (authLoading) {
+  if (authLoading && !getSampleOrderById(orderId)) {
     return (
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>Loading…</p>
       </div>
     );
@@ -152,7 +168,7 @@ export default function OrderDetailPage({
     resendState.orderId === order.id;
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-6xl">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link href={ordersBasePath} className={dash.ordersLinkAccent(light)}>
@@ -162,7 +178,7 @@ export default function OrderDetailPage({
             Order details
           </h1>
         </div>
-        {order && isAdmin ? (
+        {order && isAdmin && !isSampleOrder(order) ? (
           <button
             type="button"
             onClick={handleResendOrderEmail}

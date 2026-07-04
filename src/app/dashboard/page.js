@@ -110,7 +110,7 @@ export default function DashboardHomePage() {
       <div className="mb-10">
         <h1 className={dash.dashboardPageTitle(light)}>Dashboard</h1>
         <p className={dash.dashboardPageSubtitle(light)}>
-          Overview of your orders and storefront catalog — updated from Firestore
+          Overview of your orders and storefront catalog, updated from Firestore
           and the live catalog API.
         </p>
       </div>
@@ -144,7 +144,7 @@ export default function DashboardHomePage() {
           <div>
             <h2 className={dash.dashboardActivityTitle(light)}>Activity</h2>
             <p className={dash.dashboardActivityCaption(light)}>
-              Last 12 months — revenue (bars) and order count (line).
+              Last 12 months. Revenue (bars) and order count (line).
             </p>
           </div>
         </div>

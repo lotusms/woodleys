@@ -27,6 +27,8 @@ export const USER_ACCOUNTS_COLLECTION = "useraccounts";
  * @property {string} lastName
  * @property {string} [phone] — digits-only or formatted; optional
  * @property {Record<string, unknown>} [shippingAddress] — optional saved checkout address (e.g. fullName, address1, city, state, postalCode, country)
+ * @property {boolean} [billingSameAsShipping] — when true, billing mirrors shipping
+ * @property {Record<string, unknown>} [billingAddress] — billing address when different from shipping
  * @property {string[]} orderHistory — order ids (e.g. ORD-…), newest-first recommended by app logic
  * @property {Object<string, OrderDetailEntry>} orderDetails — keyed by order id for lookup
  * @property {import('firebase/firestore').Timestamp | import('firebase/firestore').FieldValue} [createdAt]

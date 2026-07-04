@@ -14,6 +14,10 @@ import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { fetchOrdersForCurrentUser } from "@/lib/orders-queries";
+import {
+  getSampleOrdersPastMonth,
+  isSampleOrder,
+} from "@/lib/orders-sample-data";
 import { formatUsd } from "@/lib/money";
 import { isLightThemeId } from "@/theme";
 
@@ -147,10 +151,11 @@ function orderMatchesSearch(order, q) {
 const PAGE_SIZE = 10;
 
 /**
- * @param {{ ordersBasePath?: string }} props
+ * @param {{ ordersBasePath?: string; previewSampleOrders?: boolean }} props
  */
 export default function OrdersListPage({
   ordersBasePath = "/dashboard/orders",
+  previewSampleOrders = false,
 }) {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
@@ -168,6 +173,7 @@ export default function OrdersListPage({
     error: null,
   });
   const [expandedById, setExpandedById] = useState({});
+  const [usingSampleData, setUsingSampleData] = useState(false);
 
   function toggleOrderExpanded(orderId) {
     setExpandedById((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -233,7 +239,15 @@ export default function OrdersListPage({
       setError("");
       try {
         const list = await fetchOrdersForCurrentUser();
-        if (!cancelled) setOrders(list);
+        if (!cancelled) {
+          if (previewSampleOrders && list.length === 0) {
+            setOrders(getSampleOrdersPastMonth());
+            setUsingSampleData(true);
+          } else {
+            setOrders(list);
+            setUsingSampleData(false);
+          }
+        }
       } catch (e) {
         const code = e?.code;
         const msg =
@@ -251,7 +265,7 @@ export default function OrdersListPage({
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, previewSampleOrders]);
 
   useEffect(() => {
     setPage(1);
@@ -308,7 +322,7 @@ export default function OrdersListPage({
 
   if (authLoading) {
     return (
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-6xl">
         <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>Loading…</p>
       </div>
     );
@@ -316,7 +330,7 @@ export default function OrdersListPage({
 
   if (!user?.email) {
     return (
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-6xl">
         <p className={overlayChrome.pageMutedText(light)}>
           Sign in to see orders linked to your email.
         </p>
@@ -325,15 +339,32 @@ export default function OrdersListPage({
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-6xl">
       <div className="mb-8">
         <h1 className={dash.dashboardPageTitle(light)}>Orders</h1>
-        <p className={`mt-3 max-w-2xl text-lg leading-relaxed ${light ? "text-stone-700" : "text-stone-300/95"}`}>
-          Orders placed with{" "}
-          <span className={light ? "text-stone-900" : "text-stone-200"}>{user.email}</span>{" "}
-          at checkout.
+        <p className={`mt-3 max-w-3xl ${dash.dashboardPageSubtitle(light)}`}>
+          {usingSampleData ? (
+            <>
+              Preview list. Sample orders from the last 30 days for layout and
+              workflow testing.
+            </>
+          ) : (
+            <>
+              Orders placed with{" "}
+              <span className={light ? "text-stone-900" : "text-stone-200"}>
+                {user.email}
+              </span>{" "}
+              at checkout.
+            </>
+          )}
         </p>
       </div>
+
+      {usingSampleData ? (
+        <p className={`mb-6 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
+          These records are static JSON only. They are not stored in Firestore.
+        </p>
+      ) : null}
 
       {loading ? (
         <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>Loading orders…</p>
@@ -636,7 +667,7 @@ export default function OrdersListPage({
                   <div
                     className={`flex shrink-0 flex-col gap-1 border-l p-2 sm:p-3 ${light ? "border-stone-300/55" : "border-slate-700/35"}`}
                   >
-                    {isAdmin ? (
+                    {isAdmin && !isSampleOrder(o) ? (
                       <button
                         type="button"
                         onClick={(e) => handleResendOrderEmail(o.id, e)}

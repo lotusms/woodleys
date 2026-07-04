@@ -43,10 +43,10 @@ export default function VisitShowroomCta() {
               id="visit-showroom-heading"
               className="mt-5 font-serif text-4xl font-medium leading-[1.06] tracking-[-0.03em] text-white sm:text-5xl lg:text-[3.35rem]"
             >
-              Don&apos;t choose forever from a thumbnail.
+              See it in person before you decide.
             </h2>
             <p className="mt-6 text-base leading-relaxed text-white/78 sm:text-lg">
-              See the weight, the fire, the fit—before you commit. A private hour
+              See the weight, the fire, the fit before you commit. A private hour
               in our showroom for engagement selections, custom design, heirloom
               restoration, and guidance from jewelers trusted here since{" "}
               {orgEstablished}.

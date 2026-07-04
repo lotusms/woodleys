@@ -1,0 +1,51 @@
+{
+  "id": "SAMPLE-THANK-YOU-DEMO",
+  "createdAt": "2026-07-04T16:45:00.000Z",
+  "email": "emily.richardson@example.com",
+  "phone": "9515550142",
+  "shippingAddress": {
+    "fullName": "Emily Richardson",
+    "address1": "284 Oak Valley Drive",
+    "address2": "",
+    "city": "Beaumont",
+    "state": "CA",
+    "postalCode": "92223",
+    "country": "US"
+  },
+  "lines": [
+    {
+      "productId": "vintage-halo-engagement",
+      "title": "Vintage Halo Engagement Ring",
+      "slug": "vintage-halo-engagement",
+      "priceUsd": 3280,
+      "quantity": 1,
+      "sku": "EW-HALO-014",
+      "source": "local"
+    },
+    {
+      "productId": "platinum-band-classic",
+      "title": "Classic Platinum Band",
+      "slug": "platinum-band-classic",
+      "priceUsd": 1280,
+      "quantity": 1,
+      "sku": "EW-BAND-006",
+      "source": "local"
+    }
+  ],
+  "subtotalUsd": 4560,
+  "shippingUsd": 0,
+  "totalUsd": 4560,
+  "notes": "Sizing consultation completed in showroom. Complimentary inspection included.",
+  "payment": {
+    "provider": "paypal",
+    "paypalOrderId": "PAY-SAMPLE-8XK29M",
+    "paypalCaptureId": "CAP-SAMPLE-7FJ3Q9L2"
+  },
+  "fulfillment": {
+    "provider": "local",
+    "providerStatus": "Processing"
+  },
+  "checkoutUid": null,
+  "checkoutAsGuest": true,
+  "isThankYouPreview": true
+}

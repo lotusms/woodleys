@@ -16,6 +16,7 @@
   --color-site-tertiary: #c4a574;
   --color-site-bg: var(--color-ivory);
   --color-site-fg: #2c2825;
+  --color-focus-emphasis: #141210;
 
   --site-primary: var(--color-site-primary);
   --site-secondary: var(--color-site-secondary);
@@ -48,9 +49,8 @@ body {
     text-decoration: none;
   }
 
-  :focus-visible {
-    outline: 2px solid var(--color-warm-gold-dark);
-    outline-offset: 2px;
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -115,5 +115,104 @@ body {
       opacity: 1;
       transform: none;
     }
+  }
+}
+
+/*
+ * Keyboard focus — no rings/outlines. Clear feedback via color, underline,
+ * nav border accent, or fill darkening (WCAG 2.4.7).
+ */
+:focus-visible {
+  outline: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    filter 160ms ease,
+    opacity 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="option"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  color: var(--color-warm-gold-dark) !important;
+}
+
+a:focus-visible:not(#site-logo):not([class*="border-b-2"]) {
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-warm-gold-dark) 50%, transparent);
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+
+#site-logo:focus-visible {
+  color: inherit !important;
+  text-decoration: none !important;
+  opacity: 0.72;
+}
+
+a.border-b-2:focus-visible,
+button.border-b-2:focus-visible {
+  border-bottom-color: var(--color-warm-gold) !important;
+  color: var(--color-site-fg) !important;
+  text-decoration: none !important;
+}
+
+a.text-white:focus-visible,
+button.text-white:focus-visible,
+a[class*="text-white"]:focus-visible,
+button[class*="text-white"]:focus-visible {
+  color: #fff !important;
+  text-decoration-color: rgb(255 255 255 / 0.65);
+}
+
+a:focus-visible[class*="bg-warm-gold"],
+button:focus-visible[class*="bg-warm-gold"],
+a:focus-visible[class*="from-amber"],
+button:focus-visible[class*="from-amber"],
+input[type="button"]:focus-visible,
+input[type="submit"]:focus-visible,
+input[type="reset"]:focus-visible {
+  color: inherit !important;
+  text-decoration: none !important;
+  filter: brightness(0.88);
+}
+
+input:focus-visible:not([type="checkbox"]):not([type="radio"]),
+textarea:focus-visible,
+select:focus-visible {
+  border-color: var(--color-warm-gold-dark) !important;
+  color: var(--color-focus-emphasis) !important;
+  background-color: color-mix(
+    in oklab,
+    var(--color-ivory) 88%,
+    var(--color-champagne)
+  ) !important;
+  text-decoration: none !important;
+}
+
+label:has(:focus-visible) {
+  color: var(--color-warm-gold-dark) !important;
+}
+
+[data-headlessui-state~="focus"]:not([data-headlessui-focus-guard]) {
+  background-color: color-mix(
+    in oklab,
+    var(--color-champagne) 75%,
+    var(--color-warm-gold) 25%
+  ) !important;
+  color: var(--color-warm-gold-dark) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :focus-visible {
+    transition: none;
   }
 }

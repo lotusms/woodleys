@@ -3,19 +3,17 @@ import CategoryPageLayout from "@/components/catalog/CategoryPageLayout";
 import ShopAllCatalogGrid from "@/components/catalog/ShopAllCatalogGrid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import StullerEmbed from "@/components/shop/StullerEmbed";
-import { CATALOG_SECTIONS } from "@/lib/catalog/categories";
+import { CATALOG_SECTIONS, SHOP_ALL_HERO } from "@/lib/catalog/categories";
 import { getCollectionProducts } from "@/lib/catalog/products";
 import { orgName, sitePageTitle } from "@/config";
+
+const heroSecondaryClass =
+  "inline-flex items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/70 hover:bg-white/20";
 
 export const metadata = {
   title: sitePageTitle("Shop All"),
   description:
-    "Browse engagement rings, diamonds, fine jewelry, watches, and services at Woodley's Jewelers.",
-};
-
-const HERO_IMAGE = {
-  src: "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_1200x.jpg?v=1639025505",
-  alt: "Fine jewelry collection at Woodley's Jewelers",
+    "Explore every Woodley's collection: engagement and wedding, diamonds, custom jewelry, fine jewelry, watches, and expert care.",
 };
 
 async function buildCatalogSummaries() {
@@ -48,28 +46,24 @@ export default async function ShopAllPage() {
     <CategoryPageLayout
       eyebrow="Catalog"
       title="Shop All"
-      subtitle={`Every collection at ${orgName}, from engagement rings and diamonds to custom design, fine jewelry, watches, and expert care.`}
-      heroImage={HERO_IMAGE}
+      subtitle={`Every collection at ${orgName}: engagement and wedding, diamonds, custom design, fine jewelry, watches, and expert care, in one place.`}
+      heroImage={SHOP_ALL_HERO}
       breadcrumbs={[{ label: "Shop All" }]}
       actions={
         <>
           <PrimaryButton href="/contact">Book a visit</PrimaryButton>
-          <Link
-            href="/engagement-wedding"
-            className="inline-flex items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/70 hover:bg-white/20"
-          >
-            Engagement & Wedding
+          <Link href="#collections" className={heroSecondaryClass}>
+            Explore collections
           </Link>
         </>
       }
     >
       <p className="max-w-3xl text-lg leading-relaxed text-site-secondary">
         Start with a main collection below, or browse our extended Stuller catalog
-        for additional styles. When Shopify is connected, inventory and checkout
-        flow through one secure experience.
+        for additional styles across every category we carry.
       </p>
 
-      <div className="mt-16">
+      <div id="collections" className="mt-16 scroll-mt-28">
         <ShopAllCatalogGrid catalogs={catalogs} />
       </div>
 

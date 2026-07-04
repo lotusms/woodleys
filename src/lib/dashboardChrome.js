@@ -152,6 +152,18 @@ export function ordersSearchInput(light) {
     : "w-full rounded-xl border border-slate-600/50 bg-slate-950/50 py-2.5 pl-9 pr-3 text-sm text-stone-100 placeholder:text-slate-600 outline-none ring-amber-400/0 transition focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/25";
 }
 
+/** Dashboard forms — text inputs (balanced padding, no search-icon inset). */
+export function dashFormInput(light) {
+  return light
+    ? "w-full rounded-xl border border-stone-300/80 bg-white px-3 py-2 text-sm leading-normal text-stone-900 placeholder:text-stone-500 outline-none ring-amber-400/0 transition focus:border-amber-500/50 focus:ring-2 focus:ring-amber-400/25"
+    : "w-full rounded-xl border border-slate-600/50 bg-slate-950/50 px-3 py-2 text-sm leading-normal text-stone-100 placeholder:text-slate-600 outline-none ring-amber-400/0 transition focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/25";
+}
+
+/** Dashboard forms — multiline fields. */
+export function dashFormTextarea(light) {
+  return `${dashFormInput(light)} min-h-[5.5rem] resize-y`;
+}
+
 export function ordersSelect(light) {
   return light
     ? "w-full rounded-xl border border-stone-300/80 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none ring-amber-400/0 transition focus:border-amber-500/50 focus:ring-2 focus:ring-amber-400/25"
@@ -162,6 +174,20 @@ export function ordersGhostButton(light) {
   return light
     ? "rounded-xl border border-stone-400/60 bg-white px-4 py-2.5 text-sm font-medium text-stone-800 transition hover:border-amber-500/45 hover:bg-amber-50/80"
     : "rounded-xl border border-slate-600/50 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/35 hover:bg-slate-800/80";
+}
+
+/** Dashboard form — add row (amber) */
+export function dashFormAddButton(light) {
+  return light
+    ? "rounded-xl border border-amber-500/55 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-950 transition hover:border-amber-600 hover:bg-amber-100"
+    : "rounded-xl border border-amber-400/45 bg-amber-950/30 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:border-amber-300/55 hover:bg-amber-900/40";
+}
+
+/** Dashboard form — remove row (rose) */
+export function dashFormRemoveButton(light) {
+  return light
+    ? "rounded-xl border border-rose-300/80 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-900 transition hover:border-rose-400 hover:bg-rose-100"
+    : "rounded-xl border border-rose-500/40 bg-rose-950/25 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-400/55 hover:bg-rose-950/40";
 }
 
 export function ordersPaginationButton(light) {

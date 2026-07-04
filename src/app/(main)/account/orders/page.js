@@ -1,5 +1,10 @@
-import OrdersListPage from "@/components/orders/OrdersListPage";
+import { Suspense } from "react";
+import MemberOrdersPage from "@/components/account/MemberOrdersPage";
 
 export default function AccountOrdersPage() {
-  return <OrdersListPage ordersBasePath="/account/orders" />;
+  return (
+    <Suspense fallback={<p className="text-sm text-site-secondary">Loading…</p>}>
+      <MemberOrdersPage />
+    </Suspense>
+  );
 }

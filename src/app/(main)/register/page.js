@@ -11,6 +11,7 @@ import { usePostAuthRedirect } from "@/hooks/usePostAuthRedirect";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import { siteBelowHeaderMinHeightClass } from "@/config";
 import { openAdminDashboardOrNavigate } from "@/lib/auth-routing";
+import { formatAuthError } from "@/lib/auth-errors";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
 
@@ -88,16 +89,16 @@ export default function RegisterPage() {
   }
 
   return (
-    <main
-      id="main-content"
+    <div
       className={`flex ${siteBelowHeaderMinHeightClass} flex-col px-4 py-10 sm:px-6 sm:py-14`}
     >
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col pt-8">
         <header className="shrink-0 text-center sm:text-left">
           <h1 className={overlayChrome.registerHeroTitle(light)}>Create account</h1>
           <p className={overlayChrome.registerHeroBody(light)}>
-            Create your member profile with contact details and a default shipping
-            address. You can update these anytime in My Account.
+            Create your member profile with name, contact details, shipping and
+            billing addresses. Start typing an address to search. No need to
+            fill every field by hand. You can update these anytime in My Account.
           </p>
           <p className={overlayChrome.registerHeroMeta(light)}>
             Already registered?{" "}
@@ -132,6 +133,6 @@ export default function RegisterPage() {
           />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

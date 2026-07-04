@@ -1,34 +1,56 @@
-import { getCatalogMetaByShopifyHandle } from "./categories";
+import {
+  getFirestoreProductByHandle,
+  listFirestoreProducts,
+  listFirestoreProductsByCollection,
+} from "./firestore-products";
 import {
   getMockProductByHandle,
   getMockProductsByCollectionHandle,
+  isMockPreviewHandle,
 } from "./mock-catalog";
-import { isShopifyConfigured } from "@/lib/shopify/config";
+import { listAllCatalogCollectionOptions } from "./collections-meta";
+import { getCatalogPathForShopifyHandle } from "./categories";
+import { loadSiteIntegrations } from "@/lib/site-integrations";
+import { isFirebaseAdminAuthError } from "@/lib/firebase-admin-server";
+import { isShopifyIntegrationCatalogEnabled } from "@/lib/shopify/integration-config";
 import {
   getProductByHandle as getShopifyProductByHandle,
   getProductsByCollectionHandle as getShopifyCollectionProducts,
 } from "@/lib/shopify/products";
 
 /**
- * Future: load products from your own database (Firestore, etc.).
- * @param {string} _collectionHandle
+ * @param {string} collectionHandle
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
-async function getLocalDatabaseProducts(_collectionHandle) {
-  return [];
+async function getLocalDatabaseProducts(collectionHandle) {
+  try {
+    return await listFirestoreProductsByCollection(collectionHandle);
+  } catch (e) {
+    if (!isFirebaseAdminAuthError(e)) {
+      console.error("[catalog] local products by collection:", collectionHandle, e);
+    }
+    return [];
+  }
 }
 
 /**
- * Future: load a single product from your own database.
- * @param {string} _handle
+ * @param {string} handle
  * @returns {Promise<import("./product-types").CatalogProductDetail | null>}
  */
-async function getLocalDatabaseProductByHandle(_handle) {
-  return null;
+async function getLocalDatabaseProductByHandle(handle) {
+  try {
+    return await getFirestoreProductByHandle(handle);
+  } catch (e) {
+    if (!isFirebaseAdminAuthError(e)) {
+      console.error("[catalog] local product by handle:", handle, e);
+    }
+    return null;
+  }
 }
 
 /**
- * Products for a collection page. Shopify when live and populated, then local DB, then mock preview.
+ * Products for a collection page. Firestore (admin inventory) first, then Shopify when
+ * explicitly enabled, then mock preview listings.
  *
  * @param {string} collectionHandle
  * @param {{ title?: string; description?: string; image?: { src: string; alt: string } }} [meta]
@@ -37,18 +59,18 @@ async function getLocalDatabaseProductByHandle(_handle) {
 export async function getCollectionProducts(collectionHandle, meta) {
   if (!collectionHandle) return [];
 
-  const catalogMeta = meta ?? getCatalogMetaByShopifyHandle(collectionHandle);
-
-  if (isShopifyConfigured()) {
-    const fromShopify = await getShopifyCollectionProducts(collectionHandle);
-    if (fromShopify.length > 0) {
-      return fromShopify.map((p) => ({ ...p, source: /** @type {const} */ ("shopify") }));
-    }
-  }
+  await loadSiteIntegrations();
 
   const fromDb = await getLocalDatabaseProducts(collectionHandle);
   if (fromDb.length > 0) {
     return fromDb.map((p) => ({ ...p, source: /** @type {const} */ ("local") }));
+  }
+
+  if (await isShopifyIntegrationCatalogEnabled()) {
+    const fromShopify = await getShopifyCollectionProducts(collectionHandle);
+    if (fromShopify.length > 0) {
+      return fromShopify.map((p) => ({ ...p, source: /** @type {const} */ ("shopify") }));
+    }
   }
 
   const mocks = getMockProductsByCollectionHandle(collectionHandle);
@@ -64,15 +86,130 @@ export async function getCollectionProducts(collectionHandle, meta) {
 export async function getCatalogProductByHandle(handle) {
   if (!handle) return null;
 
-  if (isShopifyConfigured()) {
+  const fromDb = await getLocalDatabaseProductByHandle(handle);
+  if (fromDb) return fromDb;
+
+  if ((await isShopifyIntegrationCatalogEnabled()) && !isMockPreviewHandle(handle)) {
     const fromShopify = await getShopifyProductByHandle(handle);
     if (fromShopify) {
       return { ...fromShopify, source: /** @type {const} */ ("shopify") };
     }
   }
 
-  const fromDb = await getLocalDatabaseProductByHandle(handle);
-  if (fromDb) return fromDb;
-
   return getMockProductByHandle(handle);
+}
+
+/**
+ * @param {import("./product-types").CatalogProductDetail | Record<string, unknown>} product
+ */
+function resolveProductCollectionHandles(product) {
+  if (Array.isArray(product.collectionHandles) && product.collectionHandles.length > 0) {
+    return product.collectionHandles.map(String);
+  }
+
+  const handle = String(product.handle ?? "");
+  if (!handle.startsWith("preview-")) return [];
+
+  const rest = handle.slice("preview-".length);
+  const knownHandles = listAllCatalogCollectionOptions()
+    .map((option) => option.shopifyHandle)
+    .sort((a, b) => b.length - a.length);
+
+  for (const collectionHandle of knownHandles) {
+    if (rest === collectionHandle || rest.startsWith(`${collectionHandle}-`)) {
+      return [collectionHandle];
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Other products from the same collection(s), excluding the current item.
+ *
+ * @param {import("./product-types").CatalogProductDetail} product
+ * @param {{ limit?: number }} [opts]
+ */
+export async function getSimilarCatalogProducts(product, { limit = 12 } = {}) {
+  const collectionHandles = resolveProductCollectionHandles(product);
+  if (!collectionHandles.length) return [];
+
+  /** @type {import("./product-types").CatalogProduct[]} */
+  const similar = [];
+  const seen = new Set([product.handle]);
+
+  for (const collectionHandle of collectionHandles) {
+    const items = await getCollectionProducts(collectionHandle);
+    for (const item of items) {
+      if (seen.has(item.handle)) continue;
+      seen.add(item.handle);
+      similar.push(item);
+      if (similar.length >= limit) return similar;
+    }
+  }
+
+  return similar;
+}
+
+/**
+ * @param {import("./product-types").CatalogProductDetail | Record<string, unknown>} product
+ * @returns {{ href: string; label: string } | null}
+ */
+export function getProductCategoryNavigation(product) {
+  const handles = resolveProductCollectionHandles(product);
+  const primaryHandle = handles[0];
+  if (!primaryHandle) return null;
+  return getCatalogPathForShopifyHandle(primaryHandle);
+}
+
+/**
+ * Homepage showcase — Firestore featured products first, then config handles.
+ *
+ * @param {readonly string[]} [fallbackHandles]
+ * @returns {Promise<import("./product-types").CatalogProduct[]>}
+ */
+export async function getFeaturedProducts(fallbackHandles = []) {
+  try {
+    const featured = await listFirestoreProducts({
+      activeOnly: true,
+      featuredOnly: true,
+    });
+    if (featured.length > 0) {
+      return featured.map((product) => ({
+        id: product.id,
+        title: product.title,
+        handle: product.handle,
+        description: product.description,
+        priceUsd: product.priceUsd,
+        maxPriceUsd: product.maxPriceUsd,
+        salePriceUsd: product.salePriceUsd,
+        image: product.image,
+        availableForSale: product.availableForSale,
+        source: product.source,
+      }));
+    }
+  } catch (e) {
+    console.error("[catalog] featured products:", e);
+  }
+
+  if (!fallbackHandles?.length) return [];
+
+  const resolved = await Promise.all(
+    fallbackHandles.map((handle) => getCatalogProductByHandle(handle)),
+  );
+
+  return resolved
+    .filter(Boolean)
+    .map((product) => ({
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
+      description: product.description,
+      priceUsd: product.priceUsd,
+      maxPriceUsd: product.maxPriceUsd,
+      salePriceUsd: product.salePriceUsd,
+      image: product.image,
+      availableForSale: product.availableForSale,
+      source: product.source,
+    }));
 }

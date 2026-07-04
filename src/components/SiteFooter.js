@@ -15,7 +15,10 @@ const legalLinks = [
 
 export default function SiteFooter() {
   return (
-    <footer className="relative z-10 mt-auto w-full border-t border-stone-200/80 bg-champagne/40 py-16">
+    <footer
+      id="site-footer"
+      className="relative z-10 mt-auto w-full border-t border-stone-200/80 bg-champagne/40 py-16"
+    >
       <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 sm:px-10 lg:grid-cols-[1.2fr_1fr_1fr] lg:px-12">
         <div>
           <SiteLogo variant="footer" />

@@ -1,19 +1,26 @@
 import HomeHero from "@/components/home/HomeHero";
-import HomeHeritage from "@/components/home/HomeHeritage";
+import HomeWhyWoodleys from "@/components/home/HomeWhyWoodleys";
+import HomeShowroomHighlights from "@/components/home/HomeShowroomHighlights";
 import HomeFeaturedCategories from "@/components/home/HomeFeaturedCategories";
-import { defaultMetadata } from "@/config";
+import { defaultMetadata, HOME_FEATURED_PRODUCT_HANDLES } from "@/config";
+import { getFeaturedProducts } from "@/lib/catalog/products";
 
 export const metadata = {
   title: defaultMetadata.title,
   description: defaultMetadata.description,
 };
 
-export default function Home() {
+export default async function Home() {
+  const featuredProducts = await getFeaturedProducts(HOME_FEATURED_PRODUCT_HANDLES);
+
   return (
-    <main>
+    <>
       <HomeHero />
-      <HomeHeritage />
+      <HomeWhyWoodleys />
+      {featuredProducts.length > 0 ? (
+        <HomeShowroomHighlights products={featuredProducts} />
+      ) : null}
       <HomeFeaturedCategories />
-    </main>
+    </>
   );
 }

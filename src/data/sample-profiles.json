@@ -1,0 +1,68 @@
+{
+  "1": {
+    "id": "1",
+    "firstName": "Elizabeth",
+    "lastName": "Martin",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "billingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "billingSameAsShipping": true,
+    "memberSince": "2026-06-28T14:20:00.000Z",
+    "orderCount": 6,
+    "recentOrders": [
+      {
+        "id": "SAMPLE-ORD-eliz-001",
+        "createdAt": "2026-07-03T16:30:00.000Z",
+        "totalUsd": 4560,
+        "status": "Processing"
+      },
+      {
+        "id": "SAMPLE-ORD-eliz-002",
+        "createdAt": "2026-06-29T11:15:00.000Z",
+        "totalUsd": 2895,
+        "status": "Ready for pickup"
+      },
+      {
+        "id": "SAMPLE-ORD-eliz-003",
+        "createdAt": "2026-06-25T09:40:00.000Z",
+        "totalUsd": 875,
+        "status": "Shipped"
+      },
+      {
+        "id": "SAMPLE-ORD-eliz-004",
+        "createdAt": "2026-06-20T14:05:00.000Z",
+        "totalUsd": 1325,
+        "status": "Delivered"
+      },
+      {
+        "id": "SAMPLE-ORD-eliz-005",
+        "createdAt": "2026-06-15T10:22:00.000Z",
+        "totalUsd": 542,
+        "status": "Delivered"
+      },
+      {
+        "id": "SAMPLE-ORD-eliz-006",
+        "createdAt": "2026-06-10T18:50:00.000Z",
+        "totalUsd": 1875,
+        "status": "Delivered"
+      }
+    ]
+  }
+}

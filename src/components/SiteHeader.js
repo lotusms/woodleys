@@ -2,18 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import SiteLogo from "@/components/brand/SiteLogo";
 import AccountAuthMenu from "@/components/auth/AccountAuthMenu";
 import DesktopNavDropdown from "@/components/navigation/DesktopNavDropdown";
+import NavCartLink from "@/components/navigation/NavCartLink";
 import { PopoverGroup } from "@headlessui/react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useInertWhen } from "@/hooks/useInertWhen";
 import {
   mainNav,
   isNavItemActive,
+  desktopNavItemClass,
   orgPhone,
   orgPhoneTel,
   siteHeaderTopOffset,
 } from "@/config";
+
+const MOBILE_MENU_INERT_TARGETS = ["main-content", "site-footer"];
 
 function NavLink({ href, label, prefix, onNavigate, className = "" }) {
   const pathname = usePathname();
@@ -23,13 +29,14 @@ function NavLink({ href, label, prefix, onNavigate, className = "" }) {
     <Link
       href={href}
       onClick={onNavigate}
-      className={`border-b-2 pb-0.5 text-[0.68rem] font-medium uppercase tracking-[0.22em] transition-colors ${className} ${
+      aria-current={active ? "page" : undefined}
+      className={`${desktopNavItemClass} ${className} ${
         active
           ? "border-warm-gold text-site-fg"
-          : "border-transparent text-site-secondary hover:border-stone-300 hover:text-site-fg"
+          : "text-site-secondary hover:border-stone-300 hover:text-site-fg"
       }`}
     >
-      {label}
+      <span className="whitespace-nowrap">{label}</span>
     </Link>
   );
 }
@@ -55,6 +62,7 @@ function DesktopMainNav() {
           />
         );
       })}
+      <NavCartLink />
     </PopoverGroup>
   );
 }
@@ -78,6 +86,7 @@ function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
       <Link
         href={item.href}
         onClick={onNavigate}
+        aria-current={active ? "page" : undefined}
         style={{ animationDelay: open ? `${60 + index * 40}ms` : "0ms" }}
         className={`mobile-nav-item block border-b border-stone-200/80 py-4 font-serif text-2xl transition ${
           active ? "text-warm-gold-dark" : "text-site-fg"
@@ -93,26 +102,33 @@ function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
       className="mobile-nav-item border-b border-stone-200/80"
       style={{ animationDelay: open ? `${60 + index * 40}ms` : "0ms" }}
     >
-      <div className="flex items-center justify-between gap-3 py-3">
-        <Link
-          href={item.href}
-          onClick={onNavigate}
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 py-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
+      >
+        <span
           className={`font-serif text-2xl ${active ? "text-warm-gold-dark" : "text-site-fg"}`}
         >
           {item.label}
-        </Link>
-        <button
-          type="button"
-          aria-expanded={expanded}
-          aria-controls={panelId}
-          onClick={() => setExpanded((v) => !v)}
-          className="rounded px-3 py-2 text-xs font-medium uppercase tracking-[0.2em] text-site-secondary hover:bg-champagne focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
-        >
+        </span>
+        <span className="shrink-0 text-xs font-medium uppercase tracking-[0.2em] text-site-secondary">
           {expanded ? "Close" : "Menu"}
-        </button>
-      </div>
+        </span>
+      </button>
       {expanded ? (
         <ul id={panelId} className="space-y-2 pb-4 pl-3" role="list">
+          <li>
+            <Link
+              href={item.href}
+              onClick={onNavigate}
+              className="block py-1 font-serif text-base text-site-fg hover:text-warm-gold-dark"
+            >
+              View all {item.label}
+            </Link>
+          </li>
           {item.groups
             ? item.groups.map((group) => (
                 <li key={group.heading ?? group.links[0]?.href}>
@@ -157,6 +173,14 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const menuButtonRef = useRef(/** @type {HTMLButtonElement | null} */ (null));
+  const mobilePanelRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+
+  useFocusTrap(mobilePanelRef, open, {
+    returnFocusRef: menuButtonRef,
+    externalFocusRefs: [menuButtonRef],
+  });
+  useInertWhen(open, MOBILE_MENU_INERT_TARGETS);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -183,28 +207,37 @@ export default function SiteHeader() {
     <>
       <header className="fixed inset-x-0 top-0 z-[110] border-b border-stone-200/70 bg-ivory/90 backdrop-blur-md">
         <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
-          <SiteLogo variant="default" />
+          <div className="min-w-0" inert={open}>
+            <SiteLogo variant="default" />
+          </div>
 
           <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 md:gap-3">
-            <a
-              href={`tel:${orgPhoneTel}`}
-              className="hidden whitespace-nowrap text-[0.62rem] font-medium uppercase tracking-[0.16em] text-site-fg transition hover:text-warm-gold-dark md:inline sm:text-[0.65rem] sm:tracking-[0.18em]"
+            <div
+              className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2 md:gap-3"
+              inert={open}
             >
-              {orgPhone}
-            </a>
-            <Link
-              href="/contact"
-              className="inline-flex shrink-0 rounded-full border border-stone-300/80 bg-white px-2.5 py-2 text-[0.62rem] font-medium uppercase tracking-[0.14em] text-site-fg transition hover:border-warm-gold hover:bg-champagne sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]"
-            >
-              <span className="sm:hidden">Visit</span>
-              <span className="hidden sm:inline">Book Visit</span>
-            </Link>
-            <AccountAuthMenu onNavigate={close} />
+              <a
+                href={`tel:${orgPhoneTel}`}
+                className="hidden whitespace-nowrap text-[0.62rem] font-medium uppercase tracking-[0.16em] text-site-fg transition hover:text-warm-gold-dark md:inline sm:text-[0.65rem] sm:tracking-[0.18em]"
+              >
+                {orgPhone}
+              </a>
+              <Link
+                href="/contact"
+                className="inline-flex shrink-0 rounded-full border border-stone-300/80 bg-white px-2.5 py-2 text-[0.62rem] font-medium uppercase tracking-[0.14em] text-site-fg transition hover:border-warm-gold hover:bg-champagne sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]"
+              >
+                <span className="sm:hidden">Visit</span>
+                <span className="hidden sm:inline">Book Visit</span>
+              </Link>
+              <AccountAuthMenu onNavigate={close} />
+            </div>
             <button
+              ref={menuButtonRef}
               type="button"
               className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-stone-300/80 bg-white text-site-fg xl:hidden"
               aria-expanded={open}
               aria-controls={panelId}
+              aria-haspopup="dialog"
               aria-label={open ? "Close menu" : "Open menu"}
               onClick={() => setOpen((v) => !v)}
             >
@@ -227,7 +260,10 @@ export default function SiteHeader() {
           </div>
         </div>
 
-        <div className="hidden border-t border-stone-200/60 xl:block">
+        <div
+          className="hidden border-t border-stone-200/60 xl:block"
+          inert={open}
+        >
           <div className="mx-auto flex min-h-12 max-w-7xl items-center justify-center px-5 py-2.5 sm:px-8 lg:px-10">
             <nav aria-label="Main" className="flex flex-wrap items-center justify-center">
               <DesktopMainNav />
@@ -238,11 +274,15 @@ export default function SiteHeader() {
 
       <div
         id={panelId}
+        ref={mobilePanelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
         aria-hidden={!open}
-        style={{ paddingTop: siteHeaderTopOffset }}
+        inert={!open}
+        style={{
+          paddingTop: siteHeaderTopOffset,
+        }}
         className={`mobile-nav-panel fixed inset-0 z-[100] flex flex-col bg-ivory xl:hidden ${
           open
             ? "mobile-nav-panel--open visible opacity-100"
@@ -261,6 +301,7 @@ export default function SiteHeader() {
                 open={open}
               />
             ))}
+            <NavCartLink variant="mobile" onNavigate={close} />
           </nav>
           <Link
             href="/contact"

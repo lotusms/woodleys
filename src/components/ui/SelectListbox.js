@@ -143,6 +143,9 @@ export default function SelectListbox({
   onMenuClosed,
   buttonClassName,
   optionsClassName,
+  optionClassName,
+  checkIconClassName,
+  chevronClassName,
   disabled = false,
   showCheck = true,
   anchor,
@@ -175,9 +178,10 @@ export default function SelectListbox({
       : overlayChrome.listboxInFlowPanel(light));
 
   const resolvedLabelClassName = overlayChrome.formFieldLabel(light);
-  const resolvedChevronClassName = overlayChrome.selectChevron(light);
-  const resolvedOptionClassName = overlayChrome.listboxOption(light);
-  const resolvedCheckClassName = overlayChrome.listboxCheckIcon(light);
+  const resolvedChevronClassName = chevronClassName ?? overlayChrome.selectChevron(light);
+  const resolvedOptionClassName = optionClassName ?? overlayChrome.listboxOption(light);
+  const resolvedCheckClassName =
+    checkIconClassName ?? overlayChrome.listboxCheckIcon(light);
 
   const buttonLayout = compact
     ? "inline-flex w-auto min-w-0 items-center gap-2"

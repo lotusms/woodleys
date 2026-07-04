@@ -1,4 +1,6 @@
-import { CATALOG_SECTIONS } from "./categories";
+import { buildBulovaSampleProducts } from "./bulova-sample-products.js";
+import { CATALOG_SECTIONS } from "./categories.js";
+import { HOME_FEATURED_PRODUCT_HANDLES } from "../../config/featured-products.js";
 
 const editorialImages = {
   engagement:
@@ -107,7 +109,7 @@ export function buildMockProductsForCollection({
       id: `mock:${collectionHandle}:${slug}`,
       handle,
       title: service
-        ? `${collectionTitle} — ${style}`
+        ? `${collectionTitle}, ${style}`
         : `${style} ${collectionTitle}`,
       description: desc,
       priceUsd: price,
@@ -152,6 +154,15 @@ for (const section of Object.values(CATALOG_SECTIONS)) {
   });
 
   for (const child of section.children) {
+    if (child.shopifyHandle === "bulova") {
+      const products = buildBulovaSampleProducts();
+      mockByHandle.set("bulova", products);
+      for (const product of products) {
+        mockByProductHandle.set(product.handle, product);
+      }
+      continue;
+    }
+
     registerCollection(child.shopifyHandle, {
       title: child.title,
       description: child.description,
@@ -176,10 +187,16 @@ export function getMockProductByHandle(handle) {
   const product = mockByProductHandle.get(handle);
   if (!product) return null;
 
+  const images = Array.isArray(product.images) && product.images.length
+    ? product.images.filter((img) => img?.src)
+    : product.image?.src
+      ? [product.image]
+      : [];
+
   return {
     ...product,
     descriptionHtml: `<p>${product.description}</p>`,
-    images: product.image ? [product.image] : [],
+    images,
     variants: [
       {
         id: `${product.id}:default`,
@@ -189,4 +206,51 @@ export function getMockProductByHandle(handle) {
       },
     ],
   };
+}
+
+/**
+ * Mock catalog product handles generated for preview mode.
+ *
+ * @param {string} handle
+ * @returns {boolean}
+ */
+export function isMockPreviewHandle(handle) {
+  return typeof handle === "string" && handle.startsWith("preview-");
+}
+
+/**
+ * All unique preview catalog products with merged collection handles.
+ * Used to seed Firestore inventory for the admin Products page.
+ *
+ * @returns {Array<import("./product-types").CatalogProduct & { collectionHandles: string[]; quantity: number; active: boolean; featured: boolean }>}
+ */
+export function listAllMockCatalogProducts() {
+  const featuredSet = new Set(HOME_FEATURED_PRODUCT_HANDLES);
+  /** @type {Map<string, import("./product-types").CatalogProduct & { collectionHandles: string[]; quantity: number; active: boolean; featured: boolean }>} */
+  const byHandle = new Map();
+
+  for (const [collectionHandle, products] of mockByHandle.entries()) {
+    for (const product of products) {
+      const existing = byHandle.get(product.handle);
+      if (existing) {
+        if (!existing.collectionHandles.includes(collectionHandle)) {
+          existing.collectionHandles.push(collectionHandle);
+        }
+        continue;
+      }
+
+      byHandle.set(product.handle, {
+        ...product,
+        collectionHandles: [collectionHandle],
+        quantity: product.availableForSale ? 6 : 0,
+        active: true,
+        featured: featuredSet.has(product.handle),
+        featuredOrder: featuredSet.has(product.handle)
+          ? HOME_FEATURED_PRODUCT_HANDLES.indexOf(product.handle)
+          : undefined,
+      });
+    }
+  }
+
+  return [...byHandle.values()];
 }

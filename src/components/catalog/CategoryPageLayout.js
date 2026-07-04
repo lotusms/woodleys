@@ -24,7 +24,7 @@ export default function CategoryPageLayout({
   children,
 }) {
   return (
-    <main className="relative z-10 w-full min-w-0">
+    <div className="relative z-10 w-full min-w-0">
       <section className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2">
         <div className="relative min-h-[min(72vh,36rem)] w-full overflow-hidden bg-champagne sm:min-h-[min(68vh,40rem)]">
           {heroImage ? (
@@ -109,6 +109,6 @@ export default function CategoryPageLayout({
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-28 pt-14 sm:px-10 lg:px-12">
         {children}
       </div>
-    </main>
+    </div>
   );
 }

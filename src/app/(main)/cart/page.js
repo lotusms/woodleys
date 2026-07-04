@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import CartPageContent from "@/components/cart/CartPageContent";
 
 export default function CartPage() {
-  redirect("/shop-all");
+  return <CartPageContent />;
 }

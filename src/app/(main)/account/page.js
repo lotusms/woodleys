@@ -31,6 +31,28 @@ export default function AccountHomePage() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Link
+          href="/account/profile"
+          className="group rounded-2xl border border-stone-200/80 bg-white/90 p-7 shadow-sm shadow-stone-400/10 transition hover:border-warm-gold/40 hover:shadow-md"
+        >
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-site-secondary">
+            Your profile
+          </p>
+          <h3 className="mt-4 font-serif text-xl font-medium text-site-fg">
+            Contact & addresses
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-site-secondary">
+            Review saved shipping and billing details used at checkout.
+          </p>
+          <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-warm-gold-dark">
+            View profile
+            <RiArrowRightLine
+              className="h-4 w-4 transition group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </span>
+        </Link>
+
+        <Link
           href="/account/orders"
           className="group rounded-2xl border border-stone-200/80 bg-white/90 p-7 shadow-sm shadow-stone-400/10 transition hover:border-warm-gold/40 hover:shadow-md"
         >
@@ -52,7 +74,9 @@ export default function AccountHomePage() {
             />
           </span>
         </Link>
+      </div>
 
+      <div className="grid gap-5 sm:grid-cols-1">
         <Link
           href="/shop"
           className="group rounded-2xl border border-stone-200/80 bg-champagne/30 p-7 shadow-sm shadow-stone-400/10 transition hover:border-warm-gold/40 hover:shadow-md"

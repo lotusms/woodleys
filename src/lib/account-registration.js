@@ -1,4 +1,27 @@
 import { digitsFromTelInput } from "@/lib/checkout-auth";
+import { isUserAddressComplete } from "@/lib/user-account-address";
+
+function validateAddressFields(fields) {
+  const label = fields.label || "Address";
+  if (!String(fields.address1 || "").trim()) {
+    return `${label} line 1 is required.`;
+  }
+  if (!String(fields.city || "").trim()) return `${label} city is required.`;
+  const country = String(fields.country || "US");
+  if (!String(fields.state || "").trim()) {
+    return country === "US"
+      ? `Select a state for ${label.toLowerCase()}.`
+      : country === "CA"
+        ? `Select a province for ${label.toLowerCase()}.`
+        : `${label} state or region is required.`;
+  }
+  if (!String(fields.postalCode || "").trim()) {
+    return `${label} postal code is required.`;
+  }
+  return "";
+}
+
+export { validateAddressFields };
 
 /**
  * Validates registration fields aligned with `registerUserWithProfile` / useraccounts doc.
@@ -14,6 +37,12 @@ import { digitsFromTelInput } from "@/lib/checkout-auth";
  *   state: string;
  *   postalCode: string;
  *   country: string;
+ *   billingSameAsShipping?: boolean;
+ *   billingAddress1?: string;
+ *   billingCity?: string;
+ *   billingState?: string;
+ *   billingPostalCode?: string;
+ *   billingCountry?: string;
  * }} fields
  * @returns {string} Error message or "" if valid.
  */
@@ -31,20 +60,34 @@ export function validateAccountRegistration(fields) {
   }
   if (!String(fields.firstName || "").trim()) return "First name is required.";
   if (!String(fields.lastName || "").trim()) return "Last name is required.";
-  if (!String(fields.address1 || "").trim()) return "Address line 1 is required.";
-  if (!String(fields.city || "").trim()) return "City is required.";
-  const country = String(fields.country || "US");
-  if (!String(fields.state || "").trim()) {
-    return country === "US"
-      ? "Select a state."
-      : country === "CA"
-        ? "Select a province."
-        : "State or region is required.";
+
+  const shippingError = validateAddressFields({
+    address1: fields.address1,
+    city: fields.city,
+    state: fields.state,
+    postalCode: fields.postalCode,
+    country: fields.country,
+    label: "Shipping address",
+  });
+  if (shippingError) return shippingError;
+
+  if (fields.billingSameAsShipping === false) {
+    const billingError = validateAddressFields({
+      address1: fields.billingAddress1,
+      city: fields.billingCity,
+      state: fields.billingState,
+      postalCode: fields.billingPostalCode,
+      country: fields.billingCountry,
+      label: "Billing address",
+    });
+    if (billingError) return billingError;
   }
-  if (!String(fields.postalCode || "").trim()) return "Postal code is required.";
+
   const phoneDigits = digitsFromTelInput(fields.phone || "");
   if (phoneDigits.length > 0 && phoneDigits.length < 10) {
     return "Enter all 10 digits for phone, or leave it blank.";
   }
   return "";
 }
+
+export { isUserAddressComplete };

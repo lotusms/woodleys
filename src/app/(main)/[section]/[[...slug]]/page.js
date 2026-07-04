@@ -56,16 +56,10 @@ export default async function CatalogSectionPage({ params }) {
   if (!section) notFound();
 
   if (!slug) {
-    const products = await getCollectionProducts(section.shopifyHandle, {
-      title: section.title,
-      description: section.intro || section.description,
-      image: section.children[0]?.image,
-    });
     return (
       <CategoryLandingPage
         sectionKey={sectionKey}
         section={section}
-        products={products}
       />
     );
   }

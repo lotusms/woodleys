@@ -1,7 +1,7 @@
 import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: sitePageTitle("Checkout"),
+  title: sitePageTitle("Complete your order"),
   description: `Shipping and payment details for your ${orgName} order.`,
 };
 

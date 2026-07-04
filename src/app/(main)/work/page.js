@@ -11,7 +11,7 @@ const pillars = [
   {
     title: "Editorial pacing",
     body:
-      "Works are sequenced like a publication—rhythm, contrast, and negative space so each piece gets its moment.",
+      "Works are sequenced like a publication: rhythm, contrast, and negative space so each piece gets its moment.",
   },
   {
     title: "Cinematic crops",
@@ -36,7 +36,7 @@ export default function WorkPage() {
     <PageLayout
       eyebrow="Collection"
       title="Work"
-      subtitle="A living catalog on the web—where the studio is the room, and the room never closes."
+      subtitle="A living catalog on the web, where the studio is the room, and the room never closes."
       width="wide"
     >
       <p className="max-w-3xl text-lg leading-relaxed text-stone-200/95 sm:text-xl sm:leading-8">
@@ -81,7 +81,7 @@ export default function WorkPage() {
         </p>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-200/90">
           The main landing page carries a modular gallery grid with the same
-          editorial spacing philosophy—use it as a development stand-in, then
+          editorial spacing philosophy. Use it as a development stand-in, then
           replace imagery with your own series when you&apos;re ready to ship.
         </p>
         <Link

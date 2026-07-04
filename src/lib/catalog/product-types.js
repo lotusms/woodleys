@@ -10,6 +10,7 @@
  *   description: string;
  *   priceUsd: number;
  *   maxPriceUsd: number;
+ *   salePriceUsd?: number | null;
  *   image?: { src: string; alt: string };
  *   availableForSale: boolean;
  *   source: CatalogProductSource;

@@ -1,5 +1,9 @@
 import PageLayout from "@/components/PageLayout";
 import AppointmentForm from "@/components/appointments/AppointmentForm";
+import {
+  ContactPageContactBand,
+  ContactPageHero,
+} from "@/components/contact/ContactPageAside";
 import { orgLocation, sitePageTitle } from "@/config";
 
 export const metadata = {
@@ -10,26 +14,20 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <PageLayout
-      eyebrow="Visit"
-      title="Contact us"
-      subtitle={`Schedule time with our team in ${orgLocation}. We keep the process simple, unhurried, and focused on what you need.`}
-    >
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
-        <div className="space-y-5 text-site-secondary">
-          <p>
-            Whether you are choosing an engagement ring, beginning a custom
-            design, or bringing in a piece for repair, an appointment ensures
-            we can give you our full attention.
-          </p>
-          <p>
-            Complete the form and your email client will open with your details
-            ready to send. We will follow up to confirm a time that works for
-            you.
-          </p>
+    <>
+      <PageLayout
+        eyebrow="Visit"
+        title="Contact us"
+        subtitle={`Schedule a private appointment in ${orgLocation} for engagement selections, custom design, repairs, and more. Share your details below and we will follow up personally to confirm a time.`}
+        subtitleClassName="text-base leading-relaxed text-site-secondary sm:text-[1.05rem]"
+        containerClassName="pb-0"
+      >
+        <div className="mb-10">
+          <AppointmentForm />
         </div>
-        <AppointmentForm />
-      </div>
-    </PageLayout>
+      </PageLayout>
+      <ContactPageContactBand />
+      <ContactPageHero />
+    </>
   );
 }

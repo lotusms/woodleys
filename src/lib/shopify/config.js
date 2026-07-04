@@ -1,7 +1,6 @@
 /**
- * Shopify Storefront API configuration.
- * When credentials are present, product/category pages can hydrate from Shopify.
- * Checkout always routes through Shopify — no competing checkout flows.
+ * Shopify Storefront API configuration from environment variables.
+ * Client-safe — used by cart checkout URL building when env is set at deploy time.
  */
 
 export function isShopifyConfigured() {
@@ -9,6 +8,11 @@ export function isShopifyConfigured() {
     process.env.SHOPIFY_STORE_DOMAIN &&
       process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
   );
+}
+
+/** When false (default), collection/PDP reads use Firestore/mock — not Storefront API. */
+export function isShopifyCatalogEnabled() {
+  return isShopifyConfigured() && process.env.SHOPIFY_CATALOG_ENABLED === "true";
 }
 
 export function getShopifyStoreDomain() {
@@ -19,9 +23,9 @@ export function getShopifyStorefrontToken() {
   return process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 }
 
-/** Single checkout entry point — Shopify cart/checkout URL or Storefront checkout. */
+/** Single checkout entry point — Shopify cart/checkout URL. */
 export function getShopifyCheckoutUrl(cartId) {
-  const domain = getShopifyStoreDomain();
+  const domain = getShopifyStoreDomain().replace(/^https?:\/\//, "").replace(/\/$/, "");
   if (!domain) return null;
   if (cartId) {
     return `https://${domain}/cart/c/${cartId}`;
@@ -30,7 +34,7 @@ export function getShopifyCheckoutUrl(cartId) {
 }
 
 export function getShopifyCollectionUrl(handle) {
-  const domain = getShopifyStoreDomain();
+  const domain = getShopifyStoreDomain().replace(/^https?:\/\//, "").replace(/\/$/, "");
   if (!domain || !handle) return null;
   return `https://${domain}/collections/${handle}`;
 }

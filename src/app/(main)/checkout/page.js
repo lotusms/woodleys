@@ -1,11 +1,5 @@
-import { redirect } from "next/navigation";
-import { getShopifyCheckoutUrl, isShopifyConfigured } from "@/lib/shopify/config";
+import CheckoutPageContent from "@/components/checkout/CheckoutPageContent";
 
 export default function CheckoutPage() {
-  if (isShopifyConfigured()) {
-    const url = getShopifyCheckoutUrl();
-    if (url) redirect(url);
-  }
-
-  redirect("/shop-all");
+  return <CheckoutPageContent />;
 }

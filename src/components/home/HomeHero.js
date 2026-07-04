@@ -24,9 +24,7 @@ export default function HomeHero() {
           <PrimaryButton href="/engagement-wedding">
             Engagement & Wedding
           </PrimaryButton>
-          <SecondaryButton href="/contact">
-            Request Appointment
-          </SecondaryButton>
+          <SecondaryButton href="/contact">Book a visit</SecondaryButton>
         </div>
       </div>
 

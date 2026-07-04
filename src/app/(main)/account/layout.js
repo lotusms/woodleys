@@ -1,6 +1,7 @@
 import AccountAuthGate from "@/components/account/AccountAuthGate";
 import MemberAccountLayout from "@/components/account/MemberAccountLayout";
 import { sitePageTitle } from "@/config";
+import { Suspense } from "react";
 
 export const metadata = {
   title: sitePageTitle("My Account"),
@@ -9,8 +10,10 @@ export const metadata = {
 
 export default function AccountLayout({ children }) {
   return (
-    <AccountAuthGate>
-      <MemberAccountLayout>{children}</MemberAccountLayout>
-    </AccountAuthGate>
+    <Suspense fallback={<p className="text-sm text-site-secondary">Loading…</p>}>
+      <AccountAuthGate>
+        <MemberAccountLayout>{children}</MemberAccountLayout>
+      </AccountAuthGate>
+    </Suspense>
   );
 }

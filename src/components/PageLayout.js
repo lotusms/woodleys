@@ -4,6 +4,8 @@ export default function PageLayout({
   eyebrow,
   title,
   subtitle,
+  subtitleClassName = "text-lg leading-relaxed text-site-secondary sm:text-xl",
+  containerClassName = "",
   children,
   width: _width = "default",
   buttonArea = null,
@@ -12,7 +14,7 @@ export default function PageLayout({
   const layoutWidth = "max-w-7xl";
 
   return (
-    <main className="relative z-10 w-full min-w-0">
+    <div className="relative z-10 w-full min-w-0">
       {heroImage ? (
         <div className="relative mx-auto mb-10 max-w-7xl px-6 sm:px-10 lg:px-12">
           <div className="relative aspect-[21/9] overflow-hidden rounded-sm bg-champagne">
@@ -32,7 +34,7 @@ export default function PageLayout({
       />
       <InnerPageBackdrop />
       <div
-        className={`relative z-10 mx-auto w-full px-6 pb-28 pt-12 sm:px-10 lg:px-12 ${layoutWidth}`}
+        className={`relative z-10 mx-auto w-full px-6 pb-28 pt-12 sm:px-10 lg:px-12 ${layoutWidth} ${containerClassName}`}
       >
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div className="max-w-3xl">
@@ -48,14 +50,12 @@ export default function PageLayout({
           {buttonArea ? <div>{buttonArea}</div> : null}
         </div>
         {subtitle ? (
-          <p className="mt-5 max-w-3xl text-lg leading-relaxed text-site-secondary sm:text-xl">
-            {subtitle}
-          </p>
+          <p className={`mt-4 max-w-2xl ${subtitleClassName}`}>{subtitle}</p>
         ) : null}
-        <div className="mt-10 space-y-6 text-base leading-8 text-site-fg/90 sm:space-y-8 sm:text-[1.05rem] sm:leading-9">
+        <div className="mt-10 flex flex-col gap-6 text-base text-site-fg/90 sm:gap-8 sm:text-[1.05rem]">
           {children}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

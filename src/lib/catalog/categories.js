@@ -1,3 +1,5 @@
+import { BULOVA_CATEGORY_IMAGE } from "./bulova-sample-products.js";
+
 /**
  * Catalog taxonomy — structured for Shopify collection handles when connected.
  * Each entry maps to a future Shopify collection handle via `shopifyHandle`.
@@ -26,7 +28,7 @@ export const CATALOG_SECTIONS = {
     title: "Engagement & Wedding",
     eyebrow: "Bridal",
     description:
-      "Engagement rings and wedding bands selected with patience and care—elegant, enduring, and personal.",
+      "Engagement rings and wedding bands selected with patience and care, elegant, enduring, and personal.",
     shopifyHandle: "engagement-wedding",
     intro:
       "From solitaire classics to vintage-inspired settings, each ring is chosen to honor your story without chasing trends.",
@@ -35,7 +37,7 @@ export const CATALOG_SECTIONS = {
         slug: "solitaire",
         title: "Solitaire",
         description:
-          "A single center stone in a refined setting—timeless focus on the diamond you choose.",
+          "A single center stone in a refined setting, timeless focus on the diamond you choose.",
         shopifyHandle: "solitaire-rings",
         image: {
           src: editorialImages.engagement,
@@ -79,7 +81,7 @@ export const CATALOG_SECTIONS = {
         slug: "wedding-bands",
         title: "Wedding Bands",
         description:
-          "Bands in precious metals—plain, pavé, or engraved—to complement your engagement ring.",
+          "Bands in precious metals, plain, pavé, or engraved, to complement your engagement ring.",
         shopifyHandle: "wedding-bands",
         image: {
           src: editorialImages.engagement,
@@ -95,7 +97,7 @@ export const CATALOG_SECTIONS = {
       "Natural and lab-grown diamonds, presented clearly so you can choose with confidence.",
     shopifyHandle: "diamonds",
     intro:
-      "We guide you through origin, cut, and shape—never rushing a decision that deserves time.",
+      "We guide you through origin, cut, and shape, never rushing a decision that deserves time.",
     children: [
       {
         slug: "natural-diamonds",
@@ -112,7 +114,7 @@ export const CATALOG_SECTIONS = {
         slug: "lab-grown-diamonds",
         title: "Lab-Grown Diamonds",
         description:
-          "Laboratory-grown diamonds with the same optical properties—offered with transparent guidance.",
+          "Laboratory-grown diamonds with the same optical properties, offered with transparent guidance.",
         shopifyHandle: "lab-grown-diamonds",
         image: {
           src: editorialImages.diamond,
@@ -185,7 +187,7 @@ export const CATALOG_SECTIONS = {
     title: "Custom Jewelry",
     eyebrow: "Bespoke",
     description:
-      "Collaborative design for pieces that carry personal meaning—guided by experienced bench jewelers.",
+      "Collaborative design for pieces that carry personal meaning, guided by experienced bench jewelers.",
     shopifyHandle: "custom-jewelry",
     intro:
       "Whether starting from a sketch or reimagining a family heirloom, we work beside you at every step.",
@@ -194,7 +196,7 @@ export const CATALOG_SECTIONS = {
         slug: "custom-design",
         title: "Custom Design",
         description:
-          "From first conversation to finished piece—a process built on clarity and craft.",
+          "From first conversation to finished piece, a process built on clarity and craft.",
         shopifyHandle: "custom-design",
         image: {
           src: editorialImages.custom,
@@ -216,7 +218,7 @@ export const CATALOG_SECTIONS = {
         slug: "consultation",
         title: "Consultation",
         description:
-          "A dedicated design consultation—$200 applied toward your final design when you proceed.",
+          "A dedicated design consultation. $200 applied toward your final design when you proceed.",
         shopifyHandle: "design-consultation",
         image: {
           src: editorialImages.custom,
@@ -232,7 +234,7 @@ export const CATALOG_SECTIONS = {
       "Rings, necklaces, earrings, and bracelets chosen for everyday elegance and special occasions.",
     shopifyHandle: "fine-jewelry",
     intro:
-      "Refined pieces that sit comfortably in a jewelry wardrobe—understated, well made, and meant to last.",
+      "Refined pieces that sit comfortably in a jewelry wardrobe, understated, well made, and meant to last.",
     children: [
       {
         slug: "rings",
@@ -274,7 +276,7 @@ export const CATALOG_SECTIONS = {
   watches: {
     title: "Watches",
     eyebrow: "Timepieces",
-    description: "Authorized styles from Bulova, Citizen, and Seiko—presented with informed guidance.",
+    description: "Authorized styles from Bulova, Citizen, and Seiko, presented with informed guidance.",
     shopifyHandle: "watches",
     intro:
       "A watch is both instrument and personal statement. We help you select and care for yours.",
@@ -284,7 +286,7 @@ export const CATALOG_SECTIONS = {
         title: "Bulova",
         description: "American heritage timepieces with classic and contemporary lines.",
         shopifyHandle: "bulova",
-        image: { src: editorialImages.watch, alt: "Bulova watch" },
+        image: BULOVA_CATEGORY_IMAGE,
       },
       {
         slug: "citizen",
@@ -315,7 +317,7 @@ export const CATALOG_SECTIONS = {
         slug: "jewelry-repairs",
         title: "Jewelry Repairs",
         description:
-          "Prongs, shanks, clasps, and structural work—whether purchased here or elsewhere.",
+          "Prongs, shanks, clasps, and structural work, whether purchased here or elsewhere.",
         shopifyHandle: "jewelry-repairs",
         image: { src: editorialImages.service, alt: "Jewelry repair at the bench" },
       },
@@ -336,7 +338,7 @@ export const CATALOG_SECTIONS = {
       {
         slug: "jewelry-cleaning",
         title: "Jewelry Cleaning",
-        description: "Professional cleaning to restore brilliance—complimentary when you visit.",
+        description: "Professional cleaning to restore brilliance, complimentary when you visit.",
         shopifyHandle: "jewelry-cleaning",
         image: { src: editorialImages.service, alt: "Jewelry cleaning service" },
       },
@@ -402,6 +404,38 @@ export function getCatalogMetaByShopifyHandle(shopifyHandle) {
   }
   return { title: "Collection", description: "" };
 }
+
+/**
+ * @param {string} shopifyHandle
+ * @returns {{ href: string; label: string } | null}
+ */
+export function getCatalogPathForShopifyHandle(shopifyHandle) {
+  for (const [sectionKey, section] of Object.entries(CATALOG_SECTIONS)) {
+    if (section.shopifyHandle === shopifyHandle) {
+      return {
+        href: `/${sectionKey}`,
+        label: section.title,
+      };
+    }
+
+    for (const child of section.children) {
+      if (child.shopifyHandle === shopifyHandle) {
+        return {
+          href: `/${sectionKey}/${child.slug}`,
+          label: child.title,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+/** Hero and shared copy for the Shop All catalog landing page. */
+export const SHOP_ALL_HERO = {
+  src: editorialImages.fine,
+  alt: "Fine jewelry, watches, and diamonds curated in the Woodley's showroom",
+};
 
 export const HOME_FEATURED_CATEGORIES = [
   {

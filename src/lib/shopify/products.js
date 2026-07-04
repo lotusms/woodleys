@@ -1,7 +1,17 @@
-import { isShopifyConfigured } from "./config";
+import { isShopifyIntegrationConfigured } from "./integration-config";
 import { shopifyStorefrontQuery } from "./storefront";
 
 /** @typedef {{ id: string; title: string; handle: string; description: string; priceUsd: number; maxPriceUsd: number; image?: { src: string; alt: string }; availableForSale: boolean }} CatalogProduct */
+
+/**
+ * @param {string} scope
+ * @param {string} handle
+ * @param {unknown[]} errors
+ */
+function logShopifyCatalogIssue(scope, handle, errors) {
+  if (process.env.NODE_ENV !== "development") return;
+  console.warn(`[shopify] ${scope}`, handle, errors);
+}
 
 const COLLECTION_PRODUCTS_QUERY = `
   query CollectionProducts($handle: String!, $first: Int!) {
@@ -96,7 +106,7 @@ function normalizeProduct(node) {
  * @returns {Promise<CatalogProduct[]>}
  */
 export async function getProductsByCollectionHandle(handle, { first = 48 } = {}) {
-  if (!isShopifyConfigured() || !handle) return [];
+  if (!(await isShopifyIntegrationConfigured()) || !handle) return [];
 
   const { data, errors } = await shopifyStorefrontQuery(COLLECTION_PRODUCTS_QUERY, {
     handle,
@@ -104,7 +114,7 @@ export async function getProductsByCollectionHandle(handle, { first = 48 } = {})
   });
 
   if (errors?.length) {
-    console.error("[shopify] collection products", handle, errors);
+    logShopifyCatalogIssue("collection products", handle, errors);
     return [];
   }
 
@@ -117,14 +127,14 @@ export async function getProductsByCollectionHandle(handle, { first = 48 } = {})
  * @returns {Promise<(CatalogProduct & { descriptionHtml?: string; images: { src: string; alt: string }[]; variants: { id: string; title: string; priceUsd: number; availableForSale: boolean }[] }) | null>}
  */
 export async function getProductByHandle(handle) {
-  if (!isShopifyConfigured() || !handle) return null;
+  if (!(await isShopifyIntegrationConfigured()) || !handle) return null;
 
   const { data, errors } = await shopifyStorefrontQuery(PRODUCT_BY_HANDLE_QUERY, {
     handle,
   });
 
   if (errors?.length) {
-    console.error("[shopify] product", handle, errors);
+    logShopifyCatalogIssue("product", handle, errors);
     return null;
   }
 

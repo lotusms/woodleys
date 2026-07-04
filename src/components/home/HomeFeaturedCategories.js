@@ -36,7 +36,7 @@ export default function HomeFeaturedCategories() {
 
             <div className="max-w-xl space-y-5 text-base leading-relaxed text-stone-700 sm:text-lg sm:leading-8">
               <p>
-                Six paths into what we do best—engagement and wedding, diamonds,
+                Six paths into what we do best: engagement and wedding, diamonds,
                 custom design, everyday fine jewelry, watches, and lifelong care.
                 Each collection is curated in our showroom, meant to be explored
                 at your pace.
@@ -50,61 +50,88 @@ export default function HomeFeaturedCategories() {
             </div>
           </div>
 
-          <ol className="mt-14 divide-y divide-stone-500/22 sm:mt-16" role="list">
+          <ul
+            className="mt-14 grid gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:gap-8"
+            role="list"
+          >
             {HOME_FEATURED_CATEGORIES.map((category, index) => {
               const sectionKey = category.href.replace(/^\//, "");
               const eyebrow = CATALOG_SECTIONS[sectionKey]?.eyebrow ?? "Collection";
               const indexLabel = String(index + 1).padStart(2, "0");
+              const isFeatured = index === 0;
+              const gridItemCount = HOME_FEATURED_CATEGORIES.length - 1;
+              const isLastOrphan =
+                index > 0 &&
+                index === HOME_FEATURED_CATEGORIES.length - 1 &&
+                gridItemCount % 2 === 1;
+              const isFullWidth = isFeatured || isLastOrphan;
 
               return (
-                <li key={category.href}>
+                <li
+                  key={category.href}
+                  className={isFullWidth ? "sm:col-span-2" : undefined}
+                >
                   <Link
                     href={category.href}
-                    className="group -mx-3 flex flex-col gap-5 rounded-sm px-3 py-8 transition-colors hover:bg-white/18 focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-[#ddd6c8] sm:-mx-4 sm:flex-row sm:items-center sm:gap-8 sm:px-4 sm:py-10 lg:gap-12"
+                    className={`group relative block overflow-hidden shadow-lg shadow-stone-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-[#ddd6c8] ${
+                      isFullWidth
+                        ? "aspect-[16/10] sm:aspect-[21/9]"
+                        : "aspect-[4/5] sm:aspect-[3/4]"
+                    }`}
                   >
-                    <span className="w-10 shrink-0 font-sans text-xs font-medium tabular-nums tracking-[0.22em] text-stone-500">
-                      {indexLabel}
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={category.image}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
+                      aria-hidden
+                    />
 
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-stone-600">
-                        {eyebrow}
-                      </p>
-                      <h3 className="mt-2 font-serif text-2xl font-medium tracking-[-0.02em] text-site-fg transition group-hover:text-warm-gold-dark sm:text-3xl lg:text-[2rem]">
-                        {category.title}
-                      </h3>
-                      <p className="mt-3 max-w-lg text-sm leading-relaxed text-stone-700 lg:hidden">
-                        {category.description}
-                      </p>
-                    </div>
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-stone-950/82 via-stone-950/28 to-stone-950/8 transition duration-500 group-hover:from-stone-950/88"
+                      aria-hidden
+                    />
+                    <div
+                      className="absolute inset-0 bg-gradient-to-r from-stone-950/35 via-transparent to-transparent opacity-80 sm:opacity-100"
+                      aria-hidden
+                    />
 
-                    <p className="hidden max-w-xs flex-1 text-sm leading-relaxed text-stone-700 lg:block">
-                      {category.description}
-                    </p>
+                    <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-10">
+                      <div className="flex items-end justify-between gap-6">
+                        <div className="min-w-0 max-w-xl">
+                          <div className="flex items-center gap-3 text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-white/70">
+                            <span className="tabular-nums">{indexLabel}</span>
+                            <span className="h-px w-8 bg-white/35" aria-hidden />
+                            <span>{eyebrow}</span>
+                          </div>
+                          <h3 className="mt-3 font-serif text-3xl font-medium tracking-[-0.02em] text-white sm:text-4xl lg:text-[2.5rem] lg:leading-[1.08]">
+                            {category.title}
+                          </h3>
+                          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/78 sm:text-base">
+                            {category.description}
+                          </p>
+                        </div>
 
-                    <div className="flex items-center gap-5 sm:shrink-0">
-                      <div className="relative h-[4.75rem] w-[3.75rem] shrink-0 overflow-hidden bg-stone-600/10 shadow-sm shadow-stone-900/8 sm:h-24 sm:w-20 lg:h-28 lg:w-[5.5rem]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={category.image}
-                          alt=""
-                          className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.06]"
+                        <span
+                          className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/10 text-lg text-white backdrop-blur-sm transition duration-300 group-hover:border-white/55 group-hover:bg-white/18 sm:flex"
                           aria-hidden
-                        />
+                        >
+                          →
+                        </span>
                       </div>
-                      <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-500/35 text-base text-stone-600 transition duration-300 group-hover:border-warm-gold-dark group-hover:bg-warm-gold/12 group-hover:text-warm-gold-dark"
-                        aria-hidden
-                      >
-                        →
+
+                      <span className="mt-5 inline-flex text-sm font-medium text-amber-100/95 transition group-hover:text-white">
+                        Explore collection
+                        <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1" aria-hidden>
+                          →
+                        </span>
                       </span>
-                      <span className="sr-only">Explore {category.title}</span>
                     </div>
                   </Link>
                 </li>
               );
             })}
-          </ol>
+          </ul>
         </div>
       </div>
     </section>

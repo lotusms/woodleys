@@ -1,5 +1,9 @@
 import nodemailer from "nodemailer";
 import { orgName } from "../../config/config.js";
+import {
+  getOrderTransactionId,
+  getPaymentMethodLabel,
+} from "../order-receipt.js";
 
 const usdFmt = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -210,18 +214,24 @@ function linesHtmlCustomer(lines) {
 
 function paymentBlockTextCustomer(payment) {
   if (!payment || typeof payment !== "object") return "Payment: received";
-  if (payment.provider === "paypal") return "Payment: PayPal";
-  return `Payment: ${payment.provider || "received"}`;
+  const method = getPaymentMethodLabel(payment);
+  const txn = getOrderTransactionId({ payment });
+  return [`Payment: ${method}`, txn ? `Transaction ID: ${txn}` : null]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function paymentSummaryCustomerHtml(payment) {
   if (!payment || typeof payment !== "object") {
     return '<p style="margin:0;font-size:14px;color:#6b7280">Your payment is recorded.</p>';
   }
-  if (payment.provider === "paypal") {
-    return '<p style="margin:0;font-size:15px;color:#1f2937;font-family:system-ui,-apple-system,sans-serif"><span style="color:#0070ba;font-weight:600">PayPal</span> — payment received</p>';
-  }
-  return `<p style="margin:0;font-size:15px;color:#1f2937;font-family:system-ui,-apple-system,sans-serif">${escapeHtml(String(payment.provider || "Payment"))}</p>`;
+  const method = escapeHtml(getPaymentMethodLabel(payment));
+  const txn = escapeHtml(getOrderTransactionId({ payment }));
+  return `<div style="background:#faf8f4;border:1px solid #e8e4dc;border-radius:10px;padding:16px 18px;font-family:system-ui,-apple-system,sans-serif">
+  <p style="margin:0 0 8px;font-size:15px;color:#1f2937"><strong style="color:#1a2e26">Payment method:</strong> ${method}</p>
+  <p style="margin:0;font-size:15px;color:#1f2937"><strong style="color:#1a2e26">Transaction ID:</strong> <span style="font-family:ui-monospace,Menlo,monospace">${txn || "—"}</span></p>
+  <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#78716c">Save this transaction ID for your records. You may need it for order support.</p>
+</div>`;
 }
 
 function paymentBlockText(payment) {
@@ -333,7 +343,7 @@ function buildCustomerReceiptHtml({
       ${notes ? `<tr><td style="padding:0 28px 24px;font-family:system-ui,-apple-system,sans-serif;"><p style="margin:0 0 8px;font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#78716c;">Note</p><p style="margin:0;font-size:14px;color:#374151;line-height:1.5">${escapeHtml(notes)}</p></td></tr>` : ""}
       <tr>
         <td style="padding:18px 28px 24px;background:#faf8f4;border-top:1px solid #e8e4dc;text-align:center;font-family:system-ui,-apple-system,sans-serif;">
-          <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5">Questions? Reply to this email — we’re happy to help.</p>
+          <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5">Questions? Reply to this email. We’re happy to help.</p>
         </td>
       </tr>
     </table>
@@ -354,7 +364,7 @@ function buildBodies({ order, payment, fulfillment, options = {} }) {
 
   const header = internal
     ? `New order #${id}`
-    : `Thank you — order #${id}`;
+    : `Thank you. Order #${id}`;
 
   const textLines = internal
     ? [
@@ -394,6 +404,7 @@ function buildBodies({ order, payment, fulfillment, options = {} }) {
         `Shipping: ${shipCost}`,
         `Total: ${total}`,
         "",
+        `Transaction ID: ${getOrderTransactionId({ id, payment })}`,
         paymentBlockTextCustomer(payment),
         ...(notes ? ["", `Note: ${notes}`] : []),
       ];
@@ -484,7 +495,7 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
         from,
         replyTo: seller,
         bcc: bccShopOnReceipt,
-        subject: `Order confirmation #${orderId} — ${orgName}`,
+        subject: `Order confirmation #${orderId}, ${orgName}`,
         text: buyerBodies.text,
         html: buyerBodies.html,
       });
@@ -507,7 +518,7 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
         to: buyer,
         ...(bccShopOnReceipt ? { bcc: bccShopOnReceipt } : {}),
         replyTo: seller,
-        subject: `Order confirmation #${orderId} — ${orgName}`,
+        subject: `Order confirmation #${orderId}, ${orgName}`,
         text: buyerBodies.text,
         html: buyerBodies.html,
       });
@@ -529,7 +540,7 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
           from,
           to: seller,
           replyTo: seller,
-          subject: `[Forward to customer] Order #${orderId} — ${buyer}`,
+          subject: `[Forward to customer] Order #${orderId}, ${buyer}`,
           text: [
             `This receipt could not be delivered automatically to ${buyer}.`,
             "Please forward this entire message (or the section below) to the customer.",
@@ -557,7 +568,7 @@ ${buyerBodies.html}`,
       from,
       to: seller,
       replyTo: seller,
-      subject: `New order #${orderId} — ${orgName}`,
+      subject: `New order #${orderId}, ${orgName}`,
       text: sellerBodies.text,
       html: sellerBodies.html,
     });
@@ -632,7 +643,7 @@ export async function sendOrderDetailsEmailBuyerWithCc({ order, payment, fulfill
         from,
         replyTo: replyToAddr,
         cc: ccAddr ? [ccAddr] : undefined,
-        subject: `Order #${orderId} — ${orgName}`,
+        subject: `Order #${orderId}, ${orgName}`,
         text: bodies.text,
         html: bodies.html,
       });
@@ -652,7 +663,7 @@ export async function sendOrderDetailsEmailBuyerWithCc({ order, payment, fulfill
       to: buyer,
       cc: ccAddr,
       replyTo: replyToAddr,
-      subject: `Order #${orderId} — ${orgName}`,
+      subject: `Order #${orderId}, ${orgName}`,
       text: bodies.text,
       html: bodies.html,
     });

@@ -1,5 +1,4 @@
 import CategoryPageLayout from "@/components/catalog/CategoryPageLayout";
-import CatalogProductSection from "@/components/catalog/CatalogProductSection";
 import CategoryGrid from "@/components/catalog/CategoryGrid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { sitePageTitle } from "@/config";
@@ -8,10 +7,9 @@ import { sitePageTitle } from "@/config";
  * @param {{
  *   sectionKey: string;
  *   section: import("@/lib/catalog/categories").CATALOG_SECTIONS[string];
- *   products: import("@/lib/catalog/product-types").CatalogProduct[];
  * }} props
  */
-export default function CategoryLandingPage({ sectionKey, section, products }) {
+export default function CategoryLandingPage({ sectionKey, section }) {
   const items = section.children.map((child) => ({
     title: child.title,
     description: child.description,
@@ -20,7 +18,6 @@ export default function CategoryLandingPage({ sectionKey, section, products }) {
     alt: child.image?.alt,
   }));
 
-  const emptyMessage = `No products in ${section.title} yet.`;
   const heroImage = section.children[0]?.image;
 
   return (
@@ -37,19 +34,8 @@ export default function CategoryLandingPage({ sectionKey, section, products }) {
       </p>
 
       <div className="mt-16">
-        <CatalogProductSection
-          label={section.title}
-          products={products}
-          emptyMessage={emptyMessage}
-        />
-      </div>
-
-      <div className="mt-20">
         <div className="border-b border-stone-200/80 pb-8">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-site-secondary">
-            Browse by style
-          </p>
-          <h2 className="mt-3 font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
+          <h2 className="font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
             Within {section.title}
           </h2>
         </div>

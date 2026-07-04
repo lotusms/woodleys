@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
   RiDashboardLine,
-  RiLockLine,
+  RiDiamondLine,
   RiSettings3Line,
   RiShoppingBag3Line,
 } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
 import InnerPageBackdrop from "@/components/InnerPageBackdrop";
 import { orgName } from "@/config";
+import { SITE_LOGO_ID } from "@/components/brand/SiteLogo";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
 import { isLightThemeId } from "@/theme";
@@ -21,8 +22,8 @@ const GRAIN_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='ht
 const navItems = [
   { href: "/dashboard", label: "Dashboard", Icon: RiDashboardLine },
   { href: "/dashboard/orders", label: "Orders", Icon: RiShoppingBag3Line },
+  { href: "/dashboard/products", label: "Products", Icon: RiDiamondLine },
   { href: "/dashboard/settings", label: "Settings", Icon: RiSettings3Line },
-  { href: "/dashboard/change-password", label: "Password", Icon: RiLockLine },
 ];
 
 export default function DashboardShell({ children }) {
@@ -68,6 +69,7 @@ export default function DashboardShell({ children }) {
                 href={item.href}
                 title={item.label}
                 aria-label={item.label}
+                aria-current={active ? "page" : undefined}
                 className={dash.dashboardNavLink(light, active)}
               >
                 <Icon
@@ -83,7 +85,12 @@ export default function DashboardShell({ children }) {
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         <header className={dash.dashboardHeader(light)}>
-          <Link href="/" className={dash.dashboardBrandLink(light)}>
+          <Link
+            id={SITE_LOGO_ID}
+            href="/"
+            className={dash.dashboardBrandLink(light)}
+            aria-label={`${orgName} home`}
+          >
             {orgName}
           </Link>
           <div className="flex items-center gap-4">
@@ -103,7 +110,9 @@ export default function DashboardShell({ children }) {
           </div>
         </header>
 
-        <main className={dash.dashboardMain(light)}>{children}</main>
+        <main id="main-content" tabIndex={-1} className={dash.dashboardMain(light)}>
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -1,19 +1,21 @@
+import { loadSiteIntegrations } from "@/lib/site-integrations";
+
 /**
  * Stuller catalog embed — sits inside site layout for a unified experience.
- * Set NEXT_PUBLIC_STULLER_EMBED_URL in environment when available.
+ * URL is configured in Dashboard → Settings (stored in Firestore) or via env fallback.
  */
-export default function StullerEmbed() {
-  const embedUrl = process.env.NEXT_PUBLIC_STULLER_EMBED_URL;
+export default async function StullerEmbed() {
+  const integrations = await loadSiteIntegrations();
+  const embedUrl = integrations.stullerEmbedUrl;
 
   if (!embedUrl) {
     return (
       <div className="rounded-sm border border-dashed border-stone-300/80 bg-champagne/40 p-10 text-center">
         <h2 className="font-serif text-xl text-site-fg">Stuller catalog</h2>
         <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-site-secondary">
-          The Stuller product catalog will appear here once{" "}
-          <code className="rounded bg-white px-1.5 py-0.5 text-xs">NEXT_PUBLIC_STULLER_EMBED_URL</code>{" "}
-          is configured. Checkout remains through Shopify for a single, consistent
-          experience.
+          Add your Stuller showcase embed URL in{" "}
+          <strong className="font-medium text-site-fg">Dashboard → Settings</strong>{" "}
+          to display the extended catalog here on Shop All.
         </p>
       </div>
     );

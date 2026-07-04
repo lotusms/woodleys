@@ -126,8 +126,7 @@ function LoginPageContent() {
   }
 
   return (
-    <main
-      id="main-content"
+    <div
       className={`flex ${siteBelowHeaderMinHeightClass} flex-col items-center justify-center px-6 py-16`}
     >
       <div className={overlayChrome.authCardPanel(light)}>
@@ -217,6 +216,6 @@ function LoginPageContent() {
           </Link>
         </p>
       </div>
-    </main>
+    </div>
   );
 }

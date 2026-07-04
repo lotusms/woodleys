@@ -9,7 +9,7 @@ import {
   PopoverPanel,
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { isNavItemActive } from "@/config";
+import { isNavItemActive, desktopNavItemClass } from "@/config";
 import { useDismissOnOutsidePress } from "@/hooks/useDismissOnOutsidePress";
 
 /**
@@ -64,22 +64,24 @@ function DesktopNavDropdownPanel({ item, open, close }) {
     <>
       <PopoverButton
         ref={buttonRef}
-        className={`inline-flex items-center gap-1 border-b-2 pb-0.5 text-[0.68rem] font-medium uppercase tracking-[0.22em] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-site-bg ${
+        type="button"
+        aria-haspopup="menu"
+        aria-current={active ? "page" : undefined}
+        className={`${desktopNavItemClass} cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-site-bg ${
           active || open
             ? "border-warm-gold text-site-fg"
-            : "border-transparent text-site-secondary hover:border-stone-300 hover:text-site-fg"
+            : "text-site-secondary hover:border-stone-300 hover:text-site-fg"
         }`}
       >
-        <span>{item.label}</span>
+        <span className="whitespace-nowrap">{item.label}</span>
         <ChevronDownIcon
-          className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 shrink-0 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden
         />
       </PopoverButton>
 
       <PopoverPanel
         ref={panelRef}
-        focus
         transition
         anchor={{ to: "bottom", gap: 12, padding: 16 }}
         className={panelClassName}
@@ -148,7 +150,7 @@ function DesktopNavDropdownPanel({ item, open, close }) {
  */
 export default function DesktopNavDropdown({ item }) {
   return (
-    <Popover className="relative">
+    <Popover className="relative inline-flex items-center">
       {({ open, close }) => (
         <DesktopNavDropdownPanel item={item} open={open} close={close} />
       )}

@@ -5,7 +5,7 @@ import { orgName, sitePageTitle } from "@/config";
 export const metadata = {
   title: sitePageTitle("Shop"),
   description:
-    "Original works available for acquisition—priced transparently, shipped with care.",
+    "Original works available for acquisition, priced transparently, shipped with care.",
 };
 
 export const dynamic = "force-dynamic";

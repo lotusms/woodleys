@@ -1,8 +1,8 @@
 import {
-  getShopifyStoreDomain,
-  getShopifyStorefrontToken,
-  isShopifyConfigured,
-} from "./config";
+  getShopifyIntegrationDomain,
+  getShopifyIntegrationStorefrontToken,
+  isShopifyIntegrationConfigured,
+} from "./integration-config";
 
 const API_VERSION = "2026-04";
 
@@ -11,12 +11,14 @@ const API_VERSION = "2026-04";
  * @param {Record<string, unknown>} [variables]
  */
 export async function shopifyStorefrontQuery(query, variables = {}) {
-  if (!isShopifyConfigured()) {
+  if (!(await isShopifyIntegrationConfigured())) {
     return { data: null, errors: [{ message: "Shopify is not configured" }] };
   }
 
-  const domain = getShopifyStoreDomain().replace(/^https?:\/\//, "").replace(/\/$/, "");
-  const token = getShopifyStorefrontToken();
+  const domain = (await getShopifyIntegrationDomain())
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  const token = await getShopifyIntegrationStorefrontToken();
 
   const res = await fetch(`https://${domain}/api/${API_VERSION}/graphql.json`, {
     method: "POST",

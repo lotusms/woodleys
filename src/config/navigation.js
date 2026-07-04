@@ -4,6 +4,10 @@
  * @typedef {{ label: string; href: string; prefix?: boolean; children?: NavLink[]; groups?: { heading?: string; links: NavLink[] }[] }} NavItem
  */
 
+/** Shared desktop nav link / dropdown trigger styles */
+export const desktopNavItemClass =
+  "inline-flex h-8 shrink-0 items-center gap-1 border-b-2 border-transparent bg-transparent p-0 pb-0.5 text-[0.68rem] font-medium uppercase leading-none tracking-[0.22em] transition-colors";
+
 /** @type {NavItem[]} */
 export const mainNav = [
   { label: "Shop All", href: "/shop-all", prefix: true },

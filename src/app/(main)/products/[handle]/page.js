@@ -1,10 +1,17 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import PageLayout from "@/components/PageLayout";
-import PrimaryButton from "@/components/ui/PrimaryButton";
+import CatalogProductPurchasePanel from "@/components/catalog/CatalogProductPurchasePanel";
+import ProductDetailGallery from "@/components/catalog/ProductDetailGallery";
+import ProductSpecsSection from "@/components/catalog/ProductSpecsSection";
+import SimilarProductsCarousel from "@/components/catalog/SimilarProductsCarousel";
+import InnerPageBackdrop from "@/components/InnerPageBackdrop";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { sitePageTitle } from "@/config";
-import { formatUsd } from "@/lib/money";
-import { getCatalogProductByHandle } from "@/lib/catalog/products";
+import { getProductImages } from "@/lib/catalog/product-images";
+import {
+  getCatalogProductByHandle,
+  getProductCategoryNavigation,
+  getSimilarCatalogProducts,
+} from "@/lib/catalog/products";
 
 export const revalidate = 60;
 
@@ -23,82 +30,76 @@ export default async function ProductPage({ params }) {
   const product = await getCatalogProductByHandle(handle);
   if (!product) notFound();
 
-  const isPreview = product.source === "mock";
-
-  const min = product.priceUsd;
-  const max = product.maxPriceUsd;
-  const priceLabel =
-    max > min && min > 0
-      ? `${formatUsd(min)} to ${formatUsd(max)}`
-      : formatUsd(min);
-
-  const shopDomain = isPreview
-    ? ""
-    : process.env.SHOPIFY_STORE_DOMAIN?.replace(/^https?:\/\//, "") || "";
+  const shopDomain =
+    process.env.SHOPIFY_STORE_DOMAIN?.replace(/^https?:\/\//, "") || "";
   const shopifyProductUrl =
     shopDomain && product.source === "shopify"
       ? `https://${shopDomain}/products/${product.handle}`
       : null;
 
-  const hero = product.images[0] || product.image;
+  const similarProducts = await getSimilarCatalogProducts(product, { limit: 12 });
+  const images = getProductImages(product);
+  const categoryNav = getProductCategoryNavigation(product);
 
   return (
-    <PageLayout
-      eyebrow="Collection"
-      title={product.title}
-      subtitle={product.description}
-      heroImage={
-        hero
-          ? { src: hero.src, alt: hero.alt }
-          : undefined
-      }
-      buttonArea={
-        <div className="flex flex-wrap gap-3">
-          {shopifyProductUrl ? (
-            <PrimaryButton href={shopifyProductUrl}>Buy on Shopify</PrimaryButton>
-          ) : isPreview ? (
-            <PrimaryButton href="/contact">Request appointment</PrimaryButton>
+    <div className="relative z-10 w-full min-w-0">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-2 opacity-[0.03] mix-blend-multiply fabric-texture"
+      />
+      <InnerPageBackdrop />
+
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-28 pt-10 sm:px-10 lg:px-12">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <SecondaryButton href="/shop-all">Shop All</SecondaryButton>
+          {categoryNav ? (
+            <SecondaryButton href={categoryNav.href}>
+              ← {categoryNav.label}
+            </SecondaryButton>
           ) : null}
-          <Link
-            href="/shop-all"
-            className="inline-flex items-center justify-center rounded-full border border-stone-300/90 bg-white px-6 py-3 text-sm font-semibold text-site-fg transition hover:border-warm-gold hover:bg-champagne/60"
-          >
-            Shop All
-          </Link>
         </div>
-      }
-    >
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
-        <div>
-          <p className="text-2xl font-medium tabular-nums text-warm-gold-dark">
-            {priceLabel}
-          </p>
-          {isPreview ? (
-            <p className="mt-3 rounded-sm border border-stone-200/80 bg-champagne/40 px-4 py-3 text-sm text-site-secondary">
-              Preview listing. Live inventory will appear here when Shopify or your
-              catalog database is connected.
+
+        <div className="mt-8 grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-3 lg:items-start lg:gap-12">
+          <div className="min-w-0 lg:col-span-1">
+            <ProductDetailGallery images={images} title={product.title} />
+          </div>
+
+          <div className="min-w-0 lg:col-span-2">
+            <h1 className="font-serif text-4xl font-medium tracking-[-0.03em] text-site-fg sm:text-5xl">
+              {product.title}
+            </h1>
+
+            {product.descriptionHtml ? (
+              <div
+                className="prose prose-stone mt-5 max-w-none text-site-secondary prose-headings:font-serif prose-headings:text-site-fg"
+                dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+              />
+            ) : (
+              <p className="mt-5 text-lg leading-relaxed text-site-secondary">
+                {product.description}
+              </p>
+            )}
+
+            <div className="mt-8">
+              <CatalogProductPurchasePanel
+                product={product}
+                shopifyProductUrl={shopifyProductUrl}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-14 space-y-14">
+          <ProductSpecsSection specs={product.specs ?? []} />
+          <SimilarProductsCarousel products={similarProducts} />
+
+          {product.source === "shopify" ? (
+            <p className="text-sm text-site-secondary">
+              Checkout is completed securely through Shopify.
             </p>
           ) : null}
-          {!isPreview && !product.availableForSale ? (
-            <p className="mt-2 text-sm text-site-secondary">Currently sold out</p>
-          ) : null}
         </div>
-
-        {product.descriptionHtml ? (
-          <div
-            className="prose prose-stone max-w-none text-site-secondary prose-headings:font-serif prose-headings:text-site-fg"
-            dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
-          />
-        ) : (
-          <p className="leading-relaxed text-site-secondary">{product.description}</p>
-        )}
       </div>
-
-      {product.source === "shopify" ? (
-        <p className="mt-10 text-sm text-site-secondary">
-          Checkout is completed securely through Shopify.
-        </p>
-      ) : null}
-    </PageLayout>
+    </div>
   );
 }

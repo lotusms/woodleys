@@ -126,6 +126,9 @@ export function CartProvider({ children }) {
                     ? latest.shippingIncluded
                     : Boolean(line.shippingIncluded),
                 sku: latest.sku ?? line.sku ?? null,
+                source: latest.source ?? line.source ?? "local",
+                shopifyVariantId:
+                  latest.shopifyVariantId ?? line.shopifyVariantId ?? null,
               };
             })
             .filter(Boolean);
@@ -172,6 +175,8 @@ export function CartProvider({ children }) {
               product.originalImage ?? product.image ?? null,
             shippingIncluded: Boolean(product.shippingIncluded),
             sku: product.sku ?? null,
+            source: product.source ?? "local",
+            shopifyVariantId: product.shopifyVariantId ?? null,
             quantity: qty,
           },
         ];

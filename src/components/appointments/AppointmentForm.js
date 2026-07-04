@@ -1,26 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import ContactHelpfulDetailsCard from "@/components/contact/ContactHelpfulDetailsCard";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SelectListbox from "@/components/ui/SelectListbox";
 import { orgEmail, orgPhone } from "@/config";
+import * as siteForm from "@/lib/siteFormChrome";
 
 const visitTypes = [
-  "Engagement & wedding consultation",
-  "Custom design consultation",
-  "Jewelry repair drop-off",
-  "Watch service",
-  "Appraisal",
-  "General visit",
+  { value: "Engagement & wedding consultation", label: "Engagement & wedding consultation" },
+  { value: "Custom design consultation", label: "Custom design consultation" },
+  { value: "Jewelry repair drop-off", label: "Jewelry repair drop-off" },
+  { value: "Watch service", label: "Watch service" },
+  { value: "Appraisal", label: "Appraisal" },
+  { value: "General visit", label: "General visit" },
 ];
 
-const timePreferences = [
-  "Morning",
-  "Afternoon",
-  "No preference",
-];
+const timePreferences = ["Morning", "Afternoon", "No preference"];
 
 export default function AppointmentForm() {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+  const [visitType, setVisitType] = useState("");
+  const [preferredTime, setPreferredTime] = useState("No preference");
 
   function validate(formData) {
     /** @type {Record<string, string>} */
@@ -28,7 +30,7 @@ export default function AppointmentForm() {
     if (!formData.get("name")?.toString().trim()) next.name = "Please enter your name.";
     if (!formData.get("email")?.toString().trim()) next.email = "Please enter your email.";
     if (!formData.get("phone")?.toString().trim()) next.phone = "Please enter your phone number.";
-    if (!formData.get("visitType")?.toString()) next.visitType = "Please select a visit type.";
+    if (!visitType.trim()) next.visitType = "Please select a visit type.";
     return next;
   }
 
@@ -43,11 +45,9 @@ export default function AppointmentForm() {
     const name = formData.get("name");
     const email = formData.get("email");
     const phone = formData.get("phone");
-    const visitType = formData.get("visitType");
-    const preferredTime = formData.get("preferredTime");
     const message = formData.get("message");
 
-    const subject = encodeURIComponent(`Appointment request — ${visitType}`);
+    const subject = encodeURIComponent(`Appointment request, ${visitType}`);
     const body = encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nVisit type: ${visitType}\nPreferred time: ${preferredTime}\n\nNotes:\n${message || "(none)"}`,
     );
@@ -58,19 +58,17 @@ export default function AppointmentForm() {
 
   if (submitted) {
     return (
-      <div
-        className="rounded-sm border border-stone-200/80 bg-white p-8"
-        role="status"
-      >
-        <h2 className="font-serif text-2xl text-site-fg">Thank you</h2>
-        <p className="mt-3 leading-relaxed text-site-secondary">
+      <div className={siteForm.siteFormSuccessShell()} role="status">
+        <p className={siteForm.siteFormEyebrow()}>Request received</p>
+        <h2 className={siteForm.siteFormTitle()}>Thank you</h2>
+        <p className={`${siteForm.siteFormIntro()} max-w-none`}>
           Your email client should open with your appointment details. If it
           does not, please call us at{" "}
-          <a href={`tel:${orgPhone.replace(/\D/g, "")}`} className="text-warm-gold-dark">
+          <a href={`tel:${orgPhone.replace(/\D/g, "")}`} className="text-warm-gold-dark underline-offset-4 hover:underline">
             {orgPhone}
           </a>{" "}
           or email{" "}
-          <a href={`mailto:${orgEmail}`} className="text-warm-gold-dark">
+          <a href={`mailto:${orgEmail}`} className="text-warm-gold-dark underline-offset-4 hover:underline">
             {orgEmail}
           </a>
           .
@@ -83,17 +81,24 @@ export default function AppointmentForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="rounded-sm border border-stone-200/80 bg-white p-6 sm:p-8"
+      className={siteForm.siteFormShell()}
       aria-labelledby="appointment-form-title"
     >
-      <h2 id="appointment-form-title" className="sr-only">
-        Appointment request form
+      <p className={siteForm.siteFormEyebrow()}>Private appointment</p>
+      <h2 id="appointment-form-title" className={siteForm.siteFormTitle()}>
+        Request a visit
       </h2>
+      <p className={`${siteForm.siteFormIntro()} max-w-none`}>
+        Share a few details and we will follow up to confirm a time in our
+        showroom.
+      </p>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className={siteForm.siteFormDivider()} />
+
+      <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-site-fg">
-            Full name <span className="text-warm-gold-dark">*</span>
+          <label htmlFor="name" className={siteForm.siteFormFieldLabel()}>
+            Full name <span className={siteForm.siteFormRequiredMark()}>*</span>
           </label>
           <input
             id="name"
@@ -102,18 +107,18 @@ export default function AppointmentForm() {
             autoComplete="name"
             aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? "name-error" : undefined}
-            className="mt-2 w-full rounded-sm border border-stone-300 bg-ivory px-4 py-3 text-site-fg focus:border-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold/20"
+            className={siteForm.siteFormControl(Boolean(errors.name))}
           />
           {errors.name ? (
-            <p id="name-error" className="mt-1 text-sm text-red-700" role="alert">
+            <p id="name-error" className={siteForm.siteFormError()} role="alert">
               {errors.name}
             </p>
           ) : null}
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-site-fg">
-            Email <span className="text-warm-gold-dark">*</span>
+          <label htmlFor="email" className={siteForm.siteFormFieldLabel()}>
+            Email <span className={siteForm.siteFormRequiredMark()}>*</span>
           </label>
           <input
             id="email"
@@ -122,18 +127,18 @@ export default function AppointmentForm() {
             autoComplete="email"
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? "email-error" : undefined}
-            className="mt-2 w-full rounded-sm border border-stone-300 bg-ivory px-4 py-3 text-site-fg focus:border-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold/20"
+            className={siteForm.siteFormControl(Boolean(errors.email))}
           />
           {errors.email ? (
-            <p id="email-error" className="mt-1 text-sm text-red-700" role="alert">
+            <p id="email-error" className={siteForm.siteFormError()} role="alert">
               {errors.email}
             </p>
           ) : null}
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-site-fg">
-            Phone <span className="text-warm-gold-dark">*</span>
+          <label htmlFor="phone" className={siteForm.siteFormFieldLabel()}>
+            Phone <span className={siteForm.siteFormRequiredMark()}>*</span>
           </label>
           <input
             id="phone"
@@ -142,85 +147,113 @@ export default function AppointmentForm() {
             autoComplete="tel"
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? "phone-error" : undefined}
-            className="mt-2 w-full rounded-sm border border-stone-300 bg-ivory px-4 py-3 text-site-fg focus:border-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold/20"
+            className={siteForm.siteFormControl(Boolean(errors.phone))}
           />
           {errors.phone ? (
-            <p id="phone-error" className="mt-1 text-sm text-red-700" role="alert">
+            <p id="phone-error" className={siteForm.siteFormError()} role="alert">
               {errors.phone}
             </p>
           ) : null}
         </div>
 
         <div>
-          <label htmlFor="visitType" className="block text-sm font-medium text-site-fg">
-            Visit type <span className="text-warm-gold-dark">*</span>
-          </label>
-          <select
-            id="visitType"
-            name="visitType"
-            defaultValue=""
-            aria-invalid={Boolean(errors.visitType)}
-            aria-describedby={errors.visitType ? "visitType-error" : undefined}
-            className="mt-2 w-full rounded-sm border border-stone-300 bg-ivory px-4 py-3 text-site-fg focus:border-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold/20"
-          >
-            <option value="" disabled>
-              Select a visit type
-            </option>
-            {visitTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          {errors.visitType ? (
-            <p id="visitType-error" className="mt-1 text-sm text-red-700" role="alert">
-              {errors.visitType}
-            </p>
-          ) : null}
+          <fieldset>
+            <legend className={siteForm.siteFormFieldsetLegend()}>
+              Visit type <span className={siteForm.siteFormRequiredMark()}>*</span>
+            </legend>
+            <SelectListbox
+              showLabel={false}
+              placeholder="Select a visit type"
+              options={visitTypes}
+              value={visitType}
+              onChange={(next) => {
+                setVisitType(next);
+                if (next) {
+                  setErrors((prev) => {
+                    if (!prev.visitType) return prev;
+                    const { visitType: _removed, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              invalid={Boolean(errors.visitType)}
+              ariaDescribedBy={errors.visitType ? "visitType-error" : undefined}
+              anchor={false}
+              buttonClassName={siteForm.siteFormSelectButton(Boolean(errors.visitType))}
+              optionsClassName={siteForm.siteFormSelectPanel()}
+              optionClassName={siteForm.siteFormSelectOption()}
+              checkIconClassName={siteForm.siteFormSelectCheck()}
+              chevronClassName={siteForm.siteFormSelectChevron()}
+            />
+            {errors.visitType ? (
+              <p id="visitType-error" className={siteForm.siteFormError()} role="alert">
+                {errors.visitType}
+              </p>
+            ) : null}
+          </fieldset>
         </div>
 
-        <div className="sm:col-span-2">
+        <div className="md:col-span-2">
           <fieldset>
-            <legend className="block text-sm font-medium text-site-fg">
+            <legend className={siteForm.siteFormFieldsetLegend()}>
               Preferred time of day
             </legend>
-            <div className="mt-3 flex flex-wrap gap-4">
-              {timePreferences.map((pref) => (
-                <label key={pref} className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="preferredTime"
-                    value={pref}
-                    defaultChecked={pref === "No preference"}
-                    className="h-4 w-4 border-stone-300 text-warm-gold focus:ring-warm-gold"
-                  />
-                  {pref}
-                </label>
-              ))}
+            <div className={siteForm.siteFormChoiceGrid()} role="radiogroup">
+              {timePreferences.map((pref) => {
+                const selected = preferredTime === pref;
+                const inputId = `preferred-time-${pref.toLowerCase().replace(/\s+/g, "-")}`;
+
+                return (
+                  <label
+                    key={pref}
+                    htmlFor={inputId}
+                    className={siteForm.siteFormChoiceOption(selected)}
+                  >
+                    <input
+                      id={inputId}
+                      type="radio"
+                      name="preferredTime"
+                      value={pref}
+                      checked={selected}
+                      onChange={() => setPreferredTime(pref)}
+                      className={siteForm.siteFormChoiceInput()}
+                    />
+                    <span className="font-medium">{pref}</span>
+                  </label>
+                );
+              })}
             </div>
           </fieldset>
         </div>
 
-        <div className="sm:col-span-2">
-          <label htmlFor="message" className="block text-sm font-medium text-site-fg">
-            Notes <span className="text-site-secondary">(optional)</span>
+        <div className="md:col-span-2">
+          <label htmlFor="message" className={siteForm.siteFormFieldLabel()}>
+            Notes{" "}
+            <span className={siteForm.siteFormOptionalMark()}>(optional)</span>
           </label>
           <textarea
             id="message"
             name="message"
             rows={4}
-            className="mt-2 w-full rounded-sm border border-stone-300 bg-ivory px-4 py-3 text-site-fg focus:border-warm-gold focus:outline-none focus:ring-2 focus:ring-warm-gold/20"
+            className={siteForm.siteFormTextarea()}
             placeholder="Share any details that will help us prepare for your visit."
           />
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="mt-8 inline-flex rounded-full bg-warm-gold px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-warm-gold-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warm-gold-dark"
-      >
-        Send appointment request
-      </button>
+      <ContactHelpfulDetailsCard embedded />
+
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs leading-relaxed text-site-secondary">
+          Required fields are marked with{" "}
+          <span className={siteForm.siteFormRequiredMark()}>*</span>
+          . Appointment requests are confirmed personally, usually within one
+          business day.
+        </p>
+        <PrimaryButton type="submit" className="w-full sm:w-auto">
+          Send appointment request
+        </PrimaryButton>
+      </div>
     </form>
   );
 }

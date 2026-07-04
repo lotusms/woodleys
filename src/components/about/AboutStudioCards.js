@@ -43,7 +43,7 @@ export default function AboutStudioCards({ orgName, principles }) {
           <p
             className={`flex justify-end text-xs uppercase tracking-[0.28em] ${muted}`}
           >
-            — Jas Perez, Artist
+            Jas Perez, Artist
           </p>
         </Card>
       </div>

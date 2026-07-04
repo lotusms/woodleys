@@ -44,7 +44,7 @@ export default function CheckoutAuthSection({ onApplyPrefill }) {
           >
             Signed in as{" "}
             <span className="font-medium text-site-primary">{user.email}</span>.
-            Your saved details are filled in below—you can change anything before
+            Your saved details are filled in below. You can change anything before
             paying.
           </p>
           <button
@@ -122,7 +122,7 @@ export default function CheckoutAuthSection({ onApplyPrefill }) {
               >
                 *
               </span>{" "}
-              — fill in contact &amp; shipping below.
+              Fill in contact &amp; shipping below.
             </p>
             <p
               className={

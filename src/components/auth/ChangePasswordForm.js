@@ -16,11 +16,16 @@ import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
 
 /**
- * @param {{ backHref: string; backLabel: string }} props
+ * @param {{ backHref?: string; backLabel?: string; embedded?: boolean; light?: boolean }} props
  */
-export default function ChangePasswordForm({ backHref, backLabel }) {
+export default function ChangePasswordForm({
+  backHref = "/dashboard",
+  backLabel = "Back to Dashboard",
+  embedded = false,
+  light: lightProp,
+}) {
   const themeId = useDocumentThemeId();
-  const light = isLightThemeId(themeId);
+  const light = lightProp ?? isLightThemeId(themeId);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -84,7 +89,7 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
     <>
       <form
         onSubmit={handleSubmit}
-        className={dash.changePasswordFormShell(light)}
+        className={embedded ? "space-y-4" : dash.changePasswordFormShell(light)}
       >
         {success ? (
           <p className={dash.changePasswordSuccess(light)} role="status">
@@ -140,11 +145,13 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
         </PrimaryButton>
       </form>
 
-      <p className={`mt-8 text-center text-sm ${overlayChrome.authFooterMuted(light)}`}>
-        <Link href={backHref} className={overlayChrome.authLinkAccent(light)}>
-          ← {backLabel}
-        </Link>
-      </p>
+      {!embedded ? (
+        <p className={`mt-8 text-center text-sm ${overlayChrome.authFooterMuted(light)}`}>
+          <Link href={backHref} className={overlayChrome.authLinkAccent(light)}>
+            ← {backLabel}
+          </Link>
+        </p>
+      ) : null}
     </>
   );
 }

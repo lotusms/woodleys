@@ -1,0 +1,547 @@
+[
+  {
+    "id": "SAMPLE-ORD-k8m2p1qx-A1B2C3",
+    "createdAt": "2026-07-03T14:22:00.000Z",
+    "email": "sarah.mitchell@gmail.com",
+    "phone": "6105550142",
+    "shippingAddress": {
+      "fullName": "Sarah Mitchell",
+      "address1": "412 Linden Lane",
+      "address2": "",
+      "city": "West Chester",
+      "state": "PA",
+      "postalCode": "19382",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Classic Solitaire",
+        "slug": "classic-solitaire",
+        "priceUsd": 2895,
+        "quantity": 1,
+        "sku": "EW-SOL-001",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 2895,
+    "shippingUsd": 0,
+    "totalUsd": 2895,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0703" },
+    "fulfillment": { "provider": "local", "providerStatus": "Ready for pickup" },
+    "notes": "Gift wrap requested.",
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-n4h7w9rt-D4E5F6",
+    "createdAt": "2026-07-01T18:05:00.000Z",
+    "email": "james.chen@outlook.com",
+    "phone": "4845550198",
+    "shippingAddress": {
+      "fullName": "James Chen",
+      "address1": "88 Market Street",
+      "address2": "Suite 210",
+      "city": "Philadelphia",
+      "state": "PA",
+      "postalCode": "19106",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Bulova Classic Automatic",
+        "slug": "bulova-classic-automatic",
+        "priceUsd": 495,
+        "quantity": 1,
+        "sku": "BUL-CL-001",
+        "source": "local"
+      },
+      {
+        "title": "Watch Sizing & Link Adjustment",
+        "slug": "watch-sizing",
+        "priceUsd": 35,
+        "quantity": 1,
+        "sku": "SVC-WATCH-SIZE",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 530,
+    "shippingUsd": 12,
+    "totalUsd": 542,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0701" },
+    "fulfillment": { "provider": "local", "providerStatus": "Shipped" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-p2j5k8lm-G7H8I9",
+    "createdAt": "2026-06-28T11:40:00.000Z",
+    "email": "lotusms@outlook.com",
+    "phone": "6105550100",
+    "shippingAddress": {
+      "fullName": "Luis Silva",
+      "address1": "15 King Street",
+      "address2": "",
+      "city": "Malvern",
+      "state": "PA",
+      "postalCode": "19355",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Vintage Halo Ring",
+        "slug": "vintage-halo-ring",
+        "priceUsd": 3420,
+        "quantity": 1,
+        "sku": "EW-HAL-004",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 3420,
+    "shippingUsd": 0,
+    "totalUsd": 3420,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0628" },
+    "fulfillment": { "provider": "local", "providerStatus": "Processing" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-q9r3t6uv-J0K1L2",
+    "createdAt": "2026-06-25T09:15:00.000Z",
+    "email": "emily.rodriguez@yahoo.com",
+    "phone": "",
+    "shippingAddress": {
+      "fullName": "Emily Rodriguez",
+      "address1": "220 Chestnut Hill Rd",
+      "address2": "",
+      "city": "Downingtown",
+      "state": "PA",
+      "postalCode": "19335",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Pearl Strand Necklace",
+        "slug": "pearl-strand-necklace",
+        "priceUsd": 875,
+        "quantity": 1,
+        "sku": "FN-PEARL-002",
+        "source": "local"
+      },
+      {
+        "title": "Sterling Silver Hoop Earrings",
+        "slug": "sterling-hoop-earrings",
+        "priceUsd": 145,
+        "quantity": 1,
+        "sku": "FN-HOOP-011",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 1020,
+    "shippingUsd": 15,
+    "totalUsd": 1035,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0625" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-w1x4y7za-M3N4O5",
+    "createdAt": "2026-06-22T16:50:00.000Z",
+    "email": "david.kim@gmail.com",
+    "phone": "2675550176",
+    "shippingAddress": {
+      "fullName": "David Kim",
+      "address1": "901 Broad Street",
+      "address2": "",
+      "city": "Exton",
+      "state": "PA",
+      "postalCode": "19341",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Three-Stone Anniversary Band",
+        "slug": "three-stone-anniversary-band",
+        "priceUsd": 1875,
+        "quantity": 1,
+        "sku": "EW-3ST-007",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 1875,
+    "shippingUsd": 0,
+    "totalUsd": 1875,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0622" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-b5c8d2ef-P6Q7R8",
+    "createdAt": "2026-06-18T13:30:00.000Z",
+    "email": "maria.gonzalez@icloud.com",
+    "phone": "2155550133",
+    "shippingAddress": {
+      "fullName": "Maria Gonzalez",
+      "address1": "67 Oak Avenue",
+      "address2": "Apt 4B",
+      "city": "Phoenixville",
+      "state": "PA",
+      "postalCode": "19460",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Bulova Marine Star",
+        "slug": "bulova-marine-star",
+        "priceUsd": 425,
+        "quantity": 1,
+        "sku": "BUL-MS-003",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 425,
+    "shippingUsd": 12,
+    "totalUsd": 437,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0618" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-f3g6h9ij-S9T0U1",
+    "createdAt": "2026-06-15T10:00:00.000Z",
+    "email": "lotusms@outlook.com",
+    "phone": "6105550100",
+    "shippingAddress": {
+      "fullName": "Luis Silva",
+      "address1": "15 King Street",
+      "address2": "",
+      "city": "Malvern",
+      "state": "PA",
+      "postalCode": "19355",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Diamond Stud Earrings",
+        "slug": "diamond-stud-earrings",
+        "priceUsd": 1250,
+        "quantity": 1,
+        "sku": "EW-STUD-002",
+        "source": "local"
+      },
+      {
+        "title": "Ring Appraisal Certificate",
+        "slug": "appraisal-certificate",
+        "priceUsd": 75,
+        "quantity": 1,
+        "sku": "SVC-APPR-001",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 1325,
+    "shippingUsd": 0,
+    "totalUsd": 1325,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0615" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-v2w5x8yz-V2W3X4",
+    "createdAt": "2026-06-12T19:45:00.000Z",
+    "email": "anna.wright@gmail.com",
+    "phone": "3025550165",
+    "shippingAddress": {
+      "fullName": "Anna Wright",
+      "address1": "14 Brandywine Blvd",
+      "address2": "",
+      "city": "Wilmington",
+      "state": "DE",
+      "postalCode": "19803",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Emerald Cut Engagement Ring",
+        "slug": "emerald-cut-engagement",
+        "priceUsd": 4650,
+        "quantity": 1,
+        "sku": "EW-EMR-001",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 4650,
+    "shippingUsd": 0,
+    "totalUsd": 4650,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0612" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "notes": "Proposal planned for June 20.",
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-z7a1b4cd-Y5Z6A7",
+    "createdAt": "2026-06-08T08:20:00.000Z",
+    "email": "robert.taylor@comcast.net",
+    "phone": "7175550120",
+    "shippingAddress": {
+      "fullName": "Robert Taylor",
+      "address1": "300 Main Street",
+      "address2": "",
+      "city": "Lancaster",
+      "state": "PA",
+      "postalCode": "17602",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Men's Signet Ring",
+        "slug": "mens-signet-ring",
+        "priceUsd": 695,
+        "quantity": 1,
+        "sku": "MR-SIG-003",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 695,
+    "shippingUsd": 12,
+    "totalUsd": 707,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0608" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-e8f1g4hi-B8C9D0",
+    "createdAt": "2026-06-05T15:10:00.000Z",
+    "email": "sarah.mitchell@gmail.com",
+    "phone": "6105550142",
+    "shippingAddress": {
+      "fullName": "Sarah Mitchell",
+      "address1": "412 Linden Lane",
+      "address2": "",
+      "city": "West Chester",
+      "state": "PA",
+      "postalCode": "19382",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Chain Bracelet, 14K Yellow Gold",
+        "slug": "chain-bracelet-14k",
+        "priceUsd": 980,
+        "quantity": 1,
+        "sku": "FN-BRC-008",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 980,
+    "shippingUsd": 15,
+    "totalUsd": 995,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-0605" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-eliz-001",
+    "createdAt": "2026-07-03T16:30:00.000Z",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "demoProfileId": "1",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Oval Halo Engagement Ring",
+        "slug": "oval-halo-engagement-ring",
+        "priceUsd": 4200,
+        "quantity": 1,
+        "sku": "EW-HALO-014",
+        "source": "local"
+      },
+      {
+        "title": "Ring Appraisal Certificate",
+        "slug": "ring-appraisal",
+        "priceUsd": 360,
+        "quantity": 1,
+        "sku": "SVC-APPR-001",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 4560,
+    "shippingUsd": 0,
+    "totalUsd": 4560,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-eliz-0703" },
+    "fulfillment": { "provider": "local", "providerStatus": "Processing" },
+    "notes": "Pickup after sizing confirmation.",
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-eliz-002",
+    "createdAt": "2026-06-29T11:15:00.000Z",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "demoProfileId": "1",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Classic Solitaire",
+        "slug": "classic-solitaire",
+        "priceUsd": 2895,
+        "quantity": 1,
+        "sku": "EW-SOL-001",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 2895,
+    "shippingUsd": 0,
+    "totalUsd": 2895,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-eliz-0629" },
+    "fulfillment": { "provider": "local", "providerStatus": "Ready for pickup" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-eliz-003",
+    "createdAt": "2026-06-25T09:40:00.000Z",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "demoProfileId": "1",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Pearl Stud Earrings, 14K",
+        "slug": "pearl-stud-earrings-14k",
+        "priceUsd": 875,
+        "quantity": 1,
+        "sku": "FN-EAR-021",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 875,
+    "shippingUsd": 0,
+    "totalUsd": 875,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-eliz-0625" },
+    "fulfillment": { "provider": "local", "providerStatus": "Shipped" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-eliz-004",
+    "createdAt": "2026-06-20T14:05:00.000Z",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "demoProfileId": "1",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Diamond Tennis Bracelet",
+        "slug": "diamond-tennis-bracelet",
+        "priceUsd": 1325,
+        "quantity": 1,
+        "sku": "FN-BRC-012",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 1325,
+    "shippingUsd": 0,
+    "totalUsd": 1325,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-eliz-0620" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-eliz-005",
+    "createdAt": "2026-06-15T10:22:00.000Z",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "demoProfileId": "1",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Bulova Classic Automatic",
+        "slug": "bulova-classic-automatic",
+        "priceUsd": 495,
+        "quantity": 1,
+        "sku": "BUL-CL-001",
+        "source": "local"
+      },
+      {
+        "title": "Watch Sizing & Link Adjustment",
+        "slug": "watch-sizing",
+        "priceUsd": 35,
+        "quantity": 1,
+        "sku": "SVC-WATCH-SIZE",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 530,
+    "shippingUsd": 12,
+    "totalUsd": 542,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-eliz-0615" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  },
+  {
+    "id": "SAMPLE-ORD-eliz-006",
+    "createdAt": "2026-06-10T18:50:00.000Z",
+    "email": "elizabeth.martin@example.com",
+    "phone": "4568662335",
+    "demoProfileId": "1",
+    "shippingAddress": {
+      "fullName": "Elizabeth Martin",
+      "address1": "123 Main Avenue South",
+      "address2": "",
+      "city": "Renton",
+      "state": "WA",
+      "postalCode": "98057",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Emerald-Cut Pendant, 18K",
+        "slug": "emerald-cut-pendant-18k",
+        "priceUsd": 1875,
+        "quantity": 1,
+        "sku": "FN-PND-007",
+        "source": "local"
+      }
+    ],
+    "subtotalUsd": 1875,
+    "shippingUsd": 0,
+    "totalUsd": 1875,
+    "payment": { "provider": "paypal", "paypalOrderId": "PAY-SAMPLE-eliz-0610" },
+    "fulfillment": { "provider": "local", "providerStatus": "Delivered" },
+    "isSample": true
+  }
+]

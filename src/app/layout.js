@@ -1,5 +1,7 @@
 import { Inter, Playfair_Display } from "next/font/google";
 import CartProvider from "@/components/CartProvider";
+import FocusOnPageStart from "@/components/a11y/FocusOnPageStart";
+import RouteAnnouncer from "@/components/a11y/RouteAnnouncer";
 import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
 import { AuthProvider } from "@/context/AuthContext";
 import { defaultMetadata } from "@/config";
@@ -49,6 +51,8 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <CartProvider>
+            <FocusOnPageStart />
+            <RouteAnnouncer />
             <ScrollToTopOnLoad />
             {children}
           </CartProvider>

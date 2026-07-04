@@ -3,12 +3,15 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { getFirebaseAuth } from "@firebase/client";
-import AddressLine1Autocomplete from "@/components/checkout/AddressLine1Autocomplete";
+import RegistrationAddressSection, {
+  normalizeStateCodeForPrintful,
+  toCheckoutCountry,
+} from "@/components/auth/RegistrationAddressSection";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
-import SelectListbox from "@/components/ui/SelectListbox";
 import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import { applySuggestionToFields } from "@/lib/apply-address-suggestion";
 import { formatAuthError } from "@/lib/auth-errors";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { validateAccountRegistration } from "@/lib/account-registration";
@@ -16,14 +19,8 @@ import {
   digitsFromTelInput,
   formatUsPhoneMask,
   registerUserWithProfile,
-  toCheckoutCountry,
 } from "@/lib/checkout-auth";
-import { CHECKOUT_COUNTRY_OPTIONS } from "@/lib/checkout-countries";
-import {
-  CA_PROVINCE_SELECT_OPTIONS,
-  normalizeStateCodeForPrintful,
-  US_STATE_SELECT_OPTIONS,
-} from "@/lib/address/state";
+import { buildUserAddress } from "@/lib/user-account-address";
 
 /**
  * @param {{
@@ -43,12 +40,21 @@ export default function RegisterAccountForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("US");
+
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+  const [billingAddress1, setBillingAddress1] = useState("");
+  const [billingAddress2, setBillingAddress2] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingState, setBillingState] = useState("");
+  const [billingPostalCode, setBillingPostalCode] = useState("");
+  const [billingCountry, setBillingCountry] = useState("US");
 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -65,26 +71,58 @@ export default function RegisterAccountForm({
     setPhone(formatUsPhoneMask(digits));
   }
 
-  function updateCountry(value) {
-    setCountry(value);
-    setState("");
+  function applyShippingSuggestion(suggestion) {
+    applySuggestionToFields(suggestion, {
+      country,
+      state,
+      setAddress1,
+      setCity,
+      setState,
+      setPostalCode,
+      setCountry,
+    });
   }
 
-  function applyAddressSuggestion(suggestion) {
-    const nextCountry = suggestion.country
-      ? toCheckoutCountry(suggestion.country)
-      : country;
-    const rawState = String(suggestion.state ?? "").trim() || state;
-    const nextState =
-      nextCountry === "US" || nextCountry === "CA"
-        ? normalizeStateCodeForPrintful(nextCountry, rawState)
-        : rawState;
+  function applyBillingSuggestion(suggestion) {
+    applySuggestionToFields(suggestion, {
+      country: billingCountry,
+      state: billingState,
+      setAddress1: setBillingAddress1,
+      setCity: setBillingCity,
+      setState: setBillingState,
+      setPostalCode: setBillingPostalCode,
+      setCountry: setBillingCountry,
+    });
+  }
 
-    setAddress1(String(suggestion.address1 ?? "").trim() || address1);
-    setCity(String(suggestion.city ?? "").trim() || city);
-    setState(nextState || state);
-    setPostalCode(String(suggestion.postalCode ?? "").trim() || postalCode);
-    setCountry(nextCountry);
+  function buildShippingAddress(fullName) {
+    return buildUserAddress({
+      fullName,
+      address1,
+      address2,
+      city,
+      state:
+        country === "US" || country === "CA"
+          ? normalizeStateCodeForPrintful(country, state)
+          : state,
+      postalCode,
+      country,
+    });
+  }
+
+  function buildBillingAddress(fullName) {
+    return buildUserAddress({
+      fullName,
+      address1: billingAddress1,
+      address2: billingAddress2,
+      city: billingCity,
+      state:
+        billingCountry === "US" || billingCountry === "CA"
+          ? normalizeStateCodeForPrintful(billingCountry, billingState)
+          : billingState,
+      postalCode: billingPostalCode,
+      country: billingCountry,
+    });
   }
 
   async function handleSubmit(e) {
@@ -101,6 +139,12 @@ export default function RegisterAccountForm({
       state,
       postalCode,
       country,
+      billingSameAsShipping,
+      billingAddress1,
+      billingCity,
+      billingState,
+      billingPostalCode,
+      billingCountry,
     });
     if (v) {
       setError(v);
@@ -109,24 +153,21 @@ export default function RegisterAccountForm({
     setError("");
     setBusy(true);
     try {
+      const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+      const shippingAddress = buildShippingAddress(fullName);
+      const billingAddress = billingSameAsShipping
+        ? shippingAddress
+        : buildBillingAddress(fullName);
+
       await registerUserWithProfile({
         email: email.trim(),
         password,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         phone,
-        shippingAddress: {
-          fullName: [firstName, lastName].filter(Boolean).join(" ").trim(),
-          address1: address1.trim(),
-          address2: address2.trim(),
-          city: city.trim(),
-          state:
-            country === "US" || country === "CA"
-              ? normalizeStateCodeForPrintful(country, state)
-              : state.trim(),
-          postalCode: postalCode.trim(),
-          country,
-        },
+        shippingAddress,
+        billingSameAsShipping,
+        billingAddress,
       });
 
       const auth = getFirebaseAuth();
@@ -139,16 +180,13 @@ export default function RegisterAccountForm({
       onRegistered?.({
         email: email.trim(),
         phone: phoneDigits ? formatUsPhoneMask(phoneDigits) : "",
-        fullName: [firstName, lastName].filter(Boolean).join(" ").trim(),
-        address1: address1.trim(),
-        address2: address2.trim(),
-        city: city.trim(),
-        state:
-          country === "US" || country === "CA"
-            ? normalizeStateCodeForPrintful(country, state)
-            : state.trim(),
-        postalCode: postalCode.trim(),
-        country,
+        fullName,
+        address1: shippingAddress.address1,
+        address2: shippingAddress.address2,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        postalCode: shippingAddress.postalCode,
+        country: shippingAddress.country,
       });
     } catch (err) {
       setError(formatAuthError(err, "Could not create account."));
@@ -161,9 +199,7 @@ export default function RegisterAccountForm({
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-0 xl:gap-x-14">
         <section className="min-w-0">
-          <h3 className={overlayChrome.formSectionHeading(light)}>
-            Account
-          </h3>
+          <h3 className={overlayChrome.formSectionHeading(light)}>Account</h3>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className={`${overlayChrome.formFieldLabel(light)} sm:col-span-2`}>
               Email
@@ -238,109 +274,86 @@ export default function RegisterAccountForm({
           </div>
         </section>
 
-        <section className={overlayChrome.formSectionColumnBorder(light)}>
-          <h3 className={overlayChrome.formSectionHeading(light)}>
-            Shipping address
-          </h3>
-          <div className="mt-4 grid grid-cols-1 gap-4">
-            <AddressLine1Autocomplete
-              value={address1}
-              onChange={setAddress1}
-              country={country}
-              onSelectSuggestion={applyAddressSuggestion}
-              inputClassName={fieldClass(false)}
-              required
+        <section className={`min-w-0 ${overlayChrome.formSectionColumnBorder(light)}`}>
+          <RegistrationAddressSection
+            idPrefix="shipping"
+            heading="Shipping address"
+            address1={address1}
+            setAddress1={setAddress1}
+            address2={address2}
+            setAddress2={setAddress2}
+            city={city}
+            setCity={setCity}
+            state={state}
+            setState={setState}
+            postalCode={postalCode}
+            setPostalCode={setPostalCode}
+            country={country}
+            setCountry={setCountry}
+            fieldClass={fieldClass}
+            inputBaseClass={INPUT_BASE}
+            onApplySuggestion={applyShippingSuggestion}
+          />
+
+          <label
+            className={`mt-6 flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 ${
+              light
+                ? "border-stone-300/70 bg-white"
+                : "border-slate-700/50 bg-slate-900/40"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={billingSameAsShipping}
+              onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500/30"
             />
-            <label className={overlayChrome.formFieldLabel(light)}>
-              Address line 2
-              <input
-                type="text"
-                autoComplete="address-line2"
-                value={address2}
-                onChange={(e) => setAddress2(e.target.value)}
-                className={fieldClass(false)}
-              />
-            </label>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <label className={overlayChrome.formFieldLabel(light)}>
-                City
-                <input
-                  type="text"
-                  autoComplete="address-level2"
-                  required
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className={fieldClass(false)}
-                />
-              </label>
-              <div className="min-w-0 xl:col-span-1">
-                {country === "US" ? (
-                  <SelectListbox
-                    label="State"
-                    placeholder="Select state"
-                    options={US_STATE_SELECT_OPTIONS}
-                    valueKey="code"
-                    labelKey="label"
-                    by="code"
-                    value={state}
-                    onChange={(code) => setState(code)}
-                    buttonClassName={fieldClass(false)}
-                  />
-                ) : country === "CA" ? (
-                  <SelectListbox
-                    label="Province"
-                    placeholder="Select province"
-                    options={CA_PROVINCE_SELECT_OPTIONS}
-                    valueKey="code"
-                    labelKey="label"
-                    by="code"
-                    value={state}
-                    onChange={(code) => setState(code)}
-                    buttonClassName={fieldClass(false)}
-                  />
-                ) : (
-                  <label className={overlayChrome.formFieldLabel(light)}>
-                    State / region
-                    <input
-                      type="text"
-                      autoComplete="address-level1"
-                      required
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      className={fieldClass(false)}
-                    />
-                  </label>
-                )}
-              </div>
-              <label
-                className={`${overlayChrome.formFieldLabel(light)} sm:col-span-2 xl:col-span-1`}
+            <span>
+              <span
+                className={`block text-sm font-medium ${light ? "text-stone-800" : "text-stone-100"}`}
               >
-                {country === "US" ? "ZIP code" : "Postal code"}
-                <input
-                  type="text"
-                  autoComplete="postal-code"
-                  required
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  className={fieldClass(false)}
-                />
-              </label>
-            </div>
-            <div className="sm:max-w-md lg:max-w-none">
-              <SelectListbox
-                label="Country"
-                placeholder="Select country"
-                options={CHECKOUT_COUNTRY_OPTIONS}
-                value={country}
-                onChange={(v) => updateCountry(toCheckoutCountry(v))}
-                buttonClassName={INPUT_BASE}
+                Billing address is the same as shipping
+              </span>
+              <span
+                className={`mt-1 block text-xs leading-relaxed ${light ? "text-stone-500" : "text-slate-400"}`}
+              >
+                Uncheck to enter a separate billing address for invoices and
+                payment records.
+              </span>
+            </span>
+          </label>
+
+          {!billingSameAsShipping ? (
+            <div
+              className={`mt-6 border-t pt-6 ${
+                light ? "border-stone-300/50" : "border-slate-700/40"
+              }`}
+            >
+              <RegistrationAddressSection
+                idPrefix="billing"
+                heading="Billing address"
+                address1={billingAddress1}
+                setAddress1={setBillingAddress1}
+                address2={billingAddress2}
+                setAddress2={setBillingAddress2}
+                city={billingCity}
+                setCity={setBillingCity}
+                state={billingState}
+                setState={setBillingState}
+                postalCode={billingPostalCode}
+                setPostalCode={setBillingPostalCode}
+                country={billingCountry}
+                setCountry={setBillingCountry}
+                fieldClass={fieldClass}
+                inputBaseClass={INPUT_BASE}
+                onApplySuggestion={applyBillingSuggestion}
               />
             </div>
-          </div>
+          ) : null}
         </section>
 
         {error ? (
-          <p className={overlayChrome.registerErrorText(light)} role="alert">
+          <p className={`lg:col-span-2 ${overlayChrome.registerErrorText(light)}`} role="alert">
             {error}
           </p>
         ) : null}

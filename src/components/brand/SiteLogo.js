@@ -6,6 +6,9 @@ const LOGO_SRC = "/images/Woodley's Jewelers_Logo.svg";
 const LOGO_WIDTH = 254;
 const LOGO_HEIGHT = 92;
 
+/** Id for the primary header logo link — initial keyboard focus target on every page. */
+export const SITE_LOGO_ID = "site-logo";
+
 const logoHeights = {
   default: "h-9 w-auto sm:h-10 lg:h-11",
   compact: "h-8 w-auto sm:h-9",
@@ -48,6 +51,7 @@ export default function SiteLogo({
 
   return (
     <Link
+      id={SITE_LOGO_ID}
       href="/"
       className="group inline-flex shrink-0 items-center focus-visible:outline-offset-4"
       aria-label={`${orgName} home`}

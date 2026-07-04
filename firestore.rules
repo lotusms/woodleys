@@ -3,6 +3,16 @@ rules_version = '2';
 // Create the DB in Console → Firestore → Databases if needed.
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isShopAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/useraccounts/$(request.auth.uid))
+        && get(/databases/$(database)/documents/useraccounts/$(request.auth.uid)).data.admin == true
+        && (
+          !get(/databases/$(database)/documents/useraccounts/$(request.auth.uid)).data.keys().hasAny(['guest'])
+          || get(/databases/$(database)/documents/useraccounts/$(request.auth.uid)).data.guest == false
+        );
+    }
+
     // Orders are written client-side after checkout completes.
     match /orders/{orderId} {
       // Public write is convenient for guest checkout. Restrict shape/size.
@@ -23,6 +33,33 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Storefront catalog — public read; admin writes from signed-in shop administrators.
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isShopAdmin()
+        && request.resource.data.handle == productId
+        && request.resource.data.title is string
+        && request.resource.data.priceUsd is number
+        && request.resource.data.quantity is number
+        && request.resource.data.active is bool
+        && request.resource.data.featured is bool
+        && request.resource.data.collectionHandles is list;
+      allow update: if isShopAdmin()
+        && request.resource.data.handle == resource.data.handle
+        && request.resource.data.title is string;
+      allow delete: if isShopAdmin();
+    }
+
+    match /catalogCollections/{collectionId} {
+      allow read: if true;
+      allow write: if isShopAdmin();
+    }
+
+    // Integration secrets — server (Admin SDK) only; dashboard uses /api/admin/settings.
+    match /siteSettings/{docId} {
+      allow read, write: if false;
+    }
+
     // User profiles: document id = Firebase Auth uid. Initial create from signed-in client (empty orders only).
     // Cloud Functions may still upsert the same shape with Admin SDK.
     match /useraccounts/{userId} {
@@ -40,11 +77,13 @@ service cloud.firestore {
         && request.resource.data.orderDetails is map
         && request.resource.data.orderDetails.keys().size() == 0
         && (!('phone' in request.resource.data) || request.resource.data.phone is string)
-        && (!('shippingAddress' in request.resource.data) || request.resource.data.shippingAddress is map);
+        && (!('shippingAddress' in request.resource.data) || request.resource.data.shippingAddress is map)
+        && (!('billingSameAsShipping' in request.resource.data) || request.resource.data.billingSameAsShipping is bool)
+        && (!('billingAddress' in request.resource.data) || request.resource.data.billingAddress is map);
       // Profile updates (e.g. checkout registration merge) — immutable order/admin fields.
       allow update: if request.auth != null && request.auth.uid == userId
         && request.resource.data.uid == resource.data.uid
-        && request.resource.data.email == resource.data.email
+        && request.resource.data.email == request.auth.token.email
         && request.resource.data.admin == resource.data.admin
         // guest flag immutable; treat missing guest as false (legacy docs before migration)
         && (request.resource.data.guest == resource.data.guest
@@ -54,7 +93,9 @@ service cloud.firestore {
         && request.resource.data.firstName is string
         && request.resource.data.lastName is string
         && (!('phone' in request.resource.data) || request.resource.data.phone is string)
-        && (!('shippingAddress' in request.resource.data) || request.resource.data.shippingAddress is map);
+        && (!('shippingAddress' in request.resource.data) || request.resource.data.shippingAddress is map)
+        && (!('billingSameAsShipping' in request.resource.data) || request.resource.data.billingSameAsShipping is bool)
+        && (!('billingAddress' in request.resource.data) || request.resource.data.billingAddress is map);
       allow delete: if false;
     }
   }
