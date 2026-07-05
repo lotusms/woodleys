@@ -34,7 +34,7 @@ export default function ProductDetailLoading() {
         <div className="relative z-10 w-full pb-20 lg:pb-28">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-16">
             <div className="min-w-0">
-              <div className="product-detail-loading-gallery relative overflow-hidden bg-champagne">
+              <div className="product-detail-loading-gallery relative overflow-hidden bg-champagne px-6 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 lg:pr-12">
                 <div className="relative aspect-[4/5] sm:aspect-[5/6] lg:aspect-[4/5]">
                   <div className="product-detail-loading-sweep" aria-hidden />
                   <div className="product-detail-loading-sparkles" aria-hidden>

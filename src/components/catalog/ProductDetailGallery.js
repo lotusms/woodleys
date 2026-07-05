@@ -53,13 +53,13 @@ export default function ProductDetailGallery({ images, title }) {
   }
 
   return (
-    <div className="relative min-w-0 overflow-hidden bg-champagne">
+    <div className="relative min-w-0 overflow-hidden bg-champagne px-6 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 lg:pr-12">
       <div className="relative aspect-[4/5] sm:aspect-[5/6] lg:aspect-[4/5]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={activeImage.src}
           alt={activeImage.alt || title}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain object-center"
         />
 
         {hasMultiple ? (

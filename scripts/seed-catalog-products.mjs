@@ -17,8 +17,20 @@ import {
 } from "./lib/catalog-products-data.mjs";
 import {
   isBulovaSampleProductHandle,
-  LEGACY_BULOVA_PREVIEW_HANDLES,
+  allLegacyBulovaHandles,
 } from "../src/lib/catalog/bulova-sample-products.js";
+import {
+  isRingSampleProductHandle,
+  allLegacyRingHandles,
+} from "../src/lib/catalog/ring-sample-products.js";
+
+function isCatalogSeedProductHandle(handle) {
+  return isBulovaSampleProductHandle(handle) || isRingSampleProductHandle(handle);
+}
+
+function allLegacyCatalogHandles() {
+  return [...allLegacyBulovaHandles(), ...allLegacyRingHandles()];
+}
 
 const require = createRequire(import.meta.url);
 const firebaseAuth = require("firebase-tools/lib/auth");
@@ -163,7 +175,15 @@ function buildProductDoc(product, now) {
     collectionHandles: [...new Set(product.collectionHandles)],
     image,
     images,
-    specs: [],
+    specs: Array.isArray(product.specs)
+      ? product.specs.filter((s) => s?.label && s?.value)
+      : [],
+    sku: product.sku ?? null,
+    brand: product.brand ?? null,
+    model: product.model ?? null,
+    condition: product.condition ?? null,
+    seoTitle: product.seoTitle ?? null,
+    metaDescription: product.metaDescription ?? null,
     createdAt: now,
     updatedAt: now,
   };
@@ -215,7 +235,7 @@ async function seedWithAdminSdk() {
     const ref = db.collection(PRODUCTS).doc(product.handle);
     const snap = await ref.get();
     if (snap.exists) {
-      if (isBulovaSampleProductHandle(product.handle)) {
+      if (isCatalogSeedProductHandle(product.handle)) {
         await ref.set(buildProductDoc(product, now), { merge: true });
         productsUpdated += 1;
       } else {
@@ -228,7 +248,7 @@ async function seedWithAdminSdk() {
   }
 
   let legacyBulovaRetired = 0;
-  for (const handle of LEGACY_BULOVA_PREVIEW_HANDLES) {
+  for (const handle of allLegacyCatalogHandles()) {
     const ref = db.collection(PRODUCTS).doc(handle);
     const snap = await ref.get();
     if (!snap.exists) continue;
@@ -295,7 +315,7 @@ async function seedWithCliRest() {
   for (const product of products) {
     const existing = await restGetDoc(PRODUCTS, product.handle, token);
     if (existing) {
-      if (isBulovaSampleProductHandle(product.handle)) {
+      if (isCatalogSeedProductHandle(product.handle)) {
         await restSetDoc(
           PRODUCTS,
           product.handle,
@@ -324,7 +344,7 @@ async function seedWithCliRest() {
   }
 
   let legacyBulovaRetired = 0;
-  for (const handle of LEGACY_BULOVA_PREVIEW_HANDLES) {
+  for (const handle of allLegacyCatalogHandles()) {
     const existing = await restGetDoc(PRODUCTS, handle, token);
     if (!existing) continue;
     await restSetDoc(

@@ -29,18 +29,22 @@ export { slugifyProductHandle } from "./product-handle";
  * @param {() => Promise<T>} restRead
  */
 async function withFirestoreRead(adminRead, restRead) {
-  if (!hasFirebaseAdminCredentials() && isFirestoreRestConfigured()) {
+  if (hasFirebaseAdminCredentials()) {
+    try {
+      return await adminRead();
+    } catch (error) {
+      if (isFirebaseAdminAuthError(error) && isFirestoreRestConfigured()) {
+        return restRead();
+      }
+      throw error;
+    }
+  }
+
+  if (isFirestoreRestConfigured()) {
     return restRead();
   }
 
-  try {
-    return await adminRead();
-  } catch (error) {
-    if (isFirebaseAdminAuthError(error) && isFirestoreRestConfigured()) {
-      return restRead();
-    }
-    throw error;
-  }
+  return [];
 }
 
 /**

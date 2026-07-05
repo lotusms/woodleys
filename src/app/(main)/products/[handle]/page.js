@@ -1,18 +1,20 @@
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import Link from "next/link";
 import ProductDetailAside from "@/components/catalog/ProductDetailAside";
 import ProductDetailGallery from "@/components/catalog/ProductDetailGallery";
-import ProductSimilarSection from "@/components/catalog/ProductSimilarSection";
+import SimilarProductsCarousel from "@/components/catalog/SimilarProductsCarousel";
 import InnerPageBackdrop from "@/components/InnerPageBackdrop";
+import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import {
   sitePageEdgeMediaAsideInsetClass,
+  sitePageInsetClass,
   sitePageTitle,
 } from "@/config";
 import { getProductImages } from "@/lib/catalog/product-images";
 import {
   getCatalogProductByHandle,
   getProductCategoryNavigation,
+  getSimilarCatalogProducts,
 } from "@/lib/catalog/products";
 
 export const revalidate = 60;
@@ -22,8 +24,8 @@ export async function generateMetadata({ params }) {
   const product = await getCatalogProductByHandle(handle);
   if (!product) return {};
   return {
-    title: sitePageTitle(product.title),
-    description: product.description,
+    title: product.seoTitle || sitePageTitle(product.title),
+    description: product.metaDescription || product.description,
   };
 }
 
@@ -64,6 +66,7 @@ export default async function ProductPage({ params }) {
 
   const images = getProductImages(product);
   const categoryNav = getProductCategoryNavigation(product);
+  const similarProducts = await getSimilarCatalogProducts(product, { limit: 8 });
 
   return (
     <div className="relative z-10 bg-ivory">
@@ -93,9 +96,14 @@ export default async function ProductPage({ params }) {
           </div>
         </div>
 
-        <Suspense fallback={null}>
-          <ProductSimilarSection handle={handle} />
-        </Suspense>
+        {similarProducts.length > 0 ? (
+          <section className="relative mt-14 lg:mt-16">
+            <SectionBandHighlightEdge position="top" />
+            <div className={`${sitePageInsetClass} pt-12 lg:pt-14`}>
+              <SimilarProductsCarousel products={similarProducts} />
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );

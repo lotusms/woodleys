@@ -1,5 +1,4 @@
 import Link from "next/link";
-import InnerPageBackdrop from "@/components/InnerPageBackdrop";
 
 /**
  * Editorial catalog layout — full-bleed hero, classic typography, modern spacing.
@@ -42,11 +41,11 @@ export default function CategoryPageLayout({
           )}
 
           <div
-            className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-stone-950/25 to-stone-950/5"
+            className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/35 to-stone-950/10"
             aria-hidden
           />
           <div
-            className="absolute inset-0 bg-gradient-to-r from-stone-950/35 via-transparent to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-stone-950/60 via-stone-950/15 to-transparent"
             aria-hidden
           />
 
@@ -100,14 +99,15 @@ export default function CategoryPageLayout({
         </div>
       </section>
 
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-2 opacity-[0.03] mix-blend-multiply fabric-texture"
-      />
-      <InnerPageBackdrop />
+      <div className="relative bg-site-bg">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-champagne/25 via-transparent to-ivory"
+        />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-28 pt-14 sm:px-10 lg:px-12">
-        {children}
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-28 pt-14 sm:px-10 lg:px-12">
+          {children}
+        </div>
       </div>
     </div>
   );

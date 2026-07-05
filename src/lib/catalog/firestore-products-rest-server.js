@@ -79,6 +79,50 @@ async function restGet(path) {
 }
 
 /**
+ * @param {Record<string, unknown>} body
+ * @returns {Promise<{ id: string; data: Record<string, unknown> }[]>}
+ */
+async function runQuery(body) {
+  if (!restConfigured()) return [];
+
+  const url = `${baseUrl()}:runQuery?key=${encodeURIComponent(apiKey())}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Firestore REST runQuery failed (${res.status}): ${text}`);
+  }
+
+  const payload = await res.json();
+  if (!Array.isArray(payload)) return [];
+
+  return payload
+    .filter((row) => row?.document)
+    .map((row) => parseFirestoreDocument(row.document));
+}
+
+/** @param {string} collectionHandle */
+function collectionQueryBody(collectionHandle) {
+  return {
+    structuredQuery: {
+      from: [{ collectionId: PRODUCTS_COLLECTION }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: "collectionHandles" },
+          op: "ARRAY_CONTAINS",
+          value: { stringValue: collectionHandle },
+        },
+      },
+    },
+  };
+}
+
+/**
  * @param {string} [pageToken]
  */
 async function listAllProductDocuments(pageToken) {
@@ -133,9 +177,14 @@ export async function restGetProductDocument(handle) {
  */
 export async function restListProductDocumentsByCollection(collectionHandle) {
   if (!collectionHandle) return [];
-  const all = await listAllProductDocuments();
-  return all.filter((doc) => {
-    const handles = doc.data.collectionHandles;
-    return Array.isArray(handles) && handles.includes(collectionHandle);
-  });
+  try {
+    return await runQuery(collectionQueryBody(collectionHandle));
+  } catch (error) {
+    console.error("[catalog] REST collection query failed, falling back to scan:", collectionHandle, error);
+    const all = await listAllProductDocuments();
+    return all.filter((doc) => {
+      const handles = doc.data.collectionHandles;
+      return Array.isArray(handles) && handles.includes(collectionHandle);
+    });
+  }
 }

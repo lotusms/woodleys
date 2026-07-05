@@ -1,4 +1,8 @@
 import { buildBulovaSampleProducts } from "./bulova-sample-products.js";
+import {
+  buildRingSampleProducts,
+  RING_SAMPLE_COLLECTION_HANDLES,
+} from "./ring-sample-products.js";
 import { CATALOG_SECTIONS } from "./categories.js";
 import { HOME_FEATURED_PRODUCT_HANDLES } from "../../config/featured-products.js";
 
@@ -9,8 +13,7 @@ const editorialImages = {
     "https://woodleyjewelers.com/cdn/shop/files/FA6CB512-0FF4-43DE-A784-70382EBDA5AD_1200x.jpg?v=1639025505",
   custom:
     "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342",
-  fine:
-    "https://woodleyjewelers.com/cdn/shop/files/80522B83-4D72-4081-8DF7-1DB5494F34F4_800x800@2x.jpg?v=1639026958",
+  fine: "/images/products/rings/festivity.png",
   watch:
     "https://woodleyjewelers.com/cdn/shop/files/open-timepiece-exposing-cogs-and-gear-wheels_800x800@2x.jpg?v=1639027083",
   service:
@@ -157,6 +160,15 @@ for (const section of Object.values(CATALOG_SECTIONS)) {
     if (child.shopifyHandle === "bulova") {
       const products = buildBulovaSampleProducts();
       mockByHandle.set("bulova", products);
+      for (const product of products) {
+        mockByProductHandle.set(product.handle, product);
+      }
+      continue;
+    }
+
+    if (RING_SAMPLE_COLLECTION_HANDLES.includes(child.shopifyHandle)) {
+      const products = buildRingSampleProducts();
+      mockByHandle.set(child.shopifyHandle, products);
       for (const product of products) {
         mockByProductHandle.set(product.handle, product);
       }

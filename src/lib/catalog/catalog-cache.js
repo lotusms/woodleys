@@ -1,16 +1,84 @@
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { listFirestoreProducts } from "./firestore-products";
-import { listAllMockCatalogProducts } from "./mock-catalog";
+import {
+  getMockProductByHandle,
+  getMockProductsByCollectionHandle,
+  isMockPreviewHandle,
+  listAllMockCatalogProducts,
+} from "./mock-catalog";
+import { isBulovaSampleProductHandle } from "./bulova-sample-products.js";
+import { RING_SAMPLE_COLLECTION_HANDLES } from "./ring-sample-products.js";
+
+/** @param {import("./product-types").CatalogProduct} mock */
+function withSeedCollectionHandles(mock) {
+  if (isRingSampleProductHandle(mock.handle)) {
+    return { ...mock, collectionHandles: [...RING_SAMPLE_COLLECTION_HANDLES] };
+  }
+  if (isBulovaSampleProductHandle(mock.handle)) {
+    return { ...mock, collectionHandles: ["bulova"] };
+  }
+  return mock;
+}
+import {
+  isLegacyRingPreviewHandle,
+  isRingSampleProductHandle,
+} from "./ring-sample-products.js";
+
+/** @param {string} handle */
+function shouldHideFromStorefront(handle) {
+  return isMockPreviewHandle(handle) || isLegacyRingPreviewHandle(handle);
+}
+
+/** @param {import("./product-types").CatalogProduct[]} products */
+function mergeActiveSeedProducts(products) {
+  /** @type {import("./product-types").CatalogProduct[]} */
+  const merged = [];
+  const handles = new Set();
+
+  for (const product of products) {
+    if (shouldHideFromStorefront(product.handle)) continue;
+
+    if (
+      isRingSampleProductHandle(product.handle) ||
+      isBulovaSampleProductHandle(product.handle)
+    ) {
+      const mock = getMockProductByHandle(product.handle);
+      if (mock) {
+        merged.push({ ...withSeedCollectionHandles(mock), active: true });
+        handles.add(mock.handle);
+        continue;
+      }
+    }
+
+    merged.push(product);
+    handles.add(product.handle);
+  }
+
+  for (const collectionHandle of ["fine-rings", "bulova"]) {
+    for (const mock of getMockProductsByCollectionHandle(collectionHandle)) {
+      if (handles.has(mock.handle)) continue;
+      merged.push({ ...withSeedCollectionHandles(mock), active: true });
+      handles.add(mock.handle);
+    }
+  }
+
+  return merged;
+}
+
+const loadActiveProducts = cache(async () => {
+  try {
+    const products = await listFirestoreProducts({ activeOnly: true });
+    if (products.length === 0) return [];
+    return mergeActiveSeedProducts(products);
+  } catch {
+    return [];
+  }
+});
 
 /** Active catalog products — shared by homepage, shop-all counts, and similar sections. */
 export const getActiveProductsList = unstable_cache(
-  async () => {
-    try {
-      return await listFirestoreProducts({ activeOnly: true });
-    } catch {
-      return [];
-    }
-  },
+  async () => loadActiveProducts(),
   ["catalog-active-products"],
   { revalidate: 60, tags: ["catalog-products"] },
 );

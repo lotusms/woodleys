@@ -87,9 +87,7 @@ export function CartProvider({ children }) {
 
     async function syncFromCatalog() {
       try {
-        const response = await fetch("/api/catalog/products", {
-          cache: "no-store",
-        });
+        const response = await fetch("/api/catalog/products");
         const data = await response.json();
         if (!active || !Array.isArray(data?.products)) return;
 

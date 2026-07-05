@@ -54,6 +54,13 @@ export function firestoreDocToProductDetail(data, id, opts = {}) {
     specs: Array.isArray(data.specs)
       ? data.specs.filter((s) => s?.label && s?.value)
       : [],
+    sku: typeof data.sku === "string" ? data.sku : undefined,
+    brand: typeof data.brand === "string" ? data.brand : undefined,
+    model: typeof data.model === "string" ? data.model : undefined,
+    condition: typeof data.condition === "string" ? data.condition : undefined,
+    seoTitle: typeof data.seoTitle === "string" ? data.seoTitle : undefined,
+    metaDescription:
+      typeof data.metaDescription === "string" ? data.metaDescription : undefined,
     availableForSale:
       active && quantity > 0 && data.availableForSale !== false,
     source: /** @type {const} */ ("local"),

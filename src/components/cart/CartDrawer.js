@@ -164,7 +164,7 @@ export default function CartDrawer() {
 
     async function loadSuggestions() {
       try {
-        const response = await fetch("/api/catalog/products", { cache: "no-store" });
+        const response = await fetch("/api/catalog/products");
         const data = await response.json();
         if (!active || !Array.isArray(data?.products)) return;
         setSuggestions(data.products);

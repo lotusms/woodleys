@@ -1,4 +1,5 @@
 import { BULOVA_CATEGORY_IMAGE } from "./bulova-sample-products.js";
+import { RING_CATEGORY_IMAGE } from "./ring-sample-products.js";
 
 /**
  * Catalog taxonomy — structured for Shopify collection handles when connected.
@@ -14,8 +15,7 @@ const editorialImages = {
     "https://woodleyjewelers.com/cdn/shop/files/FA6CB512-0FF4-43DE-A784-70382EBDA5AD_1200x.jpg?v=1639025505",
   custom:
     "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342",
-  fine:
-    "https://woodleyjewelers.com/cdn/shop/files/80522B83-4D72-4081-8DF7-1DB5494F34F4_800x800@2x.jpg?v=1639026958",
+  fine: "/images/products/rings/festivity.png",
   watch:
     "https://woodleyjewelers.com/cdn/shop/files/open-timepiece-exposing-cogs-and-gear-wheels_800x800@2x.jpg?v=1639027083",
   service:
@@ -73,7 +73,7 @@ export const CATALOG_SECTIONS = {
           "Heritage details and milgrain finishes with the comfort of modern craftsmanship.",
         shopifyHandle: "vintage-inspired-rings",
         image: {
-          src: editorialImages.fine,
+          src: editorialImages.engagement,
           alt: "Vintage-inspired engagement ring with intricate metalwork",
         },
       },
@@ -83,10 +83,7 @@ export const CATALOG_SECTIONS = {
         description:
           "Bands in precious metals, plain, pavé, or engraved, to complement your engagement ring.",
         shopifyHandle: "wedding-bands",
-        image: {
-          src: editorialImages.engagement,
-          alt: "Matching wedding bands in gold",
-        },
+        image: RING_CATEGORY_IMAGE,
       },
     ],
   },
@@ -241,7 +238,7 @@ export const CATALOG_SECTIONS = {
         title: "Rings",
         description: "Stackable bands, statement rings, and everyday gold and gemstone styles.",
         shopifyHandle: "fine-rings",
-        image: { src: editorialImages.fine, alt: "Fine jewelry rings on display" },
+        image: RING_CATEGORY_IMAGE,
       },
       {
         slug: "necklaces",
@@ -433,8 +430,8 @@ export function getCatalogPathForShopifyHandle(shopifyHandle) {
 
 /** Hero and shared copy for the Shop All catalog landing page. */
 export const SHOP_ALL_HERO = {
-  src: editorialImages.fine,
-  alt: "Fine jewelry, watches, and diamonds curated in the Woodley's showroom",
+  src: RING_CATEGORY_IMAGE.src,
+  alt: RING_CATEGORY_IMAGE.alt,
 };
 
 export const HOME_FEATURED_CATEGORIES = [
@@ -463,15 +460,15 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Fine Jewelry",
     href: "/fine-jewelry",
     description: "Rings, necklaces, earrings, and bracelets for every day.",
-    image: editorialImages.fine,
-    alt: "Fine gold jewelry collection",
+    image: RING_CATEGORY_IMAGE.src,
+    alt: RING_CATEGORY_IMAGE.alt,
   },
   {
     title: "Watches",
     href: "/watches",
     description: "Bulova, Citizen, and Seiko timepieces.",
-    image: editorialImages.watch,
-    alt: "Luxury watch with visible movement",
+    image: BULOVA_CATEGORY_IMAGE.src,
+    alt: BULOVA_CATEGORY_IMAGE.alt,
   },
   {
     title: "Services",

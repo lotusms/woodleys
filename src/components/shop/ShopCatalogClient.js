@@ -94,9 +94,7 @@ export default function ShopCatalogClient() {
 
     async function load() {
       try {
-        const response = await fetch("/api/catalog/products", {
-          cache: "no-store",
-        });
+        const response = await fetch("/api/catalog/products");
         const data = await response.json();
         if (!active) return;
         setProducts(Array.isArray(data?.products) ? data.products : []);

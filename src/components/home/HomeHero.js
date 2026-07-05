@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import { orgEstablished, orgLocation, siteHeaderProgressBarTopClass } from "@/config";
+import { BULOVA_CATEGORY_IMAGE } from "@/lib/catalog/bulova-sample-products.js";
 
 const ROTATE_MS = 10000;
 const SLIDE_FADE_MS = 900;
@@ -29,9 +31,8 @@ const SLIDES = [
   },
   {
     id: "watches",
-    image:
-      "https://woodleyjewelers.com/cdn/shop/files/open-timepiece-exposing-cogs-and-gear-wheels_800x800@2x.jpg?v=1639027083",
-    imageAlt: "Fine watch movement with visible gears and craftsmanship",
+    image: BULOVA_CATEGORY_IMAGE.src,
+    imageAlt: BULOVA_CATEGORY_IMAGE.alt,
     heading: "Precision you feel on your wrist every day",
     body: `From Bulova classics to sport and dress styles, a fine watch balances craftsmanship with everyday wear. Explore authorized timepieces chosen for reliability, design, and the quiet confidence of a name trusted for generations.`,
     primaryLabel: "Shop watches",
@@ -258,19 +259,37 @@ export default function HomeHero() {
             </div>
 
             {!reduceMotion && SLIDES.length > 1 ? (
-              <SecondaryButton
-                type="button"
-                onClick={() => setPaused((value) => !value)}
-                className="hidden !size-11 shrink-0 !p-0 sm:inline-flex"
-                aria-label={paused ? "Play carousel" : "Pause carousel"}
-                aria-pressed={paused}
-              >
-                {paused ? (
-                  <PlayIcon className="h-4 w-4" aria-hidden />
-                ) : (
-                  <PauseIcon className="h-4 w-4" aria-hidden />
-                )}
-              </SecondaryButton>
+              <div className="hidden shrink-0 items-center gap-2 sm:flex">
+                <SecondaryButton
+                  type="button"
+                  onClick={goPrev}
+                  className="!size-11 !p-0"
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeftIcon className="h-4 w-4" aria-hidden />
+                </SecondaryButton>
+                <SecondaryButton
+                  type="button"
+                  onClick={() => setPaused((value) => !value)}
+                  className="!size-11 shrink-0 !p-0"
+                  aria-label={paused ? "Play carousel" : "Pause carousel"}
+                  aria-pressed={paused}
+                >
+                  {paused ? (
+                    <PlayIcon className="h-4 w-4" aria-hidden />
+                  ) : (
+                    <PauseIcon className="h-4 w-4" aria-hidden />
+                  )}
+                </SecondaryButton>
+                <SecondaryButton
+                  type="button"
+                  onClick={goNext}
+                  className="!size-11 !p-0"
+                  aria-label="Next slide"
+                >
+                  <ChevronRightIcon className="h-4 w-4" aria-hidden />
+                </SecondaryButton>
+              </div>
             ) : null}
           </div>
         </div>

@@ -1,6 +1,5 @@
 import {
   getFirestoreProductByHandle,
-  listFirestoreProductsByCollection,
 } from "./firestore-products";
 import {
   getMockProductByHandle,
@@ -24,6 +23,12 @@ import {
   getProductsByCollectionHandle as getShopifyCollectionProducts,
 } from "@/lib/shopify/products";
 import { withNormalizedProse } from "@/lib/prose";
+import {
+  isLegacyRingPreviewHandle,
+  isRingSampleProductHandle,
+  RING_SAMPLE_COLLECTION_HANDLES,
+} from "./ring-sample-products.js";
+import { isBulovaSampleProductHandle } from "./bulova-sample-products.js";
 
 /**
  * @param {string} collectionHandle
@@ -31,7 +36,12 @@ import { withNormalizedProse } from "@/lib/prose";
  */
 async function getLocalDatabaseProducts(collectionHandle) {
   try {
-    return await listFirestoreProductsByCollection(collectionHandle);
+    const all = await getActiveProductsList();
+    return all.filter(
+      (product) =>
+        Array.isArray(product.collectionHandles) &&
+        product.collectionHandles.includes(collectionHandle),
+    );
   } catch (e) {
     if (!isFirebaseAdminAuthError(e)) {
       console.error("[catalog] local products by collection:", collectionHandle, e);
@@ -56,23 +66,48 @@ async function getLocalDatabaseProductByHandle(handle) {
 }
 
 /**
+ * Seed catalog collections are served from in-memory definitions (fast path).
+ *
+ * @param {string} collectionHandle
+ * @returns {Promise<import("./product-types").CatalogProduct[]>}
+ */
+async function getSeedCollectionProducts(collectionHandle) {
+  const mocks = getMockProductsByCollectionHandle(collectionHandle);
+  return mocks.map((mock) => withNormalizedProse(mock));
+}
+
+/**
  * @param {string} collectionHandle
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
 async function fetchCollectionProductsUncached(collectionHandle) {
+  if (
+    RING_SAMPLE_COLLECTION_HANDLES.includes(collectionHandle) ||
+    collectionHandle === "bulova"
+  ) {
+    return getSeedCollectionProducts(collectionHandle);
+  }
+
   const fromDb = await getLocalDatabaseProducts(collectionHandle);
-  if (fromDb.length > 0) {
-    return fromDb.map((p) =>
+  const activeFromDb = fromDb.filter(
+    (product) =>
+      !isLegacyRingPreviewHandle(product.handle) &&
+      !isMockPreviewHandle(product.handle),
+  );
+  if (activeFromDb.length > 0) {
+    return activeFromDb.map((p) =>
       withNormalizedProse({ ...p, source: /** @type {const} */ ("local") }),
     );
   }
 
-  if (await isShopifyIntegrationCatalogEnabled()) {
-    const fromShopify = await getShopifyCollectionProducts(collectionHandle);
-    if (fromShopify.length > 0) {
-      return fromShopify.map((p) =>
-        withNormalizedProse({ ...p, source: /** @type {const} */ ("shopify") }),
-      );
+  if (process.env.SHOPIFY_CATALOG_ENABLED === "true") {
+    if (await isShopifyIntegrationCatalogEnabled()) {
+      const fromShopify = await getShopifyCollectionProducts(collectionHandle);
+      if (fromShopify.length > 0) {
+        return fromShopify.map((p) =>
+          withNormalizedProse({ ...p, source: /** @type {const} */ ("shopify") }),
+        );
+      }
     }
   }
 
@@ -117,16 +152,27 @@ export const getCatalogProductByHandleRequest = cache(async function getCatalogP
 ) {
   if (!handle) return null;
 
+  if (isLegacyRingPreviewHandle(handle)) {
+    return null;
+  }
+
+  if (isRingSampleProductHandle(handle) || isBulovaSampleProductHandle(handle)) {
+    const mock = getMockProductByHandle(handle);
+    if (mock) return withNormalizedProse(mock);
+  }
+
   const fromDb = await getLocalDatabaseProductByHandle(handle);
   if (fromDb) return withNormalizedProse(fromDb);
 
-  if ((await isShopifyIntegrationCatalogEnabled()) && !isMockPreviewHandle(handle)) {
-    const fromShopify = await getShopifyProductByHandle(handle);
-    if (fromShopify) {
-      return withNormalizedProse({
-        ...fromShopify,
-        source: /** @type {const} */ ("shopify"),
-      });
+  if (process.env.SHOPIFY_CATALOG_ENABLED === "true" && !isMockPreviewHandle(handle)) {
+    if (await isShopifyIntegrationCatalogEnabled()) {
+      const fromShopify = await getShopifyProductByHandle(handle);
+      if (fromShopify) {
+        return withNormalizedProse({
+          ...fromShopify,
+          source: /** @type {const} */ ("shopify"),
+        });
+      }
     }
   }
 
@@ -143,6 +189,12 @@ function resolveProductCollectionHandles(product) {
   }
 
   const handle = String(product.handle ?? "");
+  if (isRingSampleProductHandle(handle)) {
+    return ["fine-rings", "wedding-bands"];
+  }
+  if (isBulovaSampleProductHandle(handle)) {
+    return ["bulova"];
+  }
   if (!handle.startsWith("preview-")) return [];
 
   const rest = handle.slice("preview-".length);
@@ -169,12 +221,15 @@ export async function getSimilarCatalogProducts(product, { limit = 12 } = {}) {
   const collectionHandles = resolveProductCollectionHandles(product);
   if (!collectionHandles.length) return [];
 
+  const batches = await Promise.all(
+    collectionHandles.map((collectionHandle) => getCollectionProducts(collectionHandle)),
+  );
+
   /** @type {import("./product-types").CatalogProduct[]} */
   const similar = [];
   const seen = new Set([product.handle]);
 
-  for (const collectionHandle of collectionHandles) {
-    const items = await getCollectionProducts(collectionHandle);
+  for (const items of batches) {
     for (const item of items) {
       if (seen.has(item.handle)) continue;
       seen.add(item.handle);
@@ -248,16 +303,6 @@ export async function getNewReleaseProducts({ limit = 12 } = {}) {
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
 export async function getFeaturedProducts(fallbackHandles = []) {
-  try {
-    const active = await getActiveProductsList();
-    const featured = active.filter((product) => product.featured);
-    if (featured.length > 0) {
-      return featured.map(toHomeCatalogProduct);
-    }
-  } catch (e) {
-    console.error("[catalog] featured products:", e);
-  }
-
   if (!fallbackHandles?.length) return [];
 
   const resolved = await Promise.all(
