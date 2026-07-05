@@ -1,4 +1,5 @@
 import InnerPageBackdrop from "@/components/InnerPageBackdrop";
+import { sitePageInsetContainerClass } from "@/config";
 
 export default function PageLayout({
   eyebrow,
@@ -11,12 +12,10 @@ export default function PageLayout({
   buttonArea = null,
   heroImage = null,
 }) {
-  const layoutWidth = "max-w-7xl";
-
   return (
     <div className="relative z-10 w-full min-w-0">
       {heroImage ? (
-        <div className="relative mx-auto mb-10 max-w-7xl px-6 sm:px-10 lg:px-12">
+        <div className={`relative mb-10 ${sitePageInsetContainerClass}`}>
           <div className="relative aspect-[21/9] overflow-hidden rounded-sm bg-champagne">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -34,7 +33,7 @@ export default function PageLayout({
       />
       <InnerPageBackdrop />
       <div
-        className={`relative z-10 mx-auto w-full px-6 pb-28 pt-12 sm:px-10 lg:px-12 ${layoutWidth} ${containerClassName}`}
+        className={`relative z-10 pb-28 pt-12 ${sitePageInsetContainerClass} ${containerClassName}`}
       >
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div className="max-w-3xl">

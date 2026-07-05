@@ -1,9 +1,11 @@
 import HomeHero from "@/components/home/HomeHero";
 import HomeWhyWoodleys from "@/components/home/HomeWhyWoodleys";
 import HomeShowroomHighlights from "@/components/home/HomeShowroomHighlights";
+import HomeShowroomFallback from "@/components/home/HomeShowroomFallback";
 import HomeFeaturedCategories from "@/components/home/HomeFeaturedCategories";
+import HomeNewReleases from "@/components/home/HomeNewReleases";
 import { defaultMetadata, HOME_FEATURED_PRODUCT_HANDLES } from "@/config";
-import { getFeaturedProducts } from "@/lib/catalog/products";
+import { getFeaturedProducts, getNewReleaseProducts } from "@/lib/catalog/products";
 
 export const metadata = {
   title: defaultMetadata.title,
@@ -11,7 +13,10 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const featuredProducts = await getFeaturedProducts(HOME_FEATURED_PRODUCT_HANDLES);
+  const [featuredProducts, newReleaseProducts] = await Promise.all([
+    getFeaturedProducts(HOME_FEATURED_PRODUCT_HANDLES),
+    getNewReleaseProducts({ limit: 12 }),
+  ]);
 
   return (
     <>
@@ -19,7 +24,10 @@ export default async function Home() {
       <HomeWhyWoodleys />
       {featuredProducts.length > 0 ? (
         <HomeShowroomHighlights products={featuredProducts} />
-      ) : null}
+      ) : (
+        <HomeShowroomFallback />
+      )}
+      <HomeNewReleases products={newReleaseProducts} />
       <HomeFeaturedCategories />
     </>
   );

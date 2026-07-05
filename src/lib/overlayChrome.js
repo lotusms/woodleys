@@ -69,6 +69,13 @@ export function checkoutDialogDrawerPanel(light) {
     : "flex h-full w-full max-w-full flex-col border-l border-slate-700/50 bg-slate-950 shadow-2xl transition data-closed:translate-x-8 data-closed:opacity-0 min-[400px]:max-w-[min(100vw,28rem)] sm:max-w-[min(100vw,36rem)] lg:max-w-[min(100vw-1rem,56rem)] xl:max-w-[min(100vw-2rem,72rem)]";
 }
 
+/** Wide two-column cart drawer — recommendations + bag. */
+export function cartDrawerPanel(light) {
+  return light
+    ? "flex h-full w-full max-w-[min(100vw,88rem)] flex-col bg-ivory shadow-2xl shadow-stone-900/15 ring-1 ring-stone-200/50 transition duration-300 data-closed:translate-x-full data-closed:opacity-0"
+    : "flex h-full w-full max-w-[min(100vw,88rem)] flex-col bg-slate-950 shadow-2xl transition duration-300 data-closed:translate-x-full data-closed:opacity-0";
+}
+
 /** @param {boolean} light */
 export function checkoutDialogDrawerHeaderBorder(light) {
   return light

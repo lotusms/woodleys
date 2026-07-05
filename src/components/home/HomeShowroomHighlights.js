@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import ProductPrice from "@/components/catalog/ProductPrice";
+import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import { formatProductPriceLabel } from "@/lib/catalog/product-pricing";
 
-const ROTATE_MS = 7000;
+const ROTATE_MS = 8500;
 const FADE_MS = 700;
 
 /**
@@ -56,15 +58,7 @@ export default function HomeShowroomHighlights({ products }) {
   return (
     <section
       aria-labelledby={`${regionId}-heading`}
-      className="relative isolate overflow-hidden border-y border-stone-200/70 bg-champagne py-20 sm:py-24 lg:py-28"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setPaused(false);
-        }
-      }}
+      className="relative isolate overflow-hidden bg-champagne py-20 sm:py-28"
     >
       <div
         className="pointer-events-none absolute inset-0 fabric-texture opacity-[0.14]"
@@ -158,6 +152,21 @@ export default function HomeShowroomHighlights({ products }) {
                     >
                       <ChevronLeftIcon className="h-5 w-5" aria-hidden />
                     </button>
+                    {count > 1 && !reduceMotion ? (
+                      <button
+                        type="button"
+                        onClick={() => setPaused((value) => !value)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-stone-950/40 text-white backdrop-blur-sm transition hover:border-white/55 hover:bg-stone-950/55 focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
+                        aria-label={paused ? "Play carousel" : "Pause carousel"}
+                        aria-pressed={paused}
+                      >
+                        {paused ? (
+                          <PlayIcon className="h-4 w-4" aria-hidden />
+                        ) : (
+                          <PauseIcon className="h-4 w-4" aria-hidden />
+                        )}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={goNext}
@@ -218,7 +227,7 @@ export default function HomeShowroomHighlights({ products }) {
           </div>
 
           <div
-            className="mt-5 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mt-5 flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Choose a piece to preview"
           >
@@ -274,6 +283,7 @@ export default function HomeShowroomHighlights({ products }) {
           </p>
         </div>
       </div>
+      <SectionBandHighlightEdge />
     </section>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
 
 /**
@@ -47,83 +46,61 @@ export default function ProductDetailGallery({ images, title }) {
 
   if (!activeImage) {
     return (
-      <div className="flex aspect-[4/5] items-center justify-center rounded-sm bg-champagne text-xs uppercase tracking-[0.2em] text-site-secondary">
+      <div className="flex aspect-[4/5] items-center justify-center bg-champagne text-xs uppercase tracking-[0.2em] text-site-secondary">
         No image
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-sm bg-champagne">
-        <div className="relative aspect-[4/5]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={activeImage.src}
-            alt={activeImage.alt || title}
-            className="h-full w-full object-cover"
-          />
+    <div className="relative min-w-0 overflow-hidden bg-champagne">
+      <div className="relative aspect-[4/5] sm:aspect-[5/6] lg:aspect-[4/5]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={activeImage.src}
+          alt={activeImage.alt || title}
+          className="h-full w-full object-cover"
+        />
 
-          {hasMultiple ? (
-            <>
-              <button
-                type="button"
-                onClick={goPrev}
-                disabled={!hasPrev}
-                className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-stone-950/45 text-white backdrop-blur-sm transition hover:bg-stone-950/60 disabled:pointer-events-none disabled:opacity-30 sm:left-4"
-                aria-label="Previous photo"
-              >
-                <ChevronLeftIcon className="h-5 w-5" aria-hidden />
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={!hasNext}
-                className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-stone-950/45 text-white backdrop-blur-sm transition hover:bg-stone-950/60 disabled:pointer-events-none disabled:opacity-30 sm:right-4"
-                aria-label="Next photo"
-              >
-                <ChevronRightIcon className="h-5 w-5" aria-hidden />
-              </button>
-              <p className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-white/25 bg-stone-950/50 px-3 py-1 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-white/90 backdrop-blur-sm">
-                {activeIndex + 1} of {images.length}
-              </p>
-            </>
-          ) : null}
-        </div>
+        {hasMultiple ? (
+          <>
+            <p className="absolute left-4 top-4 z-20 font-serif text-sm tabular-nums text-site-fg/85 sm:left-5 sm:top-5">
+              {activeIndex + 1} / {images.length}
+            </p>
+
+            <ul
+              className="absolute left-4 top-14 z-20 flex max-h-[calc(100%-4.5rem)] flex-col gap-2 overflow-y-auto sm:left-5 sm:top-16 sm:gap-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              aria-label="Product photos"
+            >
+              {images.map((image, index) => {
+                const selected = index === activeIndex;
+                return (
+                  <li key={image.src}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveIndex(index)}
+                      className={`block w-12 overflow-hidden border bg-ivory/90 shadow-sm shadow-stone-900/10 backdrop-blur-[1px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 sm:w-14 ${
+                        selected
+                          ? "border-site-fg"
+                          : "border-stone-300/70 hover:border-stone-500/80"
+                      }`}
+                      aria-label={`Show photo ${index + 1} of ${images.length}`}
+                      aria-current={selected ? "true" : undefined}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={image.src}
+                        alt=""
+                        className="aspect-square w-full object-cover"
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        ) : null}
       </div>
-
-      {hasMultiple ? (
-        <ul
-          className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          aria-label="Product photos"
-        >
-          {images.map((image, index) => {
-            const selected = index === activeIndex;
-            return (
-              <li key={image.src} className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  className={`overflow-hidden rounded-sm border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 ${
-                    selected
-                      ? "border-warm-gold-dark ring-1 ring-warm-gold-dark/25"
-                      : "border-stone-300/60 hover:border-stone-400/80"
-                  }`}
-                  aria-label={`Show photo ${index + 1} of ${images.length}`}
-                  aria-current={selected ? "true" : undefined}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image.src}
-                    alt=""
-                    className="h-16 w-16 object-cover sm:h-[4.5rem] sm:w-[4.5rem]"
-                  />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
     </div>
   );
 }

@@ -7,7 +7,10 @@ import {
   getMockProductByHandle,
   getMockProductsByCollectionHandle,
   isMockPreviewHandle,
+  listAllMockCatalogProducts,
 } from "./mock-catalog";
+import { sortCatalogProducts } from "./sort-products";
+import { cache } from "react";
 import { listAllCatalogCollectionOptions } from "./collections-meta";
 import { getCatalogPathForShopifyHandle } from "./categories";
 import { loadSiteIntegrations } from "@/lib/site-integrations";
@@ -83,7 +86,9 @@ export async function getCollectionProducts(collectionHandle, meta) {
  * @param {string} handle
  * @returns {Promise<import("./product-types").CatalogProductDetail | null>}
  */
-export async function getCatalogProductByHandle(handle) {
+export const getCatalogProductByHandle = cache(async function getCatalogProductByHandle(
+  handle,
+) {
   if (!handle) return null;
 
   const fromDb = await getLocalDatabaseProductByHandle(handle);
@@ -97,7 +102,7 @@ export async function getCatalogProductByHandle(handle) {
   }
 
   return getMockProductByHandle(handle);
-}
+});
 
 /**
  * @param {import("./product-types").CatalogProductDetail | Record<string, unknown>} product
@@ -160,6 +165,49 @@ export function getProductCategoryNavigation(product) {
   const primaryHandle = handles[0];
   if (!primaryHandle) return null;
   return getCatalogPathForShopifyHandle(primaryHandle);
+}
+
+/**
+ * @param {import("./product-types").CatalogProductDetail | import("./product-types").CatalogProduct} product
+ */
+function toHomeCatalogProduct(product) {
+  return {
+    id: product.id,
+    title: product.title,
+    handle: product.handle,
+    description: product.description,
+    priceUsd: product.priceUsd,
+    maxPriceUsd: product.maxPriceUsd,
+    salePriceUsd: product.salePriceUsd,
+    image: product.image,
+    availableForSale: product.availableForSale,
+    source: product.source,
+    createdAt: product.createdAt,
+  };
+}
+
+/**
+ * Recently added active products for the homepage new-releases carousel.
+ *
+ * @param {{ limit?: number }} [opts]
+ * @returns {Promise<import("./product-types").CatalogProduct[]>}
+ */
+export async function getNewReleaseProducts({ limit = 12 } = {}) {
+  try {
+    const fromDb = await listFirestoreProducts({ activeOnly: true });
+    if (fromDb.length > 0) {
+      return sortCatalogProducts(fromDb, "newest")
+        .slice(0, limit)
+        .map(toHomeCatalogProduct);
+    }
+  } catch (e) {
+    console.error("[catalog] new release products:", e);
+  }
+
+  const mocks = sortCatalogProducts(listAllMockCatalogProducts(), "newest");
+  return mocks.slice(0, limit).map((product) => ({
+    ...toHomeCatalogProduct({ ...product, source: /** @type {const} */ ("mock") }),
+  }));
 }
 
 /**

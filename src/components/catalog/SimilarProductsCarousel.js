@@ -5,13 +5,14 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import SuggestionCard from "@/components/catalog/SuggestionCard";
 
 /**
- * Horizontal carousel of {@link SuggestionCard} items for related products.
+ * Horizontal carousel of product tiles for related products.
  *
  * @param {{
  *   products: import("@/lib/catalog/product-types").CatalogProduct[];
+ *   className?: string;
  * }} props
  */
-export default function SimilarProductsCarousel({ products }) {
+export default function SimilarProductsCarousel({ products, className = "" }) {
   const regionId = useId();
   const scrollerRef = useRef(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -41,19 +42,19 @@ export default function SimilarProductsCarousel({ products }) {
 
   return (
     <section
-      className="border-t border-stone-200/80 pt-10"
+      className={className}
       aria-labelledby={`${regionId}-heading`}
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-site-secondary">
-            From the same collection
+            Similar items
           </p>
           <h2
             id={`${regionId}-heading`}
             className="mt-2 font-serif text-2xl font-medium tracking-[-0.02em] text-site-fg sm:text-[1.75rem]"
           >
-            Similar pieces
+            You might also like
           </h2>
         </div>
 

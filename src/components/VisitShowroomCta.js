@@ -9,7 +9,7 @@ import {
 } from "@/config";
 
 const SHOWROOM_IMAGE =
-  "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_1200x.jpg?v=1639025505";
+  "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342";
 
 export default function VisitShowroomCta() {
   return (

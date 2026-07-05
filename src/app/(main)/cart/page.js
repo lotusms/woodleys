@@ -1,5 +1,5 @@
-import CartPageContent from "@/components/cart/CartPageContent";
+import CartDrawerOpener from "@/components/cart/CartDrawerOpener";
 
 export default function CartPage() {
-  return <CartPageContent />;
+  return <CartDrawerOpener />;
 }

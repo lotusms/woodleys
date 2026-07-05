@@ -65,11 +65,62 @@ body {
   }
 }
 
+@keyframes hero-slide-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @layer utilities {
   .fabric-texture {
     background-image:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
       linear-gradient(180deg, #fdfbf7, #f7f4ef);
+  }
+
+  .milgrain-edge {
+    background-image:
+      radial-gradient(
+        circle at 50% 32%,
+        rgb(255 248 235 / 55%) 0.45px,
+        transparent 0.55px
+      ),
+      radial-gradient(
+        circle at 50% 58%,
+        rgb(154 123 79 / 78%) 1.05px,
+        transparent 1.15px
+      ),
+      radial-gradient(
+        circle at 50% 72%,
+        rgb(107 85 54 / 28%) 0.75px,
+        transparent 0.85px
+      );
+    background-repeat: repeat-x;
+    background-size: 9px 6px;
+    background-position: center bottom;
+  }
+
+  .band-highlight-edge {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(196 165 116 / 18%) 18%,
+      rgb(196 165 116 / 72%) 50%,
+      rgb(196 165 116 / 18%) 82%,
+      transparent 100%
+    );
+    box-shadow:
+      0 0 0 0.5px rgb(154 123 79 / 12%),
+      0 1px 8px rgb(196 165 116 / 14%);
+  }
+
+  .hero-slide-progress {
+    transform-origin: left center;
+    animation: hero-slide-progress linear forwards;
+    will-change: transform;
   }
 
   .product-image-scrim-card {
@@ -114,6 +165,11 @@ body {
       animation: none;
       opacity: 1;
       transform: none;
+    }
+
+    .hero-slide-progress {
+      animation: none;
+      transform: scaleX(1);
     }
   }
 }
@@ -214,5 +270,269 @@ label:has(:focus-visible) {
 @media (prefers-reduced-motion: reduce) {
   :focus-visible {
     transition: none;
+  }
+}
+
+/* Product tiles — animated blob rings on hover */
+.product-tile-blob,
+.new-release-blob {
+  transform-origin: 50% 50%;
+  transition: opacity 0.45s ease;
+}
+
+.product-tile-blob-ring,
+.new-release-blob-ring {
+  fill: none;
+  stroke-width: 1px;
+  opacity: 0.55;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.product-tile-card:hover .product-tile-blob-left,
+.product-tile-card:focus-within .product-tile-blob-left,
+.new-release-card:hover .new-release-blob-left,
+.new-release-card:focus-within .new-release-blob-left {
+  animation: product-tile-blob-spin 22s linear infinite;
+}
+
+.product-tile-card:hover .product-tile-blob-right,
+.product-tile-card:focus-within .product-tile-blob-right,
+.new-release-card:hover .new-release-blob-right,
+.new-release-card:focus-within .new-release-blob-right {
+  animation: product-tile-blob-spin 16s linear infinite reverse;
+}
+
+.product-tile-card:hover .product-tile-blob-ring,
+.product-tile-card:focus-within .product-tile-blob-ring,
+.new-release-card:hover .new-release-blob-ring,
+.new-release-card:focus-within .new-release-blob-ring {
+  animation: product-tile-blob-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes product-tile-blob-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes product-tile-blob-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-tile-card:hover .product-tile-blob-left,
+  .product-tile-card:focus-within .product-tile-blob-left,
+  .product-tile-card:hover .product-tile-blob-right,
+  .product-tile-card:focus-within .product-tile-blob-right,
+  .product-tile-card:hover .product-tile-blob-ring,
+  .product-tile-card:focus-within .product-tile-blob-ring,
+  .new-release-card:hover .new-release-blob-left,
+  .new-release-card:focus-within .new-release-blob-left,
+  .new-release-card:hover .new-release-blob-right,
+  .new-release-card:focus-within .new-release-blob-right,
+  .new-release-card:hover .new-release-blob-ring,
+  .new-release-card:focus-within .new-release-blob-ring {
+    animation: none;
+  }
+}
+
+/* Route transition — classic gold progress under the header */
+.route-transition-bar {
+  position: relative;
+  height: 100%;
+  width: 38%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-warm-gold) 35%, transparent),
+    var(--color-warm-gold-dark),
+    color-mix(in oklab, var(--color-warm-gold) 55%, white)
+  );
+  box-shadow: 0 0 18px color-mix(in oklab, var(--color-warm-gold) 45%, transparent);
+}
+
+.route-transition-bar--running {
+  animation: route-transition-run 1.35s ease-out forwards;
+}
+
+.route-transition-bar--completing {
+  width: 100%;
+  transition: width 0.28s ease-out;
+}
+
+.route-transition-spark {
+  position: absolute;
+  top: 50%;
+  right: -0.35rem;
+  height: 0.55rem;
+  width: 0.55rem;
+  border-radius: 9999px;
+  background: white;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-warm-gold-dark) 40%, transparent),
+    0 0 12px color-mix(in oklab, var(--color-warm-gold) 70%, white);
+  transform: translateY(-50%);
+}
+
+.route-transition-caption {
+  position: absolute;
+  top: 0.55rem;
+  right: 1rem;
+  font-family: var(--font-playfair), ui-serif, Georgia, serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: color-mix(in oklab, var(--color-warm-gold-dark) 82%, var(--color-site-fg));
+  animation: route-transition-caption-in 0.35s ease-out both;
+}
+
+@keyframes route-transition-run {
+  0% {
+    width: 12%;
+    opacity: 0.75;
+  }
+  20% {
+    width: 42%;
+    opacity: 1;
+  }
+  100% {
+    width: 88%;
+    opacity: 1;
+  }
+}
+
+@keyframes route-transition-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Product detail loading — showcase sweep, not a centered spinner */
+.product-detail-loading-gallery {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-warm-gold) 12%, transparent);
+}
+
+.product-detail-loading-sweep {
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    color-mix(in oklab, white 55%, var(--color-warm-gold)) 50%,
+    transparent 58%
+  );
+  opacity: 0.55;
+  animation: product-detail-showcase-sweep 1.8s ease-in-out infinite;
+}
+
+.product-detail-loading-sparkles {
+  position: absolute;
+  inset: 0;
+}
+
+.product-detail-loading-sparkles span {
+  position: absolute;
+  height: 0.45rem;
+  width: 0.45rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-warm-gold) 70%, white);
+  box-shadow: 0 0 10px color-mix(in oklab, var(--color-warm-gold) 55%, transparent);
+  animation: product-detail-sparkle 2.4s ease-in-out infinite;
+}
+
+.product-detail-loading-sparkles span:nth-child(1) {
+  top: 18%;
+  left: 22%;
+  animation-delay: 0s;
+}
+
+.product-detail-loading-sparkles span:nth-child(2) {
+  top: 34%;
+  right: 18%;
+  animation-delay: 0.7s;
+}
+
+.product-detail-loading-sparkles span:nth-child(3) {
+  bottom: 28%;
+  left: 38%;
+  animation-delay: 1.2s;
+}
+
+.product-detail-loading-line {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-champagne) 65%, white);
+}
+
+.product-detail-loading-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-warm-gold) 28%, white),
+    transparent
+  );
+  animation: product-detail-line-sheen 1.5s ease-in-out infinite;
+}
+
+@keyframes product-detail-showcase-sweep {
+  0% {
+    transform: translateX(-35%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(35%) skewX(-12deg);
+  }
+}
+
+@keyframes product-detail-sparkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes product-detail-line-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition-bar--running,
+  .route-transition-caption,
+  .product-detail-loading-sweep,
+  .product-detail-loading-sparkles span,
+  .product-detail-loading-line::after {
+    animation: none;
+  }
+
+  .route-transition-bar--running {
+    width: 72%;
   }
 }

@@ -62,6 +62,10 @@ function sameLineData(a, b) {
 export function CartProvider({ children }) {
   const [lines, setLines] = useState([]);
   const [ready, setReady] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openCart = useCallback(() => setIsOpen(true), []);
+  const closeCart = useCallback(() => setIsOpen(false), []);
 
   useEffect(() => {
     setLines(loadStored().map(normalizeLine));
@@ -188,6 +192,7 @@ export function CartProvider({ children }) {
       };
       return next;
     });
+    setIsOpen(true);
   }, []);
 
   const setQuantity = useCallback((lineKey, quantity) => {
@@ -221,6 +226,9 @@ export function CartProvider({ children }) {
     () => ({
       lines,
       ready,
+      isOpen,
+      openCart,
+      closeCart,
       addItem,
       setQuantity,
       removeLine,
@@ -231,6 +239,9 @@ export function CartProvider({ children }) {
     [
       lines,
       ready,
+      isOpen,
+      openCart,
+      closeCart,
       addItem,
       setQuantity,
       removeLine,

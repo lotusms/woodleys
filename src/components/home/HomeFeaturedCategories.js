@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import {
   CATALOG_SECTIONS,
   HOME_FEATURED_CATEGORIES,
@@ -8,9 +9,9 @@ export default function HomeFeaturedCategories() {
   return (
     <section
       aria-labelledby="home-collections-heading"
-      className="relative left-1/2 z-10 w-screen max-w-[100vw] -translate-x-1/2 border-y border-stone-400/25"
+      className="relative left-1/2 z-10 w-screen max-w-[100vw] -translate-x-1/2"
     >
-      <div className="relative overflow-hidden bg-gradient-to-b from-[#e8e2d6] via-[#ddd6c8] to-[#e2dbd0] py-20 sm:py-24 lg:py-28">
+      <div className="relative overflow-hidden bg-gradient-to-b from-[#e8e2d6] via-[#ddd6c8] to-[#e2dbd0] py-20 sm:py-28">
         <div
           className="pointer-events-none absolute inset-0 fabric-texture opacity-[0.16]"
           aria-hidden
@@ -51,7 +52,7 @@ export default function HomeFeaturedCategories() {
           </div>
 
           <ul
-            className="mt-14 grid gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:gap-8"
+            className="mt-14 grid gap-0.5 sm:mt-16 sm:grid-cols-2"
             role="list"
           >
             {HOME_FEATURED_CATEGORIES.map((category, index) => {
@@ -134,6 +135,7 @@ export default function HomeFeaturedCategories() {
           </ul>
         </div>
       </div>
+      <SectionBandHighlightEdge />
     </section>
   );
 }
