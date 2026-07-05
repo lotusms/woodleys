@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ProductPrice from "@/components/catalog/ProductPrice";
 import ProductTileBlobArt from "@/components/catalog/ProductTileBlobArt";
+import CatalogImage from "@/components/ui/CatalogImage";
 import { formatProductPriceAccessibleLabel } from "@/lib/catalog/product-pricing";
 
 const TINTS = ["#3d3834", "#4a4038", "#2f3438", "#42362e", "#353130"];
@@ -98,16 +99,17 @@ export default function ProductTileCard({
 
           <div className="relative z-[1] flex h-full items-center justify-center p-5 sm:p-6">
             {product.image ? (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={product.image.src}
-                  alt={product.image.alt || product.title}
-                  className={`max-h-full max-w-full object-contain drop-shadow-[0_18px_28px_rgba(45,38,32,0.22)] transition duration-500 group-hover:scale-[1.04] ${
-                    isSoldOut ? "grayscale" : ""
-                  }`}
-                />
-              </>
+              <CatalogImage
+                src={product.image.src}
+                alt={product.image.alt || product.title}
+                width={400}
+                height={400}
+                sizes="(max-width: 640px) 78vw, 19rem"
+                className={`object-contain drop-shadow-[0_18px_28px_rgba(45,38,32,0.22)] transition duration-500 group-hover:scale-[1.04] ${
+                  isSoldOut ? "grayscale" : ""
+                }`}
+                style={{ maxWidth: "100%", maxHeight: "100%" }}
+              />
             ) : (
               <div className="text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-white/80">
                 No image

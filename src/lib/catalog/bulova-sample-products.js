@@ -59,7 +59,7 @@ const BULOVA_SAMPLE_PRODUCT_DEFINITIONS = [
       "Water Resistance": "100M",
       Functions: "3-Hand, Date",
     }),
-    filenames: ["bulova.png", "bulova2.png", "bulova3.png"],
+    filenames: ["bulova.webp", "bulova2.webp", "bulova3.webp"],
   },
   {
     slug: "98b448",
@@ -85,7 +85,7 @@ const BULOVA_SAMPLE_PRODUCT_DEFINITIONS = [
       "Water Resistance": "100M",
       Functions: "3-Hand, Date",
     }),
-    filenames: ["bulova_orange.png", "bulova_orange2.png", "bulova_orange3.png"],
+    filenames: ["bulova_orange.webp", "bulova_orange2.webp", "bulova_orange3.webp"],
   },
   {
     slug: "98b445",
@@ -111,7 +111,7 @@ const BULOVA_SAMPLE_PRODUCT_DEFINITIONS = [
       "Water Resistance": "100M",
       Functions: "3-Hand, Date",
     }),
-    filenames: ["bulova_blue.png", "bulova_blue2.png", "bulova_blue3.png"],
+    filenames: ["bulova_blue.webp", "bulova_blue2.webp", "bulova_blue3.webp"],
   },
   {
     slug: "98b474",
@@ -137,7 +137,7 @@ const BULOVA_SAMPLE_PRODUCT_DEFINITIONS = [
       "Water Resistance": "WR100 / 10 Bar",
       Functions: "3-Hand, Date",
     }),
-    filenames: ["bulova_patriot.png", "bulova_patriot2.png", "bulova_patriot3.png"],
+    filenames: ["bulova_patriot.webp", "bulova_patriot2.webp", "bulova_patriot3.webp"],
   },
   {
     slug: "96b431",
@@ -163,12 +163,12 @@ const BULOVA_SAMPLE_PRODUCT_DEFINITIONS = [
       "Water Resistance": "WR200 / 20 Bar",
       Functions: "Calendar, 3-Hand",
     }),
-    filenames: ["bulova_yellow.png", "bulova_yellow2.png", "bulova_yellow3.png"],
+    filenames: ["bulova_yellow.webp", "bulova_yellow2.webp", "bulova_yellow3.webp"],
   },
 ];
 
 export const BULOVA_CATEGORY_IMAGE = {
-  src: bulovaWatchImage("bulova.png"),
+  src: bulovaWatchImage("bulova.webp"),
   alt: "Bulova Performance Snorkel Sea Turtle model 98B446 at Woodley's Jewelers",
 };
 

@@ -13,7 +13,6 @@ const nextConfig = {
     return config;
   },
   images: {
-    unoptimized: true,
     contentDispositionType: "inline",
     remotePatterns: [
       {

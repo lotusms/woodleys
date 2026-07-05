@@ -67,9 +67,17 @@ function mergeActiveSeedProducts(products) {
 }
 
 const loadActiveProducts = cache(async () => {
+  const FIRESTORE_TIMEOUT_MS = 900;
+
   try {
-    const products = await listFirestoreProducts({ activeOnly: true });
-    if (products.length === 0) return [];
+    const products = await Promise.race([
+      listFirestoreProducts({ activeOnly: true }),
+      new Promise((resolve) => {
+        setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
+      }),
+    ]);
+
+    if (!products || products.length === 0) return [];
     return mergeActiveSeedProducts(products);
   } catch {
     return [];

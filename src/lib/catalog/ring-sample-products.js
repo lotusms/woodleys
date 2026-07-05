@@ -63,7 +63,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       Includes:
         "Free FedEx shipping, discreet packaging, professional appraisal, lifetime warranty, FSC certified wood box",
     }),
-    filenames: ["austin.png", "austin2.png"],
+    filenames: ["austin.webp", "austin2.webp"],
   },
   {
     slug: "avalon",
@@ -94,7 +94,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       Includes:
         "Free FedEx shipping, discreet packaging, professional appraisal, lifetime warranty, FSC certified wood box",
     }),
-    filenames: ["avalon.png", "avalon2.png"],
+    filenames: ["avalon.webp", "avalon2.webp"],
   },
   {
     slug: "festivity",
@@ -129,7 +129,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       Includes:
         "Free FedEx shipping, discreet packaging, professional appraisal, lifetime warranty, FSC certified wood box",
     }),
-    filenames: ["festivity.png", "festivity2.png"],
+    filenames: ["festivity.webp", "festivity2.webp"],
   },
   {
     slug: "marina",
@@ -175,7 +175,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       Includes:
         "Free FedEx shipping, discreet packaging, professional appraisal, lifetime warranty, FSC certified wood box",
     }),
-    filenames: ["marina.png", "marina2.png"],
+    filenames: ["marina.webp", "marina2.webp"],
   },
   {
     slug: "samba",
@@ -210,12 +210,12 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       Includes:
         "Free FedEx shipping, discreet packaging, professional appraisal, lifetime warranty, FSC certified wood box",
     }),
-    filenames: ["samba.png", "samba2.png"],
+    filenames: ["samba.webp", "samba2.webp"],
   },
 ];
 
 export const RING_CATEGORY_IMAGE = {
-  src: ringImage("austin.png"),
+  src: ringImage("austin.webp"),
   alt: "Austin diamond wedding ring in 18K white gold",
 };
 

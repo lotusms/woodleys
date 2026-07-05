@@ -29,6 +29,7 @@ import {
   RING_SAMPLE_COLLECTION_HANDLES,
 } from "./ring-sample-products.js";
 import { isBulovaSampleProductHandle } from "./bulova-sample-products.js";
+import { normalizeCatalogImage } from "./normalize-image-src.js";
 
 /**
  * @param {string} collectionHandle
@@ -265,7 +266,7 @@ function toHomeCatalogProduct(product) {
     priceUsd: normalized.priceUsd,
     maxPriceUsd: normalized.maxPriceUsd,
     salePriceUsd: normalized.salePriceUsd,
-    image: normalized.image,
+    image: normalizeCatalogImage(normalized.image),
     availableForSale: normalized.availableForSale,
     source: normalized.source,
     createdAt: normalized.createdAt,
@@ -275,10 +276,20 @@ function toHomeCatalogProduct(product) {
 /**
  * Recently added active products for the homepage new-releases carousel.
  *
- * @param {{ limit?: number }} [opts]
+ * @param {{ limit?: number; handles?: readonly string[] }} [opts]
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
-export async function getNewReleaseProducts({ limit = 12 } = {}) {
+export async function getNewReleaseProducts({ limit = 12, handles } = {}) {
+  if (handles?.length) {
+    const resolved = await Promise.all(
+      handles.map((handle) => getCatalogProductByHandle(handle)),
+    );
+    return resolved
+      .filter(Boolean)
+      .map(toHomeCatalogProduct)
+      .slice(0, limit);
+  }
+
   try {
     const fromDb = await getActiveProductsList();
     if (fromDb.length > 0) {

@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { roundUsd2 } from "@/lib/money";
+import { deferUntilIdle } from "@/lib/defer-until-idle";
 
 const STORAGE_KEY = "shamrock-cart-v1";
 
@@ -148,9 +149,13 @@ export function CartProvider({ children }) {
       }
     }
 
-    syncFromCatalog();
+    const cancelDefer = deferUntilIdle(() => {
+      void syncFromCatalog();
+    }, { timeout: 4000 });
+
     return () => {
       active = false;
+      cancelDefer();
     };
   }, [ready, lines.length]);
 

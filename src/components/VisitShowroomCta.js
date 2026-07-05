@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import CatalogImage from "@/components/ui/CatalogImage";
 import { SiteLogoImage } from "@/components/brand/SiteLogo";
 import {
   orgEstablished,
@@ -9,7 +10,7 @@ import {
 } from "@/config";
 
 const SHOWROOM_IMAGE =
-  "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342";
+  "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800.jpg?v=1639027342";
 
 export default function VisitShowroomCta() {
   return (
@@ -17,13 +18,13 @@ export default function VisitShowroomCta() {
       aria-labelledby="visit-showroom-heading"
       className="relative left-1/2 z-10 w-screen max-w-[100vw] -translate-x-1/2"
     >
-      <div className="relative overflow-hidden bg-stone-950">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="relative min-h-[28rem] overflow-hidden bg-stone-950 sm:min-h-[32rem]">
+        <CatalogImage
           src={SHOWROOM_IMAGE}
           alt=""
-          className="absolute inset-0 h-full w-full scale-105 object-cover object-center opacity-35"
-          aria-hidden
+          fill
+          sizes="100vw"
+          className="scale-105 object-cover object-center opacity-35"
         />
         <div
           className="absolute inset-0 bg-gradient-to-r from-stone-950/95 via-stone-950/88 to-stone-950/75"

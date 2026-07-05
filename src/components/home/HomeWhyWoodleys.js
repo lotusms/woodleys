@@ -1,10 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { orgEstablished, orgLocation, orgName } from "@/config";
 
-const heritageBackgroundImage = "/images/map.png";
+const heritageBackgroundImage = "/images/map.webp";
 
 const pillars = [
   {
@@ -40,10 +41,12 @@ export default function HomeWhyWoodleys() {
       className="relative isolate overflow-hidden bg-ivory py-20 sm:py-28"
     >
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={heritageBackgroundImage}
           alt=""
+          width={1920}
+          height={1080}
+          sizes="100vw"
           className="h-full w-full object-cover object-[center_42%] opacity-[0.24] saturate-[0.62] contrast-[1.04] sm:opacity-[0.22]"
         />
         <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(253,251,247,0.72)_0%,rgba(253,251,247,0.28)_42%,rgba(253,251,247,0.08)_68%,transparent_88%)]" />

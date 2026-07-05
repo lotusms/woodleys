@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getActiveProductsList } from "@/lib/catalog/catalog-cache";
 import { listAllMockCatalogProducts } from "@/lib/catalog/mock-catalog";
 import { getProductChargeUsd } from "@/lib/catalog/product-pricing";
+import { normalizeCatalogImageSrc } from "@/lib/catalog/normalize-image-src";
 
 export const revalidate = 60;
 
@@ -12,8 +13,8 @@ function serializeProducts(products) {
     handle: product.handle,
     slug: product.handle,
     priceUsd: getProductChargeUsd(product),
-    image: product.image?.src ?? "",
-    originalImage: product.image?.src ?? "",
+    image: normalizeCatalogImageSrc(product.image?.src ?? ""),
+    originalImage: normalizeCatalogImageSrc(product.image?.src ?? ""),
     variantId: product.id,
     catalogVariantId: product.id,
     source: product.source ?? "local",
@@ -24,10 +25,24 @@ function serializeProducts(products) {
 }
 
 export async function GET() {
-  let products = await getActiveProductsList();
+  const mockProducts = listAllMockCatalogProducts().filter(
+    (product) => product.availableForSale,
+  );
+
+  let products = [];
+  try {
+    products = await Promise.race([
+      getActiveProductsList(),
+      new Promise((resolve) => {
+        setTimeout(() => resolve([]), 600);
+      }),
+    ]);
+  } catch {
+    products = [];
+  }
 
   if (products.length === 0) {
-    products = listAllMockCatalogProducts().filter((product) => product.availableForSale);
+    products = mockProducts;
   }
 
   return NextResponse.json(

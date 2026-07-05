@@ -6,6 +6,7 @@ import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
+import CatalogImage from "@/components/ui/CatalogImage";
 import { orgEstablished, orgLocation, siteHeaderProgressBarTopClass } from "@/config";
 import { BULOVA_CATEGORY_IMAGE } from "@/lib/catalog/bulova-sample-products.js";
 
@@ -16,7 +17,7 @@ const SLIDES = [
   {
     id: "engagement",
     image:
-      "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_2048x.jpg?v=1639025505",
+      "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_1200x.jpg?v=1639025505",
     imageAlt: "Engagement ring with brilliant diamond in an elegant setting",
     heading: "A ring worthy of the moment you say yes",
     body: `Your engagement ring marks a promise you will carry for a lifetime. We help you choose a setting and stone with patience and care, so the ring you wear feels as meaningful as the marriage it represents.`,
@@ -47,7 +48,7 @@ const SLIDES = [
   {
     id: "custom",
     image:
-      "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342",
+      "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800.jpg?v=1639027342",
     imageAlt: "Jeweler shaping a custom ring at the bench",
     heading: "Jewelry shaped around you alone",
     body: `Some stories deserve a piece that exists nowhere else. Work with our bench jewelers to design jewelry made for your taste, your milestones, and the moments only you can name, from first sketch to finished heirloom.`,
@@ -305,13 +306,17 @@ export default function HomeHero() {
                 aria-hidden={idx !== index}
                 style={{ transitionDuration: `${fadeMs}ms` }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={slide.image}
-                  alt={slide.imageAlt}
-                  className="h-full w-full object-cover"
-                  fetchPriority={idx === 0 ? "high" : undefined}
-                />
+                {idx === index ? (
+                  <CatalogImage
+                    src={slide.image}
+                    alt={slide.imageAlt}
+                    width={960}
+                    height={1200}
+                    sizes="(max-width: 1024px) 100vw, 42vw"
+                    priority={index === 0}
+                    className="h-full w-full object-cover"
+                  />
+                ) : null}
               </div>
             ))}
           </div>

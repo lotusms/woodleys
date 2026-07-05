@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import {
   CATALOG_SECTIONS,
@@ -80,10 +81,12 @@ export default function HomeFeaturedCategories() {
                         : "aspect-[4/5] sm:aspect-[3/4]"
                     }`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={category.image}
                       alt=""
+                      width={1680}
+                      height={720}
+                      sizes="(max-width: 640px) 100vw, 50vw"
                       className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
                       aria-hidden
                     />

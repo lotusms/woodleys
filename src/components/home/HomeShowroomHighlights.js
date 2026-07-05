@@ -6,6 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import ProductPrice from "@/components/catalog/ProductPrice";
 import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
+import CatalogImage from "@/components/ui/CatalogImage";
 import { formatProductPriceLabel } from "@/lib/catalog/product-pricing";
 
 const ROTATE_MS = 8500;
@@ -118,11 +119,14 @@ export default function HomeShowroomHighlights({ products }) {
                       transitionDuration: reduceMotion ? "0ms" : `${FADE_MS}ms`,
                     }}
                   >
-                    {product.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                    {product.image && index === active ? (
+                      <CatalogImage
                         src={product.image.src}
                         alt={product.image.alt || product.title}
+                        width={1200}
+                        height={960}
+                        sizes="(max-width: 1024px) 100vw, 55vw"
+                        priority={active === 0}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -251,10 +255,12 @@ export default function HomeShowroomHighlights({ products }) {
                   <span className="sr-only">{product.title}</span>
                   <div className="relative h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]">
                     {product.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <CatalogImage
                         src={product.image.src}
                         alt=""
+                        width={72}
+                        height={72}
+                        sizes="72px"
                         className={`h-full w-full object-cover transition duration-500 ${
                           selected ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                         }`}

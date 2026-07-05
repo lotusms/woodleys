@@ -15,7 +15,7 @@ const editorialImages = {
     "https://woodleyjewelers.com/cdn/shop/files/FA6CB512-0FF4-43DE-A784-70382EBDA5AD_1200x.jpg?v=1639025505",
   custom:
     "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342",
-  fine: "/images/products/rings/festivity.png",
+  fine: "/images/products/rings/festivity.webp",
   watch:
     "https://woodleyjewelers.com/cdn/shop/files/open-timepiece-exposing-cogs-and-gear-wheels_800x800@2x.jpg?v=1639027083",
   service:
