@@ -224,6 +224,7 @@ export default function SiteHeader() {
               </a>
               <Link
                 href="/contact"
+                prefetch
                 className="inline-flex shrink-0 rounded-full border border-stone-300/80 bg-white px-2.5 py-2 text-[0.62rem] font-medium uppercase tracking-[0.14em] text-site-fg transition hover:border-warm-gold hover:bg-champagne sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]"
               >
                 <span className="sm:hidden">Visit</span>
@@ -305,6 +306,7 @@ export default function SiteHeader() {
           </nav>
           <Link
             href="/contact"
+            prefetch
             onClick={close}
             className="mt-4 inline-flex items-center justify-center rounded-full bg-warm-gold px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-warm-gold-dark"
           >

@@ -1,3 +1,5 @@
+import { normalizeDescriptionHtml, normalizeProsePunctuation } from "@/lib/prose";
+
 export const PRODUCTS_COLLECTION = "products";
 export const CATALOG_COLLECTIONS_COLLECTION = "catalogCollections";
 
@@ -23,17 +25,20 @@ export function firestoreDocToProductDetail(data, id, opts = {}) {
     : [];
   const image = data.image?.src ? data.image : (images[0] ?? undefined);
 
+  const description = normalizeProsePunctuation(String(data.description ?? ""));
+  const descriptionHtml =
+    typeof data.descriptionHtml === "string" && data.descriptionHtml.trim()
+      ? normalizeDescriptionHtml(data.descriptionHtml)
+      : description
+        ? `<p>${description}</p>`
+        : "";
+
   return {
     id: `local:${handle}`,
     handle,
     title: String(data.title ?? handle),
-    description: String(data.description ?? ""),
-    descriptionHtml:
-      typeof data.descriptionHtml === "string"
-        ? data.descriptionHtml
-        : data.description
-          ? `<p>${String(data.description)}</p>`
-          : "",
+    description,
+    descriptionHtml,
     priceUsd,
     maxPriceUsd,
     salePriceUsd,

@@ -14,9 +14,10 @@ import {
 } from "@/lib/orders-sample-data";
 import { getSampleProfileById } from "@/lib/profile-sample-data";
 import { formatUsd } from "@/lib/money";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 
 function formatWhen(iso) {
-  if (!iso) return "—";
+  if (!iso) return EMPTY_VALUE_LABEL;
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return String(iso);

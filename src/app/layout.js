@@ -2,7 +2,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import CartProvider from "@/components/CartProvider";
 import FocusOnPageStart from "@/components/a11y/FocusOnPageStart";
 import RouteAnnouncer from "@/components/a11y/RouteAnnouncer";
-import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
+import ScrollRestoration from "@/components/ScrollRestoration";
 import { AuthProvider } from "@/context/AuthContext";
 import { defaultMetadata } from "@/config";
 import { ACTIVE_THEME_ID } from "@/theme";
@@ -53,7 +53,7 @@ export default function RootLayout({ children }) {
           <CartProvider>
             <FocusOnPageStart />
             <RouteAnnouncer />
-            <ScrollToTopOnLoad />
+            <ScrollRestoration />
             {children}
           </CartProvider>
         </AuthProvider>

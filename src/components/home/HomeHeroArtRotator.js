@@ -7,7 +7,8 @@ import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMat
 import LinkButton from "@/components/ui/LinkButton";
 import { orgName } from "@/config";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
-import { formatUsd } from "@/lib/money";
+import { formatUsd, formatUsdRange } from "@/lib/money";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 import { isLightThemeId } from "@/theme";
 
 const ROTATE_MS = 8000;
@@ -19,7 +20,7 @@ function heroPriceLabel(product) {
   const min = Number(product?.minPriceUsd);
   const max = Number(product?.maxPriceUsd);
   if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
+    return formatUsdRange(min, max);
   }
   return formatUsd(product?.priceUsd ?? 0);
 }
@@ -109,7 +110,7 @@ export default function HomeHeroArtRotator({ products }) {
           <p
             className={`mt-1 text-sm ${light ? "text-slate-800" : "text-slate-400"}`}
           >
-            {current.medium} • {current.dimensions || "—"}
+            {current.medium} • {current.dimensions || EMPTY_VALUE_LABEL}
           </p>
           <LinkButton href={`/shop/${current.slug}`}>View</LinkButton>
         </div>

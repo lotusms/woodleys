@@ -7,6 +7,7 @@ import {
   formatUserAddressBlock,
   formatUserPhoneDisplay,
 } from "@/lib/user-account-address";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 
 /**
  * @typedef {{
@@ -28,17 +29,17 @@ import {
  * @param {string | undefined} iso
  */
 function formatMemberSince(iso) {
-  if (!iso) return "—";
+  if (!iso) return EMPTY_VALUE_LABEL;
   try {
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
+    if (Number.isNaN(d.getTime())) return EMPTY_VALUE_LABEL;
     return d.toLocaleDateString(undefined, {
       month: "long",
       day: "numeric",
       year: "numeric",
     });
   } catch {
-    return "—";
+    return EMPTY_VALUE_LABEL;
   }
 }
 
@@ -115,7 +116,7 @@ export default function MemberProfileView({
                 Name
               </dt>
               <dd className="mt-1 text-base text-site-fg">
-                {displayName || "—"}
+                {displayName || EMPTY_VALUE_LABEL}
               </dd>
             </div>
             <div>
@@ -123,7 +124,7 @@ export default function MemberProfileView({
                 Email
               </dt>
               <dd className="mt-1 break-all text-base text-site-fg">
-                {profile.email || "—"}
+                {profile.email || EMPTY_VALUE_LABEL}
               </dd>
             </div>
             <div>
@@ -238,7 +239,7 @@ export default function MemberProfileView({
                     <p className="mt-1 text-sm text-site-secondary">
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString()
-                        : "—"}
+                        : EMPTY_VALUE_LABEL}
                       {order.status ? ` · ${order.status}` : ""}
                     </p>
                   </div>

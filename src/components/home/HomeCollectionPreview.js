@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { pickRecentCatalogProducts } from "@/lib/catalogSort";
 import { orgName } from "@/config";
-import { formatUsd } from "@/lib/money";
+import { formatUsd, formatUsdRange } from "@/lib/money";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 import CoverImageFrame from "@/components/ui/CoverImageFrame";
 import { linkButtonClasses, linkButtonClassesLight } from "@/components/ui/LinkButton";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
@@ -16,7 +17,7 @@ function formatCardPrice(product) {
   const min = Number(product?.minPriceUsd);
   const max = Number(product?.maxPriceUsd);
   if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
+    return formatUsdRange(min, max);
   }
   return formatUsd(product?.priceUsd ?? 0);
 }
@@ -75,7 +76,7 @@ function CollectionProductCard({ product }) {
             <p
               className={`text-sm ${light ? "text-slate-800" : "text-slate-400"}`}
             >
-              {product.medium} • {product.dimensions || "—"}
+              {product.medium} • {product.dimensions || EMPTY_VALUE_LABEL}
             </p>
             <span
               className={light ? linkButtonClassesLight : linkButtonClasses}

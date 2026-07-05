@@ -9,21 +9,22 @@ import {
   formatUserPhoneDisplay,
 } from "@/lib/user-account-address";
 import * as dash from "@/lib/dashboardChrome";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 
 /**
  * @param {string | undefined} iso
  */
 function formatWhen(iso) {
-  if (!iso) return "—";
+  if (!iso) return EMPTY_VALUE_LABEL;
   try {
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
+    if (Number.isNaN(d.getTime())) return EMPTY_VALUE_LABEL;
     return d.toLocaleString(undefined, {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return EMPTY_VALUE_LABEL;
   }
 }
 
@@ -33,7 +34,7 @@ function signInMethodLabel(user) {
   if (provider === "google.com") return "Google";
   if (provider === "password") return "Email & password";
   if (provider) return provider;
-  return "—";
+  return EMPTY_VALUE_LABEL;
 }
 
 /**
@@ -73,7 +74,7 @@ export default function SettingsAccountOverview({ light }) {
     const last = userAccount.lastName?.trim();
     const combined = [first, last].filter(Boolean).join(" ");
     if (combined) return combined;
-    return user?.displayName?.trim() || "—";
+    return user?.displayName?.trim() || EMPTY_VALUE_LABEL;
   }, [userAccount.firstName, userAccount.lastName, user?.displayName]);
 
   const shippingText = useMemo(
@@ -127,7 +128,7 @@ export default function SettingsAccountOverview({ light }) {
       ) : (
         <dl className="space-y-4">
           <DetailRow light={light} label="Name" value={displayName} />
-          <DetailRow light={light} label="Email" value={user?.email || "—"} />
+          <DetailRow light={light} label="Email" value={user?.email || EMPTY_VALUE_LABEL} />
           <DetailRow light={light} label="Phone" value={phoneText} />
           <div>
             <dt
@@ -173,7 +174,7 @@ export default function SettingsAccountOverview({ light }) {
               user?.uid ? (
                 <code className="break-all text-xs">{user.uid}</code>
               ) : (
-                "—"
+                EMPTY_VALUE_LABEL
               )
             }
           />

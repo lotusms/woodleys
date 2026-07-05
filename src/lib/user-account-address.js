@@ -1,4 +1,5 @@
 import { formatUsPhoneMask } from "@/lib/checkout-auth";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 
 /**
  * @typedef {{
@@ -34,7 +35,7 @@ export function formatUserAddressLines(addr) {
  */
 export function formatUserAddressBlock(addr) {
   const lines = formatUserAddressLines(addr);
-  return lines.length ? lines.join("\n") : "—";
+  return lines.length ? lines.join("\n") : EMPTY_VALUE_LABEL;
 }
 
 /**
@@ -42,7 +43,7 @@ export function formatUserAddressBlock(addr) {
  */
 export function formatUserPhoneDisplay(phone) {
   const digits = String(phone || "").replace(/\D/g, "");
-  if (!digits) return "—";
+  if (!digits) return EMPTY_VALUE_LABEL;
   return formatUsPhoneMask(digits);
 }
 

@@ -1,10 +1,22 @@
+import dynamic from "next/dynamic";
 import PageLayout from "@/components/PageLayout";
-import AppointmentForm from "@/components/appointments/AppointmentForm";
 import {
   ContactPageContactBand,
   ContactPageHero,
 } from "@/components/contact/ContactPageAside";
 import { orgLocation, sitePageTitle } from "@/config";
+
+const AppointmentForm = dynamic(
+  () => import("@/components/appointments/AppointmentForm"),
+  {
+    loading: () => (
+      <div
+        className="h-[28rem] animate-pulse rounded-sm border border-stone-200/70 bg-stone-100/60"
+        aria-hidden
+      />
+    ),
+  },
+);
 
 export const metadata = {
   title: sitePageTitle("Contact us"),

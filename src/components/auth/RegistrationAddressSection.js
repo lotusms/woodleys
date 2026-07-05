@@ -84,7 +84,7 @@ export default function RegistrationAddressSection({
       <p className={`mt-2 text-sm leading-relaxed ${light ? "text-stone-600" : "text-slate-400"}`}>
         Type your house number and street name. If you only know the number (like{" "}
         <span className="font-medium text-site-fg">123</span>), we still search
-        common street matches — St, Rd, Ave, and more.
+        common street matches, including St, Rd, Ave, and more.
       </p>
 
       <div className="mt-4 grid grid-cols-1 gap-4">

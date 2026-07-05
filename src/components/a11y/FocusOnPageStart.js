@@ -1,20 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { SITE_LOGO_ID } from "@/components/brand/SiteLogo";
+import { useLayoutEffect } from "react";
 
 /**
- * Moves keyboard focus to the site logo on first load and after in-app navigation.
+ * Moves keyboard focus into the main landmark after navigation without scrolling.
  */
 export default function FocusOnPageStart() {
   const pathname = usePathname();
 
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      const logo = document.getElementById(SITE_LOGO_ID);
-      logo?.focus({ preventScroll: true });
-    });
+  useLayoutEffect(() => {
+    const main = document.getElementById("main-content");
+    main?.focus({ preventScroll: true });
   }, [pathname]);
 
   return null;

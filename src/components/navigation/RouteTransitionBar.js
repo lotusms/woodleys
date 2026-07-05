@@ -1,16 +1,8 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { siteHeaderProgressBarTopClass } from "@/config";
-
-const PHRASES = [
-  "Unveiling the piece…",
-  "From the showroom floor…",
-  "Inspecting the setting…",
-  "Opening the vault…",
-  "Polishing the details…",
-];
 
 /** @param {HTMLAnchorElement | null} anchor */
 function shouldHandleNavigation(anchor) {
@@ -44,38 +36,15 @@ function shouldHandleNavigation(anchor) {
 
 export default function RouteTransitionBar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [phase, setPhase] = useState("idle");
-  const [phrase, setPhrase] = useState(PHRASES[0]);
-  const finishTimerRef = useRef(null);
-  const routeKey = `${pathname}?${searchParams.toString()}`;
-
-  const finishTransition = useCallback(() => {
-    setPhase((current) => {
-      if (current === "idle") return current;
-      return "completing";
-    });
-
-    if (finishTimerRef.current) {
-      window.clearTimeout(finishTimerRef.current);
-    }
-
-    finishTimerRef.current = window.setTimeout(() => {
-      setPhase("idle");
-    }, 480);
-  }, []);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    finishTransition();
-    return () => {
-      if (finishTimerRef.current) {
-        window.clearTimeout(finishTimerRef.current);
-      }
-    };
-  }, [routeKey, finishTransition]);
+    setVisible(false);
+  }, [pathname]);
 
   useEffect(() => {
-    function onPointerDown(event) {
+    function onClick(event) {
+      if (event.defaultPrevented) return;
       if (event.button !== 0) return;
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
@@ -85,29 +54,25 @@ export default function RouteTransitionBar() {
       const anchor = target.closest("a");
       if (!shouldHandleNavigation(anchor)) return;
 
-      setPhrase(PHRASES[Math.floor(Math.random() * PHRASES.length)]);
-      setPhase("running");
+      setVisible(true);
     }
 
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
   }, []);
 
-  if (phase === "idle") return null;
+  if (!visible) return null;
 
   return (
     <div
       className={`pointer-events-none fixed inset-x-0 z-[120] ${siteHeaderProgressBarTopClass}`}
       role="status"
       aria-live="polite"
-      aria-label={phrase}
+      aria-label="Loading page"
     >
-      <div className="relative h-[3px] w-full overflow-hidden bg-stone-400/20">
-        <div className={`route-transition-bar route-transition-bar--${phase}`}>
-          <span className="route-transition-spark" aria-hidden />
-        </div>
+      <div className="relative h-[2px] w-full overflow-hidden bg-stone-400/15">
+        <div className="route-transition-bar route-transition-bar--running" />
       </div>
-      <p className="route-transition-caption">{phrase}</p>
     </div>
   );
 }

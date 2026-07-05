@@ -71,7 +71,7 @@ export default function HomeNewReleases({ products }) {
               Fresh arrivals from the showroom
             </h2>
             <p className="mt-4 max-w-lg text-base leading-relaxed text-site-secondary">
-              Recently added pieces — explore online, then visit us in Beaumont to
+              Recently added pieces. Explore online, then visit us in Beaumont to
               see them in person.
             </p>
           </div>

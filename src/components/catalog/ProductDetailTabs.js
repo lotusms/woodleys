@@ -109,7 +109,7 @@ export default function ProductDetailTabs({
             </p>
             <p>
               Need sizing, repair, or restoration? Our bench jewelers handle most
-              work in-house — book a visit when you are ready.
+              work in-house. Book a visit when you are ready.
             </p>
           </div>
         ) : null}

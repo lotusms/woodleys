@@ -261,7 +261,7 @@ export default function HomeShowroomHighlights({ products }) {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-[0.55rem] uppercase tracking-widest text-site-secondary">
-                        —
+                        No image
                       </div>
                     )}
                   </div>

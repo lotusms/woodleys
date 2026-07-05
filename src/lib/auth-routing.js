@@ -3,6 +3,8 @@
  * Admins open the dashboard in a new tab on sign-in; members stay in the main site UI.
  */
 
+import { clearCachedUserAccount } from "@/lib/user-account-cache";
+
 /** Named target so repeat opens focus the same tab instead of spawning new ones. */
 const ADMIN_PORTAL_WINDOW_NAME = "woodleys-admin-portal";
 
@@ -12,6 +14,7 @@ let adminPortalWindow = null;
 /** Resets the cached portal window reference (call on sign-out). */
 export function clearAdminPortalSession() {
   adminPortalWindow = null;
+  clearCachedUserAccount();
 }
 
 /**

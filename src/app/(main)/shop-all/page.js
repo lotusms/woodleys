@@ -4,8 +4,10 @@ import ShopAllCatalogGrid from "@/components/catalog/ShopAllCatalogGrid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import StullerEmbed from "@/components/shop/StullerEmbed";
 import { CATALOG_SECTIONS, SHOP_ALL_HERO } from "@/lib/catalog/categories";
-import { getCollectionProducts } from "@/lib/catalog/products";
+import { getCollectionProductCounts } from "@/lib/catalog/catalog-cache";
 import { orgName, sitePageTitle } from "@/config";
+
+export const revalidate = 60;
 
 const heroSecondaryClass =
   "inline-flex items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/70 hover:bg-white/20";
@@ -17,26 +19,24 @@ export const metadata = {
 };
 
 async function buildCatalogSummaries() {
+  const counts = await getCollectionProductCounts();
   const entries = Object.entries(CATALOG_SECTIONS);
 
-  return Promise.all(
-    entries.map(async ([key, section]) => {
-      const products = await getCollectionProducts(section.shopifyHandle);
-      const heroImage = section.children[0]?.image;
+  return entries.map(([key, section]) => {
+    const heroImage = section.children[0]?.image;
 
-      return {
-        key,
-        title: section.title,
-        eyebrow: section.eyebrow,
-        description: section.intro || section.description,
-        href: `/${key}`,
-        image: heroImage?.src,
-        alt: heroImage?.alt || section.title,
-        subcategoryCount: section.children.length,
-        productCount: products.length,
-      };
-    }),
-  );
+    return {
+      key,
+      title: section.title,
+      eyebrow: section.eyebrow,
+      description: section.intro || section.description,
+      href: `/${key}`,
+      image: heroImage?.src,
+      alt: heroImage?.alt || section.title,
+      subcategoryCount: section.children.length,
+      productCount: counts[section.shopifyHandle] ?? 0,
+    };
+  });
 }
 
 export default async function ShopAllPage() {

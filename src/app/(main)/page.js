@@ -7,6 +7,8 @@ import HomeNewReleases from "@/components/home/HomeNewReleases";
 import { defaultMetadata, HOME_FEATURED_PRODUCT_HANDLES } from "@/config";
 import { getFeaturedProducts, getNewReleaseProducts } from "@/lib/catalog/products";
 
+export const revalidate = 60;
+
 export const metadata = {
   title: defaultMetadata.title,
   description: defaultMetadata.description,

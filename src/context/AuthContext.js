@@ -19,6 +19,12 @@ import { getFirebaseAuth, getFirebaseDb } from "@firebase/client";
 import { signInWithGoogle as googleSignIn } from "@/lib/google-auth";
 import { clearAdminPortalSession } from "@/lib/auth-routing";
 import { ensureUserAccountDocIfMissing } from "@/lib/ensure-user-account";
+import {
+  clearCachedUserAccount,
+  readCachedUserAccount,
+  userAccountFromFirestoreData,
+  writeCachedUserAccount,
+} from "@/lib/user-account-cache";
 import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 
 const AuthContext = createContext(null);
@@ -48,39 +54,26 @@ export function AuthProvider({ children }) {
   const [userAccount, setUserAccount] = useState(idleAccount);
 
   useEffect(() => {
-    let unsub = () => {};
     let cancelled = false;
+    let unsub = () => {};
 
-    (async () => {
-      try {
-        const auth = getFirebaseAuth();
-        const ready = auth.authStateReady();
-        const timeout = new Promise((resolve) => {
-          window.setTimeout(resolve, 4000);
-        });
-        await Promise.race([ready, timeout]);
+    try {
+      const auth = getFirebaseAuth();
+      unsub = onAuthStateChanged(auth, (u) => {
         if (cancelled) return;
-        setUser(auth.currentUser ?? null);
+        setUser(u);
         setLoading(false);
-        if (auth.currentUser) {
+        if (u) {
           void ensureUserAccountDocIfMissing();
         }
-        unsub = onAuthStateChanged(auth, (u) => {
-          if (cancelled) return;
-          setUser(u);
-          setLoading(false);
-          if (u) {
-            void ensureUserAccountDocIfMissing();
-          }
-        });
-      } catch (e) {
-        console.error("[auth]", e);
-        if (!cancelled) {
-          setUser(null);
-          setLoading(false);
-        }
+      });
+    } catch (e) {
+      console.error("[auth]", e);
+      if (!cancelled) {
+        setUser(null);
+        setLoading(false);
       }
-    })();
+    }
 
     return () => {
       cancelled = true;
@@ -95,10 +88,8 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- bootstrap listener + loading UI before first snapshot
-    setUserAccount({
-      uid: user.uid,
-      status: "loading",
+    const cached = readCachedUserAccount(user.uid);
+    const emptyAccount = {
       admin: false,
       guest: false,
       firstName: "",
@@ -107,6 +98,13 @@ export function AuthProvider({ children }) {
       shippingAddress: null,
       billingAddress: null,
       billingSameAsShipping: true,
+    };
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- bootstrap listener + loading UI before first snapshot
+    setUserAccount({
+      uid: user.uid,
+      status: cached ? "ready" : "loading",
+      ...(cached ?? emptyAccount),
     });
 
     const db = getFirebaseDb();
@@ -115,38 +113,21 @@ export function AuthProvider({ children }) {
       ref,
       (snap) => {
         if (!snap.exists()) {
+          const account = { ...emptyAccount };
+          writeCachedUserAccount(user.uid, account);
           setUserAccount({
             uid: user.uid,
             status: "ready",
-            admin: false,
-            guest: false,
-            firstName: "",
-            lastName: "",
-            phone: "",
-            shippingAddress: null,
-            billingAddress: null,
-            billingSameAsShipping: true,
+            ...account,
           });
           return;
         }
-        const d = snap.data();
+        const account = userAccountFromFirestoreData(snap.data());
+        writeCachedUserAccount(user.uid, account);
         setUserAccount({
           uid: user.uid,
           status: "ready",
-          admin: Boolean(d.admin),
-          guest: Boolean(d.guest),
-          firstName: typeof d.firstName === "string" ? d.firstName : "",
-          lastName: typeof d.lastName === "string" ? d.lastName : "",
-          phone: typeof d.phone === "string" ? d.phone : "",
-          shippingAddress:
-            d.shippingAddress && typeof d.shippingAddress === "object"
-              ? /** @type {Record<string, unknown>} */ (d.shippingAddress)
-              : null,
-          billingAddress:
-            d.billingAddress && typeof d.billingAddress === "object"
-              ? /** @type {Record<string, unknown>} */ (d.billingAddress)
-              : null,
-          billingSameAsShipping: d.billingSameAsShipping !== false,
+          ...account,
         });
       },
       (err) => {
@@ -154,14 +135,7 @@ export function AuthProvider({ children }) {
         setUserAccount({
           uid: user.uid,
           status: "ready",
-          admin: false,
-          guest: false,
-          firstName: "",
-          lastName: "",
-          phone: "",
-          shippingAddress: null,
-          billingAddress: null,
-          billingSameAsShipping: true,
+          ...emptyAccount,
         });
       },
     );
@@ -193,6 +167,7 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     setSigningOut(true);
     clearAdminPortalSession();
+    clearCachedUserAccount();
     try {
       const auth = getFirebaseAuth();
       await firebaseSignOut(auth);

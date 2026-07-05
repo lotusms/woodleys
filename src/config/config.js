@@ -21,12 +21,12 @@ export const siteHeaderTopOffset = "4.5rem";
 export const siteHeaderNavOffset = "3rem";
 
 /** Tailwind classes — clear fixed header on main-site pages. */
-export const siteHeaderClearanceClass = "pt-[4.5rem] xl:pt-[7.5rem]";
+export const siteHeaderClearanceClass = "pt-[4.5rem] xl:pt-[8rem]";
 /** Fixed hero slide progress — sits flush under the header. */
-export const siteHeaderProgressBarTopClass = "top-[4.5rem] xl:top-[7.5rem]";
+export const siteHeaderProgressBarTopClass = "top-[4.5rem] xl:top-[8rem]";
 /** Full-height content area below the fixed header. */
 export const siteBelowHeaderMinHeightClass =
-  "min-h-[calc(100dvh-4.5rem)] xl:min-h-[calc(100dvh-7.5rem)]";
+  "min-h-[calc(100dvh-4.5rem)] xl:min-h-[calc(100dvh-8rem)]";
 
 /**
  * Page shell layout — main content has no default horizontal inset.

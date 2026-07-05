@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import DashboardActivityChart from "@/components/dashboard/DashboardActivityChart";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
 import {
@@ -13,6 +13,18 @@ import { fetchOrdersForCurrentUser } from "@/lib/orders-queries";
 import { formatUsd } from "@/lib/money";
 import * as overlayChrome from "@/lib/overlayChrome";
 import { isLightThemeId } from "@/theme";
+
+const DashboardActivityChart = dynamic(
+  () => import("@/components/dashboard/DashboardActivityChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[280px] items-center justify-center text-sm text-site-secondary">
+        Loading chart…
+      </div>
+    ),
+  },
+);
 
 function StatCard({ title, a, b, aLabel, bLabel, sub, light }) {
   return (
@@ -40,11 +52,6 @@ export default function DashboardHomePage() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState("");
-  const [catalog, setCatalog] = useState({
-    live: null,
-    variants: null,
-    loading: true,
-  });
 
   useEffect(() => {
     if (authLoading || !user) return;

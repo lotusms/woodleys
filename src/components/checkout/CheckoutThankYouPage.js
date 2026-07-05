@@ -9,6 +9,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { formatUsd } from "@/lib/money";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 import { ORDER_EMAIL_STATUS_KEY, ORDER_STORAGE_KEY } from "@/lib/checkout";
 import {
   getOrderTransactionId,
@@ -228,7 +229,7 @@ function ThankYouContent() {
               <p
                 className={`mt-3 break-all font-mono text-base sm:text-lg ${lightSurface ? "text-amber-950" : "text-amber-100"}`}
               >
-                {transactionId || "—"}
+                {transactionId || EMPTY_VALUE_LABEL}
               </p>
             </div>
           </div>
@@ -284,7 +285,7 @@ function ThankYouContent() {
             </p>
             <p>
               <span className="text-site-secondary">Transaction ID:</span>{" "}
-              <span className="break-all text-site-primary">{transactionId || "—"}</span>
+              <span className="break-all text-site-primary">{transactionId || EMPTY_VALUE_LABEL}</span>
             </p>
             <p>
               <span className="text-site-secondary">Payment method:</span>{" "}

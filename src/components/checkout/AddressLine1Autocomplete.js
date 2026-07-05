@@ -141,7 +141,7 @@ export default function AddressLine1Autocomplete({
   const dropdownContent =
     !shouldSearch ? (
       <p className={overlayChrome.addressSuggestMuted(light)}>
-        Keep typing — enter your house number or street address.
+        Keep typing. Enter your house number or street address.
       </p>
     ) : addressSuggestLoading ? (
       <p className={overlayChrome.addressSuggestMuted(light)}>

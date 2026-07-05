@@ -16,3 +16,8 @@ export function roundUsd2(amount) {
 export function formatUsd(amount) {
   return usd.format(Number(amount));
 }
+
+/** Formats a USD price range without en dashes. */
+export function formatUsdRange(minUsd, maxUsd) {
+  return `${formatUsd(minUsd)} to ${formatUsd(maxUsd)}`;
+}

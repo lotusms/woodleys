@@ -6,7 +6,7 @@ import Card from "@/components/ui/Card";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as overlayChrome from "@/lib/overlayChrome";
-import { formatUsd } from "@/lib/money";
+import { formatUsd, formatUsdRange } from "@/lib/money";
 import { isLightThemeId } from "@/theme";
 
 function variantKey(variant, index) {
@@ -18,7 +18,7 @@ function displayPrice(product, selectedVariant) {
   const min = Number(product?.minPriceUsd);
   const max = Number(product?.maxPriceUsd);
   if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
-    return `${formatUsd(min)}–${formatUsd(max)}`;
+    return formatUsdRange(min, max);
   }
   return formatUsd(product.priceUsd);
 }

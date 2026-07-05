@@ -12,10 +12,11 @@ import * as overlayChrome from "@/lib/overlayChrome";
 import { fetchOrderByIdForCurrentUser } from "@/lib/orders-queries";
 import { getSampleOrderById, isSampleOrder } from "@/lib/orders-sample-data";
 import { formatUsd } from "@/lib/money";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 import { isLightThemeId } from "@/theme";
 
 function formatWhen(iso) {
-  if (!iso) return "—";
+  if (!iso) return EMPTY_VALUE_LABEL;
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return String(iso);
@@ -238,13 +239,13 @@ export default function OrderDetailPage({
               <div>
                 <dt className={dash.dashboardStatCaption(light)}>Email</dt>
                 <dd className={light ? "text-stone-800" : "text-stone-200"}>
-                  {order.email || "—"}
+                  {order.email || EMPTY_VALUE_LABEL}
                 </dd>
               </div>
               <div>
                 <dt className={dash.dashboardStatCaption(light)}>Phone</dt>
                 <dd className={light ? "text-stone-800" : "text-stone-200"}>
-                  {order.phone || "—"}
+                  {order.phone || EMPTY_VALUE_LABEL}
                 </dd>
               </div>
             </dl>
@@ -381,7 +382,7 @@ export default function OrderDetailPage({
                 <div className="flex justify-between gap-4">
                   <dt className={dash.dashboardStatCaption(light)}>Provider</dt>
                   <dd className={light ? "text-stone-800" : "text-stone-200"}>
-                    {String(order.fulfillment.provider ?? "—")}
+                    {String(order.fulfillment.provider ?? EMPTY_VALUE_LABEL)}
                   </dd>
                 </div>
                 {order.fulfillment.providerOrderId ? (

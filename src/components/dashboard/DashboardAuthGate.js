@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import DashboardShell from "@/components/dashboard/DashboardShell";
 import { useAuth } from "@/context/AuthContext";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
@@ -20,6 +21,18 @@ function GateEscapeBar() {
       <Link href="/login" className={dash.authGateMutedLink(light)}>
         Sign in
       </Link>
+    </div>
+  );
+}
+
+function GateMessage({ children }) {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
+  const muted = overlayChrome.pageMutedText(light);
+
+  return (
+    <div className={`flex min-h-[40vh] items-center justify-center ${muted}`}>
+      <p className="text-sm tracking-wide">{children}</p>
     </div>
   );
 }
@@ -53,7 +66,7 @@ export default function DashboardAuthGate({ children }) {
     }
   }, [user, loading, accountLoading, isAdmin, userAccount.status, signingOut, router]);
 
-  if (loading || accountLoading) {
+  if (loading) {
     return (
       <>
         <GateEscapeBar />
@@ -86,16 +99,15 @@ export default function DashboardAuthGate({ children }) {
     );
   }
 
-  if (userAccount.status === "ready" && !isAdmin) {
-    return (
-      <>
-        <GateEscapeBar />
-        <div className={`flex min-h-dvh items-center justify-center ${muted}`}>
-          <p className="text-sm tracking-wide">Opening your account…</p>
-        </div>
-      </>
-    );
-  }
-
-  return children;
+  return (
+    <DashboardShell>
+      {accountLoading ? (
+        <GateMessage>Verifying access…</GateMessage>
+      ) : userAccount.status === "ready" && !isAdmin ? (
+        <GateMessage>Opening your account…</GateMessage>
+      ) : (
+        children
+      )}
+    </DashboardShell>
+  );
 }

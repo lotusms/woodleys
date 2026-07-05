@@ -19,10 +19,11 @@ import {
   isSampleOrder,
 } from "@/lib/orders-sample-data";
 import { formatUsd } from "@/lib/money";
+import { EMPTY_VALUE_LABEL } from "@/lib/prose";
 import { isLightThemeId } from "@/theme";
 
 function formatWhen(iso) {
-  if (!iso) return "—";
+  if (!iso) return EMPTY_VALUE_LABEL;
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return String(iso);
@@ -710,7 +711,7 @@ export default function OrdersListPage({
             <span
               className={`tabular-nums ${light ? "text-stone-800" : "text-stone-400"}`}
             >
-              {rangeStart}–{rangeEnd}
+              {rangeStart} to {rangeEnd}
             </span>{" "}
             of{" "}
             <span

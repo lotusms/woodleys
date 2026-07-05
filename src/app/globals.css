@@ -30,7 +30,14 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+  scroll-padding-top: 4.5rem;
+}
+
+@media (min-width: 1280px) {
+  html {
+    scroll-padding-top: 8rem;
+  }
 }
 
 body {
@@ -361,38 +368,7 @@ label:has(:focus-visible) {
 }
 
 .route-transition-bar--running {
-  animation: route-transition-run 1.35s ease-out forwards;
-}
-
-.route-transition-bar--completing {
-  width: 100%;
-  transition: width 0.28s ease-out;
-}
-
-.route-transition-spark {
-  position: absolute;
-  top: 50%;
-  right: -0.35rem;
-  height: 0.55rem;
-  width: 0.55rem;
-  border-radius: 9999px;
-  background: white;
-  box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--color-warm-gold-dark) 40%, transparent),
-    0 0 12px color-mix(in oklab, var(--color-warm-gold) 70%, white);
-  transform: translateY(-50%);
-}
-
-.route-transition-caption {
-  position: absolute;
-  top: 0.55rem;
-  right: 1rem;
-  font-family: var(--font-playfair), ui-serif, Georgia, serif;
-  font-size: 0.72rem;
-  font-style: italic;
-  letter-spacing: 0.04em;
-  color: color-mix(in oklab, var(--color-warm-gold-dark) 82%, var(--color-site-fg));
-  animation: route-transition-caption-in 0.35s ease-out both;
+  animation: route-transition-run 0.8s ease-out forwards;
 }
 
 @keyframes route-transition-run {
@@ -407,17 +383,6 @@ label:has(:focus-visible) {
   100% {
     width: 88%;
     opacity: 1;
-  }
-}
-
-@keyframes route-transition-caption-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -525,7 +490,6 @@ label:has(:focus-visible) {
 
 @media (prefers-reduced-motion: reduce) {
   .route-transition-bar--running,
-  .route-transition-caption,
   .product-detail-loading-sweep,
   .product-detail-loading-sparkles span,
   .product-detail-loading-line::after {

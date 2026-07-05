@@ -190,7 +190,7 @@ export default function HomeHero() {
       <section
         aria-roledescription="carousel"
         aria-label="Featured collections"
-        className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-6 pb-12 pt-8 sm:px-10 sm:pb-16 sm:pt-10 lg:grid-cols-2 lg:gap-12 lg:px-12 lg:pb-16 lg:pt-12 xl:min-h-[calc(100vh-7.5rem)]"
+        className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-6 pb-12 pt-8 sm:px-10 sm:pb-16 sm:pt-10 lg:grid-cols-2 lg:gap-12 lg:px-12 lg:pb-16 lg:pt-12 xl:min-h-[calc(100vh-8rem)]"
         onKeyDown={(e) => {
           if (e.key === "ArrowLeft") {
             e.preventDefault();
