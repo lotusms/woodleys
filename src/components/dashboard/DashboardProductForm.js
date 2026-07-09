@@ -80,8 +80,12 @@ export default function DashboardProductForm({ mode, handle }) {
   const [form, setForm] = useState(buildFormState(null));
   const [loading, setLoading] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
+  const [mainPhotoUploading, setMainPhotoUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const hasMainImage = Boolean(form.image.src.trim());
+  const canSubmit = hasMainImage && !mainPhotoUploading && !saving;
 
   useEffect(() => {
     if (mode !== "edit" || !handle) return;
@@ -123,6 +127,15 @@ export default function DashboardProductForm({ mode, handle }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (!form.image.src.trim()) {
+      setError("Add a main product photo before saving.");
+      return;
+    }
+    if (mainPhotoUploading) {
+      setError("Wait for the main photo upload to finish.");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setSuccess("");
@@ -345,10 +358,12 @@ export default function DashboardProductForm({ mode, handle }) {
           </div>
         </DashboardFormSection>
 
-        <DashboardFormSection title="Main photo" light={light}>
+        <DashboardFormSection title="Main photo (required)" light={light}>
           <ProductPhotoField
             src={form.image.src}
             alt={form.image.alt}
+            required
+            onUploadingChange={setMainPhotoUploading}
             onSrcChange={(value) =>
               setForm((prev) => ({
                 ...prev,
@@ -488,11 +503,18 @@ export default function DashboardProductForm({ mode, handle }) {
           </div>
         </DashboardFormSection>
 
-        <div className={`${dash.ordersPanel(light)} flex flex-wrap gap-3`}>
+        <div className={`${dash.ordersPanel(light)} flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center`}>
           <button
             type="submit"
-            disabled={saving}
-            className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
+            disabled={!canSubmit}
+            title={
+              !hasMainImage
+                ? "Add a main product photo to continue"
+                : mainPhotoUploading
+                  ? "Wait for the photo upload to finish"
+                  : undefined
+            }
+            className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
               light
                 ? "bg-amber-500 text-white hover:bg-amber-600"
                 : "bg-amber-400/90 text-slate-950 hover:bg-amber-300"
@@ -500,6 +522,11 @@ export default function DashboardProductForm({ mode, handle }) {
           >
             {saving ? "Saving…" : mode === "create" ? "Create product" : "Save changes"}
           </button>
+          {!hasMainImage ? (
+            <p className={`text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
+              Upload or paste a main photo to enable {mode === "create" ? "Create product" : "Save changes"}.
+            </p>
+          ) : null}
           <Link href="/dashboard/products" className={dash.ordersGhostButton(light)}>
             Cancel
           </Link>

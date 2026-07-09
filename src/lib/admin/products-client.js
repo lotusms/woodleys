@@ -1,6 +1,21 @@
 "use client";
 
 import { getFirebaseAuth } from "@firebase/client";
+import {
+  createDashboardProduct,
+  getDashboardProductByHandle,
+  updateDashboardProduct,
+} from "@/lib/catalog/firestore-products-browser";
+
+/** @param {unknown} error */
+function isAdminServerUnavailable(error) {
+  const msg = error instanceof Error ? error.message : String(error);
+  return (
+    msg.includes("Firebase Admin is not configured") ||
+    msg.includes("default credentials") ||
+    msg.includes("FIREBASE_SERVICE_ACCOUNT")
+  );
+}
 
 async function getAdminToken() {
   const auth = getFirebaseAuth();
@@ -50,29 +65,48 @@ export function fetchAdminProducts() {
 /**
  * @param {Record<string, unknown>} payload
  */
-export function createAdminProduct(payload) {
-  return adminFetch("/api/admin/products", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export async function createAdminProduct(payload) {
+  try {
+    return await adminFetch("/api/admin/products", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    if (!isAdminServerUnavailable(error)) throw error;
+    const product = await createDashboardProduct(payload);
+    return { product };
+  }
 }
 
 /**
  * @param {string} handle
  */
-export function fetchAdminProduct(handle) {
-  return adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`);
+export async function fetchAdminProduct(handle) {
+  try {
+    return await adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`);
+  } catch (error) {
+    if (!isAdminServerUnavailable(error)) throw error;
+    const product = await getDashboardProductByHandle(handle);
+    if (!product) throw new Error("Product not found.");
+    return { product };
+  }
 }
 
 /**
  * @param {string} handle
  * @param {Record<string, unknown>} patch
  */
-export function updateAdminProduct(handle, patch) {
-  return adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`, {
-    method: "PATCH",
-    body: JSON.stringify(patch),
-  });
+export async function updateAdminProduct(handle, patch) {
+  try {
+    return await adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    });
+  } catch (error) {
+    if (!isAdminServerUnavailable(error)) throw error;
+    const product = await updateDashboardProduct(handle, patch);
+    return { product };
+  }
 }
 
 /**

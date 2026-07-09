@@ -43,5 +43,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# FirebasePrivateKey.json
+# Firebase service account keys (never commit)
+.secrets/
+firebase/*-firebase-adminsdk-*.json
+woodleys-3c319-firebase-adminsdk-*.json
 firebase/shamrockartstudio-firebase-adminsdk-fbsvc-f5df15afc4.json

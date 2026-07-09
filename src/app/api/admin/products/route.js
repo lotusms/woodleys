@@ -51,6 +51,15 @@ export async function POST(request) {
     return NextResponse.json({ error: "title is required" }, { status: 400 });
   }
 
+  const imageSrc =
+    typeof body?.image?.src === "string" ? body.image.src.trim() : "";
+  if (!imageSrc) {
+    return NextResponse.json(
+      { error: "A main product image is required." },
+      { status: 400 },
+    );
+  }
+
   const handle =
     typeof body?.handle === "string" && body.handle.trim()
       ? body.handle.trim()

@@ -19,6 +19,8 @@
     "lint": "eslint",
     "set:admin": "node scripts/set-admin-role.mjs",
     "seed:admin": "node scripts/seed-admin-firestore.mjs",
+    "setup:firebase-admin": "node scripts/setup-firebase-admin-env.mjs",
+    "verify:firebase-admin": "node --env-file=.env.local scripts/verify-firebase-admin.mjs",
     "seed:products": "node --env-file=.env.local scripts/seed-catalog-products.mjs",
     "firebase:deploy:firestore:main": "firebase deploy --only firestore:main",
     "shopify:storefront-token": "node scripts/shopify-create-storefront-token.mjs",

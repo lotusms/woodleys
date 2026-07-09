@@ -57,6 +57,8 @@ function ProductImagePreview({ src, alt = "", light, label = "Photo preview" }) 
  *   showRemove?: boolean;
  *   onRemove?: () => void;
  *   storageFolder?: string;
+ *   required?: boolean;
+ *   onUploadingChange?: (uploading: boolean) => void;
  * }} props
  */
 export default function ProductPhotoField({
@@ -72,12 +74,22 @@ export default function ProductPhotoField({
   showRemove = false,
   onRemove,
   storageFolder = "",
+  required = false,
+  onUploadingChange,
 }) {
   const inputId = useId();
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+
+  useEffect(() => {
+    onUploadingChange?.(uploading);
+  }, [uploading, onUploadingChange]);
+
+  useEffect(() => {
+    return () => onUploadingChange?.(false);
+  }, [onUploadingChange]);
 
   const labelClass = `mb-2 block text-sm font-medium ${light ? "text-stone-700" : "text-slate-300"}`;
   const canUpload = Boolean(storageFolder.trim());
@@ -217,13 +229,20 @@ export default function ProductPhotoField({
         ) : null}
 
         <label className="block">
-          <span className={labelClass}>{urlLabel}</span>
+          <span className={labelClass}>
+            {urlLabel}
+            {required ? (
+              <span className={light ? "text-amber-700" : "text-amber-300"}> (required)</span>
+            ) : null}
+          </span>
           <input
             type="url"
             value={src}
             onChange={(e) => onSrcChange(e.target.value)}
             placeholder="https://… or upload above"
             className={inputClassName}
+            required={required}
+            aria-required={required}
           />
         </label>
 
