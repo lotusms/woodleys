@@ -1,0 +1,512 @@
+<hr>
+<h2>title: Woodley&#39;s Jewelers — User Experience Report
+author: Woodley&#39;s Jewelers
+date: July 9, 2026</h2>
+<h1>Woodley&#39;s Jewelers</h1>
+<h2>User Experience Report</h2>
+<p><strong>Document purpose:</strong> Explain the UX rationale behind the Woodley&#39;s Jewelers web application for stakeholders, designers, and developers.</p>
+<p><strong>Date:</strong> July 9, 2026</p>
+<hr>
+<h2>Executive Summary</h2>
+<p>Woodley&#39;s Jewelers is designed as a <strong>luxury jewelry showroom experience on the web</strong>, not a generic e-commerce template. The UX balances three goals:</p>
+<ol>
+<li><strong>Inspire trust and craftsmanship</strong> through editorial layout, warm typography, and appointment-first cues.</li>
+<li><strong>Support real shopping workflows</strong> — browse collections, view product detail, add to cart, and check out.</li>
+<li><strong>Give staff a focused admin workspace</strong> to manage inventory, orders, and storefront content without clutter.</li>
+</ol>
+<p>The app intentionally separates <strong>storefront</strong> (public) and <strong>dashboard</strong> (admin), uses <strong>URL-driven state</strong> where filters matter, and favors <strong>reversible actions</strong> (deactivate) over destructive ones (delete) unless the user explicitly confirms.</p>
+<hr>
+<h2>Product Context</h2>
+<h3>Who Uses the App</h3>
+<table>
+<thead>
+<tr>
+<th>Audience</th>
+<th>Primary Goals</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Shoppers</strong></td>
+<td>Discover jewelry, explore categories, view details, purchase or book a visit</td>
+</tr>
+<tr>
+<td><strong>Members</strong></td>
+<td>Manage account, orders, and profile</td>
+</tr>
+<tr>
+<td><strong>Staff / Admins</strong></td>
+<td>Manage products, orders, featured items, and storefront inventory</td>
+</tr>
+</tbody></table>
+<h3>What Kind of Business This Is</h3>
+<p>Woodley&#39;s is a <strong>high-touch retail jeweler</strong>. The UX reflects that:</p>
+<ul>
+<li>Phone number and <strong>&quot;Book Visit&quot;</strong> are prominent in the header.</li>
+<li>Product pages emphasize imagery, craftsmanship, and category context.</li>
+<li>Admin tools prioritize <strong>inventory control</strong> and <strong>merchandising</strong> (featured products, collections) over bulk operations.</li>
+</ul>
+<hr>
+<h2>Core UX Principles</h2>
+<h3>1. Editorial Luxury, Not Marketplace Clutter</h3>
+<p>Serif headlines, uppercase eyebrows, champagne/ivory surfaces, and full-bleed heroes create a showroom feel. Product grids are curated, not dense warehouse listings.</p>
+<h3>2. Appointment-First Retail</h3>
+<p>The site supports online shopping, but the experience nudges toward in-store relationships: visit CTAs, service categories (repairs, appraisals, sizing), and brand storytelling on the homepage.</p>
+<h3>3. Clear Separation of Contexts</h3>
+<p>Shoppers stay in the storefront shell (header, footer, brand navigation). Admins enter a dedicated dashboard with its own navigation and no storefront chrome — reducing confusion and accidental public exposure of admin UI.</p>
+<h3>4. Reversible Before Permanent</h3>
+<p>Products are <strong>deactivated</strong> rather than deleted by default. Deactivation hides items from the storefront while preserving data. Permanent delete is only available for deactivated products and requires typing <strong>DELETE</strong>.</p>
+<h3>5. State You Can Share and Return To</h3>
+<p>Product filters, categories, search, and sort use URL parameters so staff can bookmark views (e.g. Services → Appraisals, sorted by price) and use browser back/forward without losing context.</p>
+<h3>6. Soft Overlays, Not Blocking Darkness</h3>
+<p>Dialogs and drawers use a <strong>light blur backdrop</strong> so users retain spatial context of the page behind them — appropriate for a refined, non-aggressive interface.</p>
+<hr>
+<h2>Information Architecture</h2>
+<h3>Storefront Structure</h3>
+<pre><code>Home
+├── Shop / Collections (by category)
+│   ├── Engagement &amp; Wedding
+│   ├── Diamonds
+│   ├── Custom Jewelry
+│   ├── Fine Jewelry
+│   ├── Watches
+│   └── Services
+├── Product detail pages
+├── Cart → Checkout
+├── Account (member self-service)
+└── Content (About, Contact, policies)
+</code></pre>
+<p><strong>Rationale:</strong> Navigation mirrors how customers think about jewelry — by occasion, type, and service — not by internal SKUs or database structure.</p>
+<h3>Admin Structure</h3>
+<pre><code>Dashboard
+├── Dashboard (overview)
+├── Orders
+├── Products
+└── Settings
+</code></pre>
+<p><strong>Rationale:</strong> Admin nav stays shallow. Complex product organization lives <strong>inside</strong> the Products page, not in the global sidebar — keeping the main menu scannable.</p>
+<h3>Access Control</h3>
+<ul>
+<li>Unauthenticated users are redirected to sign in.</li>
+<li>Non-admin users are redirected to their account area.</li>
+<li>Dashboard routes are excluded from search indexing.</li>
+</ul>
+<p><strong>Rationale:</strong> Admin is a private workspace; members and admins never compete for the same navigation model.</p>
+<hr>
+<h2>Storefront Experience</h2>
+<h3>Homepage Funnel</h3>
+<p>The homepage follows an intentional editorial sequence:</p>
+<ol>
+<li><strong>Hero</strong> — rotating highlights (engagement, watches, custom work) with pause/play and keyboard support.</li>
+<li><strong>Brand story</strong> — why Woodley&#39;s.</li>
+<li><strong>Showroom highlights</strong> — featured products.</li>
+<li><strong>New releases</strong> — freshness and discovery.</li>
+<li><strong>Featured categories</strong> — entry points into the catalog.</li>
+</ol>
+<p><strong>Rationale:</strong> Lead with emotion and craftsmanship, then merchandise, then breadth — matching how customers shop in a showroom.</p>
+<h3>Collection and Shop Pages</h3>
+<ul>
+<li>Full-bleed editorial heroes with breadcrumbs, eyebrow labels, and serif titles.</li>
+<li>Category pages feel like <strong>magazine sections</strong>, not filter-heavy grids.</li>
+<li>Shop-all combines native catalog with extended browsing where needed.</li>
+</ul>
+<p><strong>Rationale:</strong> Jewelry is visual and categorical; the layout supports browsing and inspiration before comparison.</p>
+<h3>Product Detail Page (PDP)</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>UX Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Layout</strong></td>
+<td>Gallery left; purchase panel sticky on desktop</td>
+</tr>
+<tr>
+<td><strong>Hierarchy</strong></td>
+<td>Title → price → stock → quantity → add to cart</td>
+</tr>
+<tr>
+<td><strong>Feedback</strong></td>
+<td>Brief &quot;added&quot; confirmation after add-to-cart</td>
+</tr>
+<tr>
+<td><strong>Discovery</strong></td>
+<td>Similar products below the fold</td>
+</tr>
+<tr>
+<td><strong>Context</strong></td>
+<td>Breadcrumbs back to shop and category</td>
+</tr>
+</tbody></table>
+<p><strong>Rationale:</strong> On PDP, the decision moment is visual and emotional; sticky purchase controls reduce scroll friction on desktop without crowding the imagery.</p>
+<h3>Cart and Checkout</h3>
+<p><strong>Cart drawer (primary pattern)</strong></p>
+<ul>
+<li>Opens from the header when items exist.</li>
+<li>Wide layout with suggestions (&quot;We think you would like&quot;) beside the bag on larger screens.</li>
+<li>Checkout can start inside the drawer.</li>
+</ul>
+<p><strong>Full cart page</strong></p>
+<ul>
+<li>Fallback for users who prefer a dedicated page or arrive via direct link.</li>
+</ul>
+<p><strong>Checkout</strong></p>
+<ul>
+<li>Handles local catalog and Shopify flows.</li>
+<li>Clearly blocks <strong>mixed carts</strong> with guidance instead of failing silently.</li>
+</ul>
+<p><strong>Rationale:</strong> Drawer keeps shoppers in context; full page supports deep review; explicit mixed-cart messaging prevents checkout frustration.</p>
+<hr>
+<h2>Admin Dashboard Experience</h2>
+<h3>Shell and Navigation</h3>
+<ul>
+<li><strong>Icon sidebar</strong> on smaller screens; labels appear on large screens.</li>
+<li><strong>Solid sidebar background</strong> for clear separation from content.</li>
+<li><strong>Active state</strong> uses warm amber highlighting consistent with brand CTAs.</li>
+<li>Header shows brand, personalized welcome, and logout.</li>
+</ul>
+<p><strong>Rationale:</strong> Admins need fast wayfinding without sacrificing content space on tablets.</p>
+<h3>Products Page — Layout Decisions</h3>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│  Title + subtitle                          [Add product] │
+├─────────────────────────────────────────────────────────┤
+│  Search (full width)              Sort dropdown        │
+├─────────────────────────────────────────────────────────┤
+│  &quot;Showing X products in [category]&quot;                     │
+├──────────────┬──────────────────────────────────────────┤
+│  Categories  │  Active products                         │
+│  (25%)       │  (75%)                                   │
+│              │  ─────────────────                       │
+│              │  Deactivated products                    │
+└──────────────┴──────────────────────────────────────────┘
+</code></pre>
+<h4>Why Title and Search Are Full Width</h4>
+<p>Search and page context apply to <strong>all</strong> products. Keeping them above the split avoids implying search only affects one column.</p>
+<h4>Why Categories Live Inside the Page, Not the Main Sidebar</h4>
+<p>The global sidebar is for <strong>app-level</strong> navigation (Orders, Products, Settings). Category/subcategory browsing is <strong>task-specific</strong> to product management. Nesting it in the Products page:</p>
+<ul>
+<li>Keeps the main nav clean.</li>
+<li>Mirrors how staff think: &quot;I&#39;m on Products → now I&#39;m browsing Services → Appraisals.&quot;</li>
+<li>Allows a dedicated category panel with counts and expandable subcategories.</li>
+</ul>
+<h4>Why the Split Is 25% / 75%</h4>
+<p>The category tree needs enough width for labels and counts without dominating the screen. The product list needs room for thumbnails, metadata, and action buttons.</p>
+<h4>Why Active and Deactivated Are Separate Sections</h4>
+<p>Staff need different mental models:</p>
+<ul>
+<li><strong>Active</strong> = live on the storefront; supports feature, deactivate, edit.</li>
+<li><strong>Deactivated</strong> = hidden but recoverable; supports activate, edit, delete.</li>
+</ul>
+<p>Splitting them prevents accidental actions on the wrong inventory state.</p>
+<h3>Filtering and Sorting</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Location</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Category / subcategory</strong></td>
+<td>Left panel</td>
+<td>URL: <code>?section=services&amp;collection=appraisals</code></td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td>Top bar</td>
+<td>Filters by name or handle</td>
+</tr>
+<tr>
+<td><strong>Sort</strong></td>
+<td>Top bar</td>
+<td>A–Z, Z–A, price, featured, recently added/updated</td>
+</tr>
+</tbody></table>
+<p><strong>Rationale:</strong> Category navigation replaced a redundant &quot;filter by collection&quot; dropdown. One control per job reduces duplicate paths to the same outcome.</p>
+<h3>Product Row Actions</h3>
+<table>
+<thead>
+<tr>
+<th>Product State</th>
+<th>Actions</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Active</strong></td>
+<td>Feature, Deactivate, Edit</td>
+<td>Featured items surface on homepage; deactivate is reversible</td>
+</tr>
+<tr>
+<td><strong>Deactivated</strong></td>
+<td><strong>Activate</strong> (primary), Edit, Delete</td>
+<td>Activate is the most likely next step; delete is destructive</td>
+</tr>
+</tbody></table>
+<h4>Activate as Primary Button</h4>
+<p>Activate uses the same amber primary style as &quot;Add product&quot; because it is the <strong>main positive action</strong> for deactivated inventory.</p>
+<h4>No Feature on Deactivated Products</h4>
+<p>Featured products must be active on the storefront. Hiding Feature on deactivated rows prevents invalid states and confusion.</p>
+<h4>Delete with Type-to-Confirm</h4>
+<p>Delete opens a dialog requiring the user to type <strong>DELETE</strong>. The confirm button stays disabled until the exact word is entered.</p>
+<p><strong>Rationale:</strong> Permanent deletion is irreversible; type-to-confirm is a proven pattern for high-stakes admin actions.</p>
+<hr>
+<h2>Visual Design System</h2>
+<h3>Color and Mood</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Character</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Background</strong></td>
+<td>Warm ivory (<code>#faf8f4</code>)</td>
+</tr>
+<tr>
+<td><strong>Text</strong></td>
+<td>Deep brown-gray</td>
+</tr>
+<tr>
+<td><strong>Accent</strong></td>
+<td>Warm gold for CTAs and highlights</td>
+</tr>
+<tr>
+<td><strong>Destructive</strong></td>
+<td>Red outline/text, same button shape as secondary actions</td>
+</tr>
+</tbody></table>
+<p><strong>Rationale:</strong> Warm neutrals and gold align with jewelry retail — precious, calm, trustworthy — not cold tech-blue SaaS.</p>
+<h3>Typography</h3>
+<ul>
+<li><strong>Playfair Display</strong> — headings and editorial moments.</li>
+<li><strong>Inter</strong> — UI, forms, and body text.</li>
+</ul>
+<p><strong>Rationale:</strong> Serif + sans pairing is common in luxury retail: character for storytelling, clarity for tasks.</p>
+<h3>Buttons</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Primary (amber)</strong></td>
+<td>Add product, Activate, key CTAs</td>
+</tr>
+<tr>
+<td><strong>Ghost / outline</strong></td>
+<td>Edit, Deactivate, secondary actions</td>
+</tr>
+<tr>
+<td><strong>Destructive outline (red)</strong></td>
+<td>Delete — same shape as ghost, different color</td>
+</tr>
+</tbody></table>
+<p><strong>Rationale:</strong> Shape consistency reduces visual noise; color carries meaning.</p>
+<h3>Decorative Language</h3>
+<p>Subtle fabric texture, band highlights, and image scrims reinforce craftsmanship without distracting from product photography.</p>
+<hr>
+<h2>Interaction Patterns</h2>
+<h3>Loading</h3>
+<ul>
+<li><strong>Skeleton layouts</strong> on catalog pages (layout stays stable).</li>
+<li><strong>Text states</strong> in dashboard (&quot;Loading products…&quot;).</li>
+<li><strong>Route transition bar</strong> — thin amber progress under the header on navigation.</li>
+</ul>
+<p><strong>Rationale:</strong> Skeletons and progress bars feel faster than blank screens or spinners alone.</p>
+<h3>Empty States</h3>
+<p>Every major view includes guidance:</p>
+<ul>
+<li>Empty cart → &quot;Browse catalog&quot;</li>
+<li>No active products in filter → &quot;Add your first product&quot;</li>
+<li>No deactivated products → clear empty message</li>
+</ul>
+<p><strong>Rationale:</strong> Empty states are onboarding moments, not dead ends.</p>
+<h3>Feedback</h3>
+<ul>
+<li>Success/error banners in admin with appropriate ARIA roles.</li>
+<li>Inline form validation in checkout.</li>
+<li>Brief add-to-cart confirmation on PDP.</li>
+</ul>
+<hr>
+<h2>Accessibility</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Landmarks</strong></td>
+<td><code>main</code>, <code>nav</code>, dialog roles</td>
+</tr>
+<tr>
+<td><strong>Focus management</strong></td>
+<td>Focus moves to main on route change; focus trap in modals</td>
+</tr>
+<tr>
+<td><strong>Screen reader announcements</strong></td>
+<td>Route title announced on navigation</td>
+</tr>
+<tr>
+<td><strong>Keyboard</strong></td>
+<td>Hero carousel, mobile menu Escape, accordion controls</td>
+</tr>
+<tr>
+<td><strong>Reduced motion</strong></td>
+<td>Animations respect <code>prefers-reduced-motion</code></td>
+</tr>
+<tr>
+<td><strong>Labels</strong></td>
+<td>Product tiles include accessible price in aria-label</td>
+</tr>
+</tbody></table>
+<p><strong>Focus styling note:</strong> Default focus rings are replaced with gold underline, border accent, and background shifts — chosen to match the visual language while still meeting contrast and visibility goals.</p>
+<hr>
+<h2>Responsive Behavior</h2>
+<table>
+<thead>
+<tr>
+<th>Breakpoint Behavior</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Header</strong></td>
+<td>Full nav desktop; hamburger + full-screen menu mobile</td>
+</tr>
+<tr>
+<td><strong>Dashboard sidebar</strong></td>
+<td>Icons only on small screens; labels on large</td>
+</tr>
+<tr>
+<td><strong>Products page</strong></td>
+<td>Category panel stacks above list on mobile; side-by-side on desktop</td>
+</tr>
+<tr>
+<td><strong>PDP</strong></td>
+<td>Single column mobile; sticky purchase panel desktop</td>
+</tr>
+<tr>
+<td><strong>Cart drawer</strong></td>
+<td>Horizontal scroll suggestions on mobile; column layout desktop</td>
+</tr>
+</tbody></table>
+<p>Touch targets (e.g. 44×44px hamburger) support mobile showroom use — customers browsing on phones in-store or at home.</p>
+<hr>
+<h2>Performance as UX</h2>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>User Benefit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ISR / caching (60s)</strong></td>
+<td>Fast page loads; catalog stays reasonably fresh</td>
+</tr>
+<tr>
+<td><strong>Prefetch on product hover</strong></td>
+<td>Snappier navigation to PDP</td>
+</tr>
+<tr>
+<td><strong>Lazy-loaded charts</strong></td>
+<td>Dashboard home loads without blocking</td>
+</tr>
+<tr>
+<td><strong>Cart suggestions load on drawer open</strong></td>
+<td>Faster initial page load</td>
+</tr>
+<tr>
+<td><strong>Client-side filter/sort in admin</strong></td>
+<td>Instant response after products load</td>
+</tr>
+<tr>
+<td><strong>Font display: swap</strong></td>
+<td>Text visible during font load</td>
+</tr>
+</tbody></table>
+<p><strong>Rationale:</strong> Performance choices are framed around <strong>perceived speed</strong> and <strong>stable layouts</strong>, not raw metrics alone.</p>
+<hr>
+<h2>Key UX Decisions — Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>What We Did</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Separate storefront and dashboard</td>
+<td>Two shells, two nav models</td>
+<td>Clear roles, less confusion</td>
+</tr>
+<tr>
+<td>Categories inside Products page</td>
+<td>25/75 split below search</td>
+<td>Task-specific browsing without cluttering global nav</td>
+</tr>
+<tr>
+<td>URL-based filters</td>
+<td>section, collection, q, sort in URL</td>
+<td>Shareable, refresh-safe views</td>
+</tr>
+<tr>
+<td>Sort replaces collection filter</td>
+<td>Single sort dropdown</td>
+<td>Sidebar already handles category filtering</td>
+</tr>
+<tr>
+<td>Deactivate vs delete</td>
+<td>Deactivate default; delete only when deactivated</td>
+<td>Reversible mistakes; delete is explicit</td>
+</tr>
+<tr>
+<td>Type DELETE to confirm</td>
+<td>Modal with typed confirmation</td>
+<td>Prevents accidental data loss</td>
+</tr>
+<tr>
+<td>Activate = primary button</td>
+<td>Amber CTA style</td>
+<td>Highlights the main recovery action</td>
+</tr>
+<tr>
+<td>Delete = red outline button</td>
+<td>Same shape as Edit, red styling</td>
+<td>Consistent layout, clear danger</td>
+</tr>
+<tr>
+<td>No Feature on deactivated</td>
+<td>Hidden on inactive rows</td>
+<td>Prevents invalid featured state</td>
+</tr>
+<tr>
+<td>Faint blur modals</td>
+<td>Light backdrop, not dark overlay</td>
+<td>Premium feel; context preserved</td>
+</tr>
+<tr>
+<td>Appointment CTAs in header</td>
+<td>Book Visit, phone visible</td>
+<td>Matches high-touch retail model</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Stakeholder Talking Points</h2>
+<h3>For Business Owners</h3>
+<p>&quot;We designed the site like a showroom, not a warehouse. Shopping feels editorial; admin tools are simple and safe — staff can hide products without deleting them, and deletion requires explicit confirmation.&quot;</p>
+<h3>For Designers</h3>
+<p>&quot;One visual language across storefront and admin: warm ivory, gold accents, serif headlines. Admin uses the same button hierarchy — primary for constructive actions, outline for secondary, red outline for destructive.&quot;</p>
+<h3>For Developers</h3>
+<p>&quot;State lives in the URL where it matters. Layout splits are intentional: full-width discovery controls, then task-specific columns. Empty, loading, and error states are first-class.&quot;</p>
+<hr>
+<p><em>Woodley&#39;s Jewelers — User Experience Report — July 2026</em></p>

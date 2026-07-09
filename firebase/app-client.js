@@ -1,0 +1,16 @@
+import { getApps, initializeApp } from "firebase/app";
+import { assertFirebaseConfig } from "./config.js";
+
+let appInstance = null;
+
+/** Browser-only Firebase App (Next.js client components / event handlers). */
+export function getFirebaseApp() {
+  if (typeof window === "undefined") {
+    throw new Error("Firebase client is only available in the browser.");
+  }
+  if (appInstance) return appInstance;
+  const config = assertFirebaseConfig();
+  appInstance =
+    getApps().length > 0 ? getApps()[0] : initializeApp(config);
+  return appInstance;
+}

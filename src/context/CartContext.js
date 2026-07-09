@@ -83,7 +83,7 @@ export function CartProvider({ children }) {
   }, [lines, ready]);
 
   useEffect(() => {
-    if (!ready || lines.length === 0) return;
+    if (!ready || lines.length === 0 || !isOpen) return;
     let active = true;
 
     async function syncFromCatalog() {
@@ -157,7 +157,7 @@ export function CartProvider({ children }) {
       active = false;
       cancelDefer();
     };
-  }, [ready, lines.length]);
+  }, [ready, lines.length, isOpen]);
 
   const addItem = useCallback((product, qty = 1) => {
     setLines((prev) => {

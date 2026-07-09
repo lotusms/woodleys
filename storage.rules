@@ -3,9 +3,16 @@ service firebase.storage {
   match /b/{bucket}/o {
     // Public read so Next.js and `<Image src={downloadURL}>` can load studio assets
     // without Firebase Auth. Tighten to `match /public/{path=**}` if you move uploads.
+    // Product images — public read; authenticated dashboard users may upload.
+    match /product/{productFolder}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.resource.size < 12 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
     match /{path=**} {
       allow read: if true;
-      // Only signed-in accounts may upload; lock to admin (e.g. custom claim) when ready.
       allow write: if request.auth != null;
     }
   }

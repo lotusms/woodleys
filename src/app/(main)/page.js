@@ -1,11 +1,29 @@
-import HomeHero from "@/components/home/HomeHero";
+import dynamic from "next/dynamic";
+import HomeHeroPreload from "@/components/home/HomeHeroPreload";
+import HomeHeroStatic from "@/components/home/HomeHeroStatic";
+import HomeHeroClientGate from "@/components/home/HomeHeroClientGate";
 import HomeWhyWoodleys from "@/components/home/HomeWhyWoodleys";
-import HomeShowroomHighlights from "@/components/home/HomeShowroomHighlights";
 import HomeShowroomFallback from "@/components/home/HomeShowroomFallback";
-import HomeFeaturedCategories from "@/components/home/HomeFeaturedCategories";
-import HomeNewReleases from "@/components/home/HomeNewReleases";
 import { defaultMetadata, HOME_FEATURED_PRODUCT_HANDLES, HOME_NEW_RELEASE_HANDLES } from "@/config";
 import { getFeaturedProducts, getNewReleaseProducts } from "@/lib/catalog/products";
+
+const HomeShowroomHighlights = dynamic(
+  () => import("@/components/home/HomeShowroomHighlights"),
+  { loading: () => <HomeShowroomFallback /> },
+);
+
+const HomeNewReleases = dynamic(
+  () => import("@/components/home/HomeNewReleases"),
+  {
+    loading: () => (
+      <div className="min-h-[28rem] bg-ivory py-20 sm:py-24" aria-hidden />
+    ),
+  },
+);
+
+const HomeFeaturedCategories = dynamic(
+  () => import("@/components/home/HomeFeaturedCategories"),
+);
 
 export const revalidate = 60;
 
@@ -22,7 +40,11 @@ export default async function Home() {
 
   return (
     <>
-      <HomeHero />
+      <HomeHeroPreload />
+      <div className="home-hero-root relative">
+        <HomeHeroStatic />
+        <HomeHeroClientGate />
+      </div>
       <HomeWhyWoodleys />
       {featuredProducts.length > 0 ? (
         <HomeShowroomHighlights products={featuredProducts} />

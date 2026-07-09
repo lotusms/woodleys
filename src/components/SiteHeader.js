@@ -1,71 +1,52 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import SiteLogo from "@/components/brand/SiteLogo";
-import AccountAuthMenu from "@/components/auth/AccountAuthMenu";
-import DesktopNavDropdown from "@/components/navigation/DesktopNavDropdown";
 import NavCartLink from "@/components/navigation/NavCartLink";
-import { PopoverGroup } from "@headlessui/react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useInertWhen } from "@/hooks/useInertWhen";
 import {
   mainNav,
   isNavItemActive,
-  desktopNavItemClass,
   orgPhone,
   orgPhoneTel,
   siteHeaderTopOffset,
 } from "@/config";
 
+const AccountAuthMenu = dynamic(
+  () => import("@/components/auth/AccountAuthMenu"),
+  {
+    ssr: false,
+    loading: () => (
+      <span
+        className="inline-flex h-10 shrink-0 items-center rounded-full border border-stone-300/80 bg-white px-2.5 sm:min-w-[6.75rem] sm:px-4"
+        aria-hidden
+      />
+    ),
+  }
+);
+
+const DesktopMainNav = dynamic(
+  () => import("@/components/navigation/DesktopMainNav"),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="flex min-h-6 w-full max-w-xl items-center justify-center gap-5"
+        aria-hidden
+      >
+        {["a", "b", "c", "d", "e", "f"].map((id) => (
+          <span key={id} className="h-3 w-14 rounded-full bg-stone-200/50" />
+        ))}
+      </div>
+    ),
+  },
+);
+
 const MOBILE_MENU_INERT_TARGETS = ["main-content", "site-footer"];
-
-function NavLink({ href, label, prefix, onNavigate, className = "" }) {
-  const pathname = usePathname();
-  const active = isNavItemActive(pathname, { href, prefix });
-
-  return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      aria-current={active ? "page" : undefined}
-      className={`${desktopNavItemClass} ${className} ${
-        active
-          ? "border-warm-gold text-site-fg"
-          : "text-site-secondary hover:border-stone-300 hover:text-site-fg"
-      }`}
-    >
-      <span className="whitespace-nowrap">{label}</span>
-    </Link>
-  );
-}
-
-function DesktopMainNav() {
-  return (
-    <PopoverGroup className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 xl:gap-x-6">
-      {mainNav.map((item) => {
-        const hasDropdown =
-          (item.children && item.children.length > 0) ||
-          (item.groups && item.groups.length > 0);
-
-        if (hasDropdown) {
-          return <DesktopNavDropdown key={item.href} item={item} />;
-        }
-
-        return (
-          <NavLink
-            key={item.href}
-            href={item.href}
-            label={item.label}
-            prefix={item.prefix}
-          />
-        );
-      })}
-      <NavCartLink />
-    </PopoverGroup>
-  );
-}
 
 function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
   const [expanded, setExpanded] = useState(false);

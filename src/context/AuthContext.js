@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { pathNeedsEagerAuth } from "@/lib/auth-init-policy";
+import { pathNeedsEagerAuth, authDeferTimeoutMs } from "@/lib/auth-init-policy";
 import { deferUntilIdle } from "@/lib/defer-until-idle";
 import { clearAdminPortalSession } from "@/lib/auth-routing";
 import {
@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const eagerAuth = pathNeedsEagerAuth(pathname);
+  const authDeferMs = authDeferTimeoutMs(pathname);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(eagerAuth);
   /** True while intentionally signing out — auth gates skip /login so home can load. */
@@ -57,7 +58,7 @@ export function AuthProvider({ children }) {
       try {
         const [{ onAuthStateChanged }, { getFirebaseAuth }] = await Promise.all([
           import("firebase/auth"),
-          import("@firebase/client"),
+          import("@firebase/auth-client"),
         ]);
         if (cancelled) return;
 
@@ -66,15 +67,6 @@ export function AuthProvider({ children }) {
           if (cancelled) return;
           setUser(u);
           setLoading(false);
-          if (u) {
-            deferUntilIdle(() => {
-              if (!cancelled) {
-                void import("@/lib/ensure-user-account").then((mod) =>
-                  mod.ensureUserAccountDocIfMissing(),
-                );
-              }
-            }, { timeout: 5000 });
-          }
         });
       } catch (e) {
         console.error("[auth]", e);
@@ -95,13 +87,13 @@ export function AuthProvider({ children }) {
 
     const cancelDefer = deferUntilIdle(() => {
       void startAuth();
-    }, { timeout: 3500 });
+    }, { timeout: authDeferMs });
     return () => {
       cancelled = true;
       cancelDefer();
       unsub();
     };
-  }, [eagerAuth]);
+  }, [eagerAuth, authDeferMs]);
 
   /* Firestore listener: set loading before first snapshot; snapshot/error callbacks update state. */
   useEffect(() => {
@@ -135,7 +127,7 @@ export function AuthProvider({ children }) {
     const attachListener = async () => {
       const [{ doc, onSnapshot }, { getFirebaseDb }] = await Promise.all([
         import("firebase/firestore"),
-        import("@firebase/client"),
+        import("@firebase/db-client"),
       ]);
       if (cancelled) return;
 
@@ -146,6 +138,13 @@ export function AuthProvider({ children }) {
         ref,
         (snap) => {
           if (!snap.exists()) {
+            deferUntilIdle(() => {
+              if (!cancelled) {
+                void import("@/lib/ensure-user-account").then((mod) =>
+                  mod.ensureUserAccountDocIfMissing(),
+                );
+              }
+            }, { timeout: eagerAuth ? 1000 : 8000 });
             const account = { ...emptyAccount };
             writeCachedUserAccount(user.uid, account);
             setUserAccount({
@@ -177,7 +176,7 @@ export function AuthProvider({ children }) {
     if (cached && !eagerAuth) {
       const cancelDefer = deferUntilIdle(() => {
         void attachListener();
-      }, { timeout: 5000 });
+      }, { timeout: authDeferMs || 10000 });
 
       return () => {
         cancelled = true;
@@ -191,7 +190,7 @@ export function AuthProvider({ children }) {
       cancelled = true;
       unsub();
     };
-  }, [user, eagerAuth]);
+  }, [user, eagerAuth, authDeferMs]);
 
   useEffect(() => {
     if (pathname === "/" || pathname === "") {
@@ -208,7 +207,7 @@ export function AuthProvider({ children }) {
   const signIn = useCallback(async (email, password) => {
     const [{ signInWithEmailAndPassword }, { getFirebaseAuth }] = await Promise.all([
       import("firebase/auth"),
-      import("@firebase/client"),
+      import("@firebase/auth-client"),
     ]);
     const auth = getFirebaseAuth();
     await signInWithEmailAndPassword(auth, email.trim(), password);
@@ -226,7 +225,7 @@ export function AuthProvider({ children }) {
     try {
       const [{ signOut: firebaseSignOut }, { getFirebaseAuth }] = await Promise.all([
         import("firebase/auth"),
-        import("@firebase/client"),
+        import("@firebase/auth-client"),
       ]);
       const auth = getFirebaseAuth();
       await firebaseSignOut(auth);

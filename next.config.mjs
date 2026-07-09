@@ -2,6 +2,16 @@
 const nextConfig = {
   devIndicators: false,
   turbopack: {},
+  experimental: {
+    optimizePackageImports: [
+      "firebase",
+      "@paypal/react-paypal-js",
+      "@headlessui/react",
+      "@heroicons/react/24/outline",
+      "@heroicons/react/24/solid",
+      "@heroicons/react/20/solid",
+    ],
+  },
   webpack: (config, { dev }) => {
     if (dev) {
       config.watchOptions = {
@@ -13,6 +23,8 @@ const nextConfig = {
     return config;
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200],
     contentDispositionType: "inline",
     remotePatterns: [
       {
@@ -24,6 +36,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "cdn.shopify.com",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+        pathname: "/v0/b/**",
       },
     ],
   },

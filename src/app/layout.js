@@ -1,5 +1,4 @@
 import { Inter, Playfair_Display } from "next/font/google";
-import CartProvider from "@/components/CartProvider";
 import FocusOnPageStart from "@/components/a11y/FocusOnPageStart";
 import RouteAnnouncer from "@/components/a11y/RouteAnnouncer";
 import ScrollRestoration from "@/components/ScrollRestoration";
@@ -13,7 +12,7 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
 });
 
 const inter = Inter({
@@ -50,12 +49,10 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning
       >
         <AuthProvider>
-          <CartProvider>
-            <FocusOnPageStart />
-            <RouteAnnouncer />
-            <ScrollRestoration />
-            {children}
-          </CartProvider>
+          <FocusOnPageStart />
+          <RouteAnnouncer />
+          <ScrollRestoration />
+          {children}
         </AuthProvider>
       </body>
     </html>

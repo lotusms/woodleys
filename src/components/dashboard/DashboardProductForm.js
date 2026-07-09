@@ -174,6 +174,11 @@ export default function DashboardProductForm({ mode, handle }) {
 
   const labelClass = `mb-2 block text-sm font-medium ${light ? "text-stone-700" : "text-slate-300"}`;
 
+  const productStorageFolder =
+    mode === "edit"
+      ? String(handle ?? "")
+      : form.handle.trim() || slugifyProductHandle(form.title);
+
   if (loading) {
     return <p className={light ? "text-stone-600" : "text-slate-400"}>Loading product…</p>;
   }
@@ -332,6 +337,7 @@ export default function DashboardProductForm({ mode, handle }) {
             light={light}
             inputClassName={inputClass}
             previewLabel="Main product photo preview"
+            storageFolder={productStorageFolder}
           />
         </DashboardFormSection>
 
@@ -378,6 +384,7 @@ export default function DashboardProductForm({ mode, handle }) {
                 light={light}
                 inputClassName={inputClass}
                 previewLabel={`Additional photo ${index + 1} preview`}
+                storageFolder={productStorageFolder}
                 showRemove
                 onRemove={() =>
                   setForm((prev) => ({

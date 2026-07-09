@@ -123,11 +123,10 @@ export default function HomeShowroomHighlights({ products }) {
                       <CatalogImage
                         src={product.image.src}
                         alt={product.image.alt || product.title}
-                        width={1200}
-                        height={960}
+                        fill
                         sizes="(max-width: 1024px) 100vw, 55vw"
                         priority={active === 0}
-                        className="h-full w-full object-cover"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-xs uppercase tracking-[0.2em] text-site-secondary">
@@ -258,10 +257,9 @@ export default function HomeShowroomHighlights({ products }) {
                       <CatalogImage
                         src={product.image.src}
                         alt=""
-                        width={72}
-                        height={72}
+                        fill
                         sizes="72px"
-                        className={`h-full w-full object-cover transition duration-500 ${
+                        className={`object-cover transition duration-500 ${
                           selected ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                         }`}
                       />

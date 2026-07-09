@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
   Dialog,
   DialogBackdrop,
@@ -13,8 +14,8 @@ import {
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import CheckoutFlow from "@/components/checkout/CheckoutFlow";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import CatalogImage from "@/components/ui/CatalogImage";
 import { useCart } from "@/context/CartContext";
 import {
   cartIsLocalOnly,
@@ -25,6 +26,16 @@ import { lineImageAlt, lineImageSrc, productToCartPayload } from "@/lib/cart-lin
 import { getProductChargeUsd } from "@/lib/catalog/product-pricing";
 import { formatUsd } from "@/lib/money";
 import * as overlayChrome from "@/lib/overlayChrome";
+
+const CheckoutFlow = dynamic(
+  () => import("@/components/checkout/CheckoutFlow"),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="text-sm text-site-secondary">Loading checkout…</p>
+    ),
+  },
+);
 
 /**
  * @param {{
@@ -71,13 +82,15 @@ function CartDrawerSuggestions({ products, cartSlugs, onAdd, onNavigate }) {
                 className="block overflow-hidden bg-champagne"
               >
                 {imageSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <CatalogImage
                     src={imageSrc}
                     alt={
                       (typeof product.image === "object" && product.image?.alt) ||
                       product.title
                     }
+                    width={320}
+                    height={400}
+                    sizes="224px"
                     className="aspect-[4/5] w-full object-cover"
                   />
                 ) : (
@@ -159,7 +172,7 @@ export default function CartDrawer() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || lines.length === 0) return;
     let active = true;
 
     async function loadSuggestions() {
@@ -322,10 +335,12 @@ export default function CartDrawer() {
                             className="relative aspect-square overflow-hidden bg-champagne"
                           >
                             {imageSrc ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <CatalogImage
                                 src={imageSrc}
                                 alt={lineImageAlt(line)}
+                                width={88}
+                                height={88}
+                                sizes="88px"
                                 className="h-full w-full object-cover"
                               />
                             ) : null}

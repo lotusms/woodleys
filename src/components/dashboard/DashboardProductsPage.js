@@ -1,22 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { RiAddLine, RiStarFill, RiStarLine } from "react-icons/ri";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { RiAddLine, RiSearchLine, RiStarFill, RiStarLine } from "react-icons/ri";
 import {
-  listDashboardProducts,
+  deleteDashboardProduct,
   updateDashboardProduct,
 } from "@/lib/catalog/firestore-products-browser";
 import { listAllCatalogCollectionOptions } from "@/lib/catalog/collections-meta";
 import { useAuth } from "@/context/AuthContext";
+import { useDashboardProducts } from "@/context/DashboardProductsContext";
+import DashboardDeleteProductDialog from "@/components/dashboard/DashboardDeleteProductDialog";
+import DashboardProductsCategoryNav from "@/components/dashboard/DashboardProductsCategoryNav";
 import SearchableSelectListbox from "@/components/ui/SearchableSelectListbox";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import {
+  PRODUCTS_CATEGORY_NAV,
+  PRODUCTS_FILTER_ALL,
+  PRODUCTS_SORT_OPTIONS,
+  PRODUCTS_SORT_TITLE_ASC,
+  filterDashboardProducts,
+  normalizeProductsSort,
+  sortDashboardProducts,
+} from "@/lib/dashboard-products-filter";
 import * as dash from "@/lib/dashboardChrome";
 import { isLightThemeId } from "@/theme";
 
-const collectionOptions = listAllCatalogCollectionOptions();
 const collectionTitleByHandle = Object.fromEntries(
-  collectionOptions.map((c) => [c.shopifyHandle, c.title]),
+  listAllCatalogCollectionOptions().map((c) => [c.shopifyHandle, c.title]),
 );
 
 /**
@@ -53,14 +65,16 @@ function StatusBadge({ light, label, tone = "neutral" }) {
  *   product: Record<string, unknown>;
  *   light: boolean;
  *   onToggle: (handle: string, patch: Record<string, unknown>) => Promise<void>;
+ *   onRequestDelete?: (product: Record<string, unknown>) => void;
  *   busy: boolean;
  * }} props
  */
-function ProductRow({ product, light, onToggle, busy }) {
+function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
   const handle = String(product.handle);
   const collections = Array.isArray(product.collectionHandles)
     ? product.collectionHandles
     : [];
+  const isActive = Boolean(product.active);
 
   return (
     <div className={dash.ordersListRow(light)}>
@@ -91,7 +105,7 @@ function ProductRow({ product, light, onToggle, busy }) {
               {product.featured ? (
                 <StatusBadge light={light} label="Featured" tone="gold" />
               ) : null}
-              {product.active ? (
+              {isActive ? (
                 <StatusBadge light={light} label="Active" tone="success" />
               ) : (
                 <StatusBadge light={light} label="Deactivated" tone="muted" />
@@ -111,29 +125,42 @@ function ProductRow({ product, light, onToggle, busy }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() =>
-              onToggle(handle, { featured: !product.featured, active: true })
-            }
-            className={dash.ordersGhostButton(light)}
-            aria-label={product.featured ? "Remove from featured" : "Mark as featured"}
-          >
-            {product.featured ? (
-              <RiStarFill className="mr-1.5 inline size-4 text-amber-600" aria-hidden />
-            ) : (
-              <RiStarLine className="mr-1.5 inline size-4" aria-hidden />
-            )}
-            {product.featured ? "Unfeature" : "Feature"}
-          </button>
+          {isActive ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() =>
+                onToggle(handle, { featured: !product.featured, active: true })
+              }
+              className={dash.ordersGhostButton(light)}
+              aria-label={
+                product.featured ? "Remove from featured" : "Mark as featured"
+              }
+            >
+              {product.featured ? (
+                <RiStarFill
+                  className="mr-1.5 inline size-4 text-amber-600"
+                  aria-hidden
+                />
+              ) : (
+                <RiStarLine className="mr-1.5 inline size-4" aria-hidden />
+              )}
+              {product.featured ? "Unfeature" : "Feature"}
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={busy}
             onClick={() => onToggle(handle, { active: !product.active })}
-            className={dash.ordersGhostButton(light)}
+            className={
+              isActive
+                ? dash.ordersGhostButton(light)
+                : light
+                  ? "rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-60"
+                  : "rounded-xl bg-amber-400/90 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-300 disabled:opacity-60"
+            }
           >
-            {product.active ? "Deactivate" : "Activate"}
+            {isActive ? "Deactivate" : "Activate"}
           </button>
           <Link
             href={`/dashboard/products/${encodeURIComponent(handle)}`}
@@ -141,41 +168,63 @@ function ProductRow({ product, light, onToggle, busy }) {
           >
             Edit
           </Link>
+          {!isActive && onRequestDelete ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onRequestDelete(product)}
+              className={
+                light
+                  ? "rounded-xl border border-red-400/70 bg-white px-4 py-2.5 text-sm font-medium text-red-700 transition hover:border-red-500 hover:bg-red-50 disabled:opacity-60"
+                  : "rounded-xl border border-red-500/45 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-950/40 disabled:opacity-60"
+              }
+            >
+              Delete
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
 
-export default function DashboardProductsPage() {
+function buildProductsPageHref({ section, collection, query, sort }) {
+  const params = new URLSearchParams();
+  if (section && section !== PRODUCTS_FILTER_ALL) {
+    params.set("section", section);
+  }
+  if (collection && collection !== PRODUCTS_FILTER_ALL) {
+    params.set("collection", collection);
+  }
+  if (query?.trim()) {
+    params.set("q", query.trim());
+  }
+  const normalizedSort = normalizeProductsSort(sort);
+  if (normalizedSort !== PRODUCTS_SORT_TITLE_ASC) {
+    params.set("sort", normalizedSort);
+  }
+  const qs = params.toString();
+  return qs ? `/dashboard/products?${qs}` : "/dashboard/products";
+}
+
+function DashboardProductsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const { user, loading: authLoading, accountLoading, isAdmin } = useAuth();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { products, loading, replaceProduct, removeProduct } =
+    useDashboardProducts();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [busyHandle, setBusyHandle] = useState("");
-  const [collectionFilter, setCollectionFilter] = useState("all");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const items = await listDashboardProducts();
-      setProducts(items);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load products.");
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (authLoading || accountLoading || !user || !isAdmin) return;
-    void load();
-  }, [authLoading, accountLoading, user, isAdmin, load]);
+  const activeSection = searchParams.get("section") || PRODUCTS_FILTER_ALL;
+  const activeCollection = searchParams.get("collection") || PRODUCTS_FILTER_ALL;
+  const searchQuery = searchParams.get("q") || "";
+  const sortKey = normalizeProductsSort(searchParams.get("sort"));
 
   const handleToggle = useCallback(
     async (handle, patch) => {
@@ -184,9 +233,7 @@ export default function DashboardProductsPage() {
       setSuccess("");
       try {
         const data = await updateDashboardProduct(handle, patch);
-        setProducts((prev) =>
-          prev.map((p) => (p.handle === handle ? data : p)),
-        );
+        replaceProduct(data);
         setSuccess("Product updated.");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not update product.");
@@ -194,34 +241,61 @@ export default function DashboardProductsPage() {
         setBusyHandle("");
       }
     },
-    [],
+    [replaceProduct],
   );
 
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteTarget?.handle) return;
+    const handle = String(deleteTarget.handle);
+    setDeleting(true);
+    setBusyHandle(handle);
+    setError("");
+    setSuccess("");
+    try {
+      await deleteDashboardProduct(handle);
+      removeProduct(handle);
+      setDeleteTarget(null);
+      setSuccess("Product deleted permanently.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not delete product.");
+    } finally {
+      setDeleting(false);
+      setBusyHandle("");
+    }
+  }, [deleteTarget, removeProduct]);
+
   const filtered = useMemo(() => {
-    if (collectionFilter === "all") return products;
-    return products.filter((p) =>
-      Array.isArray(p.collectionHandles)
-        ? p.collectionHandles.includes(collectionFilter)
-        : false,
+    const matched = filterDashboardProducts(products, {
+      section: activeSection,
+      collection: activeCollection,
+      query: searchQuery,
+    });
+    return sortDashboardProducts(matched, sortKey);
+  }, [products, activeSection, activeCollection, searchQuery, sortKey]);
+
+  const activeCategoryLabel =
+    activeCollection !== PRODUCTS_FILTER_ALL
+      ? (collectionTitleByHandle[activeCollection] ?? activeCollection)
+      : (PRODUCTS_CATEGORY_NAV.find((item) => item.key === activeSection)?.label ??
+        "All products");
+
+  function updateFilters({ section, collection, query, sort }) {
+    router.push(
+      buildProductsPageHref({
+        section: section ?? activeSection,
+        collection: collection ?? activeCollection,
+        query: query ?? searchQuery,
+        sort: sort ?? sortKey,
+      }),
     );
-  }, [products, collectionFilter]);
+  }
 
   const activeProducts = filtered.filter((p) => p.active);
   const inactiveProducts = filtered.filter((p) => !p.active);
-
-  const collectionFilterOptions = useMemo(
-    () => [
-      { value: "all", label: "All collections" },
-      ...collectionOptions.map((option) => ({
-        value: option.shopifyHandle,
-        label: option.title,
-      })),
-    ],
-    [],
-  );
+  const pageLoading = authLoading || accountLoading || loading;
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className={dash.dashboardPageTitle(light)}>Products</h1>
@@ -254,75 +328,158 @@ export default function DashboardProductsPage() {
         </p>
       ) : null}
 
-      <div className="mb-8 flex justify-end">
-        <SearchableSelectListbox
-          id="products-collection-filter"
-          label="Filter by collection"
-          inlineLabel
-          light={light}
-          value={collectionFilter}
-          onChange={setCollectionFilter}
-          options={collectionFilterOptions}
-          searchPlaceholder="Search collections…"
-          placeholder="All collections"
-          anchor={{ to: "bottom end", gap: 8, padding: 12 }}
-        />
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="w-full sm:max-w-md">
+          <label
+            htmlFor="products-search"
+            className={`mb-1.5 block text-xs font-medium uppercase tracking-wider ${light ? "text-stone-600" : "text-slate-500"}`}
+          >
+            Search products
+          </label>
+          <div className="relative">
+            <RiSearchLine
+              className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${light ? "text-stone-500" : "text-slate-500"}`}
+              aria-hidden
+            />
+            <input
+              id="products-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) =>
+                updateFilters({
+                  query: event.target.value,
+                })
+              }
+              placeholder="Search by product name or handle…"
+              autoComplete="off"
+              className={dash.ordersSearchInput(light)}
+            />
+          </div>
+        </div>
+
+        <div className="w-full sm:w-72">
+          <SearchableSelectListbox
+            id="products-sort"
+            label="Sort by"
+            inlineLabel
+            light={light}
+            value={sortKey}
+            onChange={(nextSort) => updateFilters({ sort: nextSort })}
+            options={PRODUCTS_SORT_OPTIONS}
+            searchPlaceholder="Search sort options…"
+            placeholder="A to Z"
+            anchor={{ to: "bottom end", gap: 8, padding: 12 }}
+          />
+        </div>
       </div>
 
-      {authLoading || accountLoading || loading ? (
-        <p className={light ? "text-stone-600" : "text-slate-400"}>Loading products…</p>
-      ) : (
-        <>
-          <section>
-            <h2 className={dash.dashboardStatHeading(light)}>Active products</h2>
-            <div className="mt-4 space-y-3">
-              {activeProducts.length > 0 ? (
-                activeProducts.map((product) => (
-                  <ProductRow
-                    key={String(product.handle)}
-                    product={product}
-                    light={light}
-                    onToggle={handleToggle}
-                    busy={busyHandle === product.handle}
-                  />
-                ))
-              ) : (
-                <div className={dash.ordersEmptyPanel(light)}>
-                  <p>No active products in this view.</p>
-                  <Link href="/dashboard/products/new" className={dash.ordersLinkAccent(light)}>
-                    Add your first product
-                  </Link>
-                </div>
-              )}
-            </div>
-          </section>
+      <p className={`mb-6 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
+        Showing {filtered.length} product{filtered.length === 1 ? "" : "s"} in{" "}
+        <span className="font-medium text-site-fg">{activeCategoryLabel}</span>
+        {searchQuery.trim() ? (
+          <>
+            {" "}
+            matching &ldquo;{searchQuery.trim()}&rdquo;
+          </>
+        ) : null}
+      </p>
 
-          <section className="mt-10">
-            <h2 className={dash.dashboardStatHeading(light)}>Deactivated products</h2>
-            <p className={`mt-2 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
-              Hidden from collection pages and the homepage slider, but kept in
-              Firestore so you can activate them again.
-            </p>
-            <div className="mt-4 space-y-3">
-              {inactiveProducts.length > 0 ? (
-                inactiveProducts.map((product) => (
-                  <ProductRow
-                    key={String(product.handle)}
-                    product={product}
-                    light={light}
-                    onToggle={handleToggle}
-                    busy={busyHandle === product.handle}
-                  />
-                ))
-              ) : (
-                <div className={dash.ordersEmptyPanel(light)}>
-                  <p>No deactivated products.</p>
-                </div>
-              )}
-            </div>
-          </section>
-        </>
+      {!user || !isAdmin ? null : pageLoading ? (
+        <p className={light ? "text-stone-600" : "text-slate-400"}>
+          Loading products…
+        </p>
+      ) : (
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)] lg:gap-8 lg:items-start">
+          <aside className="mb-8 lg:mb-0 lg:sticky lg:top-6">
+            <DashboardProductsCategoryNav light={light} />
+          </aside>
+
+          <div className="min-w-0">
+            <section>
+              <h2 className={dash.dashboardStatHeading(light)}>
+                Active products
+              </h2>
+              <div className="mt-4 space-y-3">
+                {activeProducts.length > 0 ? (
+                  activeProducts.map((product) => (
+                    <ProductRow
+                      key={String(product.handle)}
+                      product={product}
+                      light={light}
+                      onToggle={handleToggle}
+                      busy={busyHandle === product.handle}
+                    />
+                  ))
+                ) : (
+                  <div className={dash.ordersEmptyPanel(light)}>
+                    <p>No active products in this view.</p>
+                    <Link
+                      href="/dashboard/products/new"
+                      className={dash.ordersLinkAccent(light)}
+                    >
+                      Add your first product
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="mt-10">
+              <h2 className={dash.dashboardStatHeading(light)}>
+                Deactivated products
+              </h2>
+              <p
+                className={`mt-2 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}
+              >
+                Hidden from collection pages and the homepage slider, but kept
+                in Firestore so you can activate them again.
+              </p>
+              <div className="mt-4 space-y-3">
+                {inactiveProducts.length > 0 ? (
+                  inactiveProducts.map((product) => (
+                    <ProductRow
+                      key={String(product.handle)}
+                      product={product}
+                      light={light}
+                      onToggle={handleToggle}
+                      onRequestDelete={setDeleteTarget}
+                      busy={busyHandle === product.handle}
+                    />
+                  ))
+                ) : (
+                  <div className={dash.ordersEmptyPanel(light)}>
+                    <p>No deactivated products.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
       )}
+
+      <DashboardDeleteProductDialog
+        open={Boolean(deleteTarget)}
+        productTitle={String(deleteTarget?.title ?? "")}
+        busy={deleting}
+        onClose={() => {
+          if (!deleting) setDeleteTarget(null);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
+  );
+}
+
+export default function DashboardProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-7xl">
+          <p className="text-sm text-stone-600">Loading products…</p>
+        </div>
+      }
+    >
+      <DashboardProductsPageContent />
+    </Suspense>
   );
 }

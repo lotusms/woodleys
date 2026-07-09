@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { DashboardProductsProvider } from "@/context/DashboardProductsContext";
 import { useAuth } from "@/context/AuthContext";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
@@ -100,14 +101,16 @@ export default function DashboardAuthGate({ children }) {
   }
 
   return (
-    <DashboardShell>
-      {accountLoading ? (
-        <GateMessage>Verifying access…</GateMessage>
-      ) : userAccount.status === "ready" && !isAdmin ? (
-        <GateMessage>Opening your account…</GateMessage>
-      ) : (
-        children
-      )}
-    </DashboardShell>
+    <DashboardProductsProvider>
+      <DashboardShell>
+        {accountLoading ? (
+          <GateMessage>Verifying access…</GateMessage>
+        ) : userAccount.status === "ready" && !isAdmin ? (
+          <GateMessage>Opening your account…</GateMessage>
+        ) : (
+          children
+        )}
+      </DashboardShell>
+    </DashboardProductsProvider>
   );
 }

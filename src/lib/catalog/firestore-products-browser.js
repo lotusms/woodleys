@@ -2,6 +2,7 @@
 
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -169,4 +170,23 @@ export async function createDashboardProduct(input) {
   await setDoc(ref, docData);
 
   return firestoreDocToProductDetail(docData, handle, { includeInactive: true });
+}
+
+/**
+ * Permanently deletes a product document from Firestore.
+ * @param {string} handle
+ */
+export async function deleteDashboardProduct(handle) {
+  if (!handle) {
+    throw new Error("A product handle is required.");
+  }
+
+  const db = getFirebaseDb();
+  const ref = doc(db, PRODUCTS_COLLECTION, handle);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("Product not found.");
+  }
+
+  await deleteDoc(ref);
 }

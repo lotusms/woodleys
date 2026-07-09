@@ -8,60 +8,14 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import SectionBandHighlightEdge from "@/components/ui/SectionBandHighlightEdge";
 import CatalogImage from "@/components/ui/CatalogImage";
 import { orgEstablished, orgLocation, siteHeaderProgressBarTopClass } from "@/config";
-import { BULOVA_CATEGORY_IMAGE } from "@/lib/catalog/bulova-sample-products.js";
+import { HOME_HERO_SLIDES } from "@/lib/home-hero-slides";
+import { normalizeCatalogImageSrc } from "@/lib/catalog/normalize-image-src";
+import { deferUntilIdle } from "@/lib/defer-until-idle";
 
 const ROTATE_MS = 10000;
 const SLIDE_FADE_MS = 900;
 
-const SLIDES = [
-  {
-    id: "engagement",
-    image:
-      "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_1200x.jpg?v=1639025505",
-    imageAlt: "Engagement ring with brilliant diamond in an elegant setting",
-    heading: "A ring worthy of the moment you say yes",
-    body: `Your engagement ring marks a promise you will carry for a lifetime. We help you choose a setting and stone with patience and care, so the ring you wear feels as meaningful as the marriage it represents.`,
-    primaryLabel: "Engagement & Wedding",
-    primaryHref: "/engagement-wedding",
-    secondaryLabel: "Explore diamonds",
-    secondaryHref: "/diamonds",
-    sectionBg:
-      "bg-[linear-gradient(118deg,#f3e6dc_0%,#f8f1ea_42%,#faf8f4_100%)]",
-    sectionGlow:
-      "bg-[radial-gradient(ellipse_90%_80%_at_15%_50%,rgba(228,196,168,0.35),transparent_55%)]",
-  },
-  {
-    id: "watches",
-    image: BULOVA_CATEGORY_IMAGE.src,
-    imageAlt: BULOVA_CATEGORY_IMAGE.alt,
-    heading: "Precision you feel on your wrist every day",
-    body: `From Bulova classics to sport and dress styles, a fine watch balances craftsmanship with everyday wear. Explore authorized timepieces chosen for reliability, design, and the quiet confidence of a name trusted for generations.`,
-    primaryLabel: "Shop watches",
-    primaryHref: "/watches",
-    secondaryLabel: "View all collections",
-    secondaryHref: "/shop-all",
-    sectionBg:
-      "bg-[linear-gradient(118deg,#e6eaee_0%,#f0eeea_44%,#faf8f4_100%)]",
-    sectionGlow:
-      "bg-[radial-gradient(ellipse_90%_80%_at_15%_50%,rgba(176,190,204,0.28),transparent_55%)]",
-  },
-  {
-    id: "custom",
-    image:
-      "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800.jpg?v=1639027342",
-    imageAlt: "Jeweler shaping a custom ring at the bench",
-    heading: "Jewelry shaped around you alone",
-    body: `Some stories deserve a piece that exists nowhere else. Work with our bench jewelers to design jewelry made for your taste, your milestones, and the moments only you can name, from first sketch to finished heirloom.`,
-    primaryLabel: "Custom jewelry",
-    primaryHref: "/custom-jewelry",
-    secondaryLabel: "Book a visit",
-    secondaryHref: "/contact",
-    sectionBg:
-      "bg-[linear-gradient(118deg,#ebe2cf_0%,#f3ecdf_46%,#faf8f4_100%)]",
-    sectionGlow:
-      "bg-[radial-gradient(ellipse_90%_80%_at_15%_50%,rgba(196,165,116,0.26),transparent_55%)]",
-  },
-];
+const SLIDES = HOME_HERO_SLIDES;
 
 export default function HomeHero() {
   const regionId = useId();
@@ -70,12 +24,18 @@ export default function HomeHero() {
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [progressVisible, setProgressVisible] = useState(true);
+  const [enhanced, setEnhanced] = useState(false);
+
+  useEffect(() => {
+    return deferUntilIdle(() => setEnhanced(true), { timeout: 2500 });
+  }, []);
 
   useEffect(() => {
     setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   useEffect(() => {
+    if (!enhanced) return undefined;
     const node = heroRef.current;
     if (!node) return undefined;
 
@@ -98,7 +58,7 @@ export default function HomeHero() {
       xlQuery.removeEventListener("change", attach);
       observer?.disconnect();
     };
-  }, []);
+  }, [enhanced]);
 
   const fadeMs = reduceMotion ? 0 : SLIDE_FADE_MS;
 
@@ -110,15 +70,31 @@ export default function HomeHero() {
   const goPrev = useCallback(() => goTo(index - 1), [goTo, index]);
 
   useEffect(() => {
-    if (paused || reduceMotion || SLIDES.length <= 1) return undefined;
+    if (!enhanced || paused || reduceMotion || SLIDES.length <= 1) return undefined;
     const id = window.setInterval(goNext, ROTATE_MS);
     return () => window.clearInterval(id);
-  }, [paused, reduceMotion, goNext]);
+  }, [enhanced, paused, reduceMotion, goNext]);
+
+  useEffect(() => {
+    if (!enhanced || reduceMotion || SLIDES.length <= 1) return;
+    const nextIndex = (index + 1) % SLIDES.length;
+    const href = normalizeCatalogImageSrc(SLIDES[nextIndex].image);
+    const selector = `link[data-hero-prefetch="${SLIDES[nextIndex].id}"]`;
+    if (document.querySelector(selector)) return;
+
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "image";
+    link.href = href;
+    link.setAttribute("data-hero-prefetch", SLIDES[nextIndex].id);
+    document.head.appendChild(link);
+  }, [enhanced, index, reduceMotion]);
 
   const current = SLIDES[index];
 
   return (
     <>
+      {enhanced ? (
       <div
         className={`fixed inset-x-0 z-[111] h-[2px] w-screen max-w-none overflow-hidden bg-stone-400/15 ${siteHeaderProgressBarTopClass} transition-opacity duration-300 ${
           progressVisible ? "opacity-100" : "pointer-events-none opacity-0"
@@ -145,6 +121,7 @@ export default function HomeHero() {
           }
         />
       </div>
+      ) : null}
 
       <div className="sr-only" role="tablist" aria-label="Hero slides">
         {SLIDES.map((slide, idx) => (
@@ -165,6 +142,7 @@ export default function HomeHero() {
 
       <div
         ref={heroRef}
+        data-hero-interactive
         className="relative left-1/2 z-10 w-screen max-w-[100vw] -translate-x-1/2"
       >
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
@@ -236,7 +214,7 @@ export default function HomeHero() {
             ))}
           </div>
 
-          <div className="relative mt-8 flex w-fit max-w-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <div className="relative mt-8 flex w-full max-w-full flex-col gap-3 sm:min-h-11 sm:flex-row sm:items-center sm:gap-2">
             <div className="relative grid">
             {SLIDES.map((slide, idx) => (
               <div
@@ -259,8 +237,12 @@ export default function HomeHero() {
             ))}
             </div>
 
-            {!reduceMotion && SLIDES.length > 1 ? (
-              <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            {SLIDES.length > 1 ? (
+              <div
+                className={`hidden shrink-0 items-center gap-2 sm:flex motion-reduce:hidden sm:min-w-[8.75rem] ${
+                  enhanced && !reduceMotion ? "" : "invisible"
+                }`}
+              >
                 <SecondaryButton
                   type="button"
                   onClick={goPrev}
@@ -306,17 +288,18 @@ export default function HomeHero() {
                 aria-hidden={idx !== index}
                 style={{ transitionDuration: `${fadeMs}ms` }}
               >
-                {idx === index ? (
+                {index === idx ? (
                   <CatalogImage
                     src={slide.image}
                     alt={slide.imageAlt}
-                    width={960}
-                    height={1200}
+                    fill
                     sizes="(max-width: 1024px) 100vw, 42vw"
-                    priority={index === 0}
-                    className="h-full w-full object-cover"
+                    priority={idx === 0}
+                    className="object-cover"
                   />
-                ) : null}
+                ) : (
+                  <div className="h-full w-full bg-champagne" aria-hidden />
+                )}
               </div>
             ))}
           </div>

@@ -1,14 +1,18 @@
-"use client";
-
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { getFirebaseAuth, getFirebaseDb } from "@firebase/client";
-
 /**
  * Ensures `useraccounts/{uid}` exists for the signed-in user (Firestore client write).
- * Avoids Cloud Function / CORS issues on localhost when Functions are not deployed.
  */
 export async function ensureUserAccountDocIfMissing() {
   try {
+    const [
+      { doc, getDoc, serverTimestamp, setDoc },
+      { getFirebaseAuth },
+      { getFirebaseDb },
+    ] = await Promise.all([
+      import("firebase/firestore"),
+      import("@firebase/auth-client"),
+      import("@firebase/db-client"),
+    ]);
+
     const auth = getFirebaseAuth();
     const u = auth.currentUser;
     if (!u) return;

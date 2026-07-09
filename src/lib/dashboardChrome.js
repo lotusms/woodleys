@@ -11,8 +11,8 @@ export function dashboardRoot(light) {
 
 export function dashboardAside(light) {
   return light
-    ? "relative z-10 flex w-[4.25rem] shrink-0 flex-col border-r border-stone-300/60 bg-white/92 px-2 py-6 backdrop-blur-md lg:w-56 lg:px-4 lg:py-8"
-    : "relative z-10 flex w-[4.25rem] shrink-0 flex-col border-r border-white/[0.06] bg-slate-950/85 px-2 py-6 backdrop-blur-md supports-[backdrop-filter]:bg-slate-950/75 lg:w-56 lg:px-4 lg:py-8";
+    ? "relative z-10 flex w-[4.25rem] shrink-0 flex-col overflow-y-auto border-r border-stone-300/70 bg-stone-50 px-2 py-6 shadow-[inset_-1px_0_0_rgba(255,255,255,0.65)] lg:w-56 lg:px-4 lg:py-8"
+    : "relative z-10 flex w-[4.25rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.08] bg-slate-900 px-2 py-6 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.45)] lg:w-56 lg:px-4 lg:py-8";
 }
 
 export function dashboardNavLabel(light) {

@@ -6,6 +6,12 @@
   "engines": {
     "node": ">=20.9.0"
   },
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 111",
+    "safari >= 16.4"
+  ],
   "scripts": {
     "dev": "open http://localhost:3002 >/dev/null 2>&1 || true; WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true next dev --port 3002 --webpack",
     "build": "next build",

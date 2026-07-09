@@ -14,3 +14,10 @@ export function pathNeedsEagerAuth(pathname) {
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 }
+
+/** @param {string} pathname */
+export function authDeferTimeoutMs(pathname) {
+  if (pathNeedsEagerAuth(pathname)) return 0;
+  if (pathname === "/" || pathname === "") return 10000;
+  return 6000;
+}

@@ -1,10 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CheckoutAuthSection from "@/components/checkout/CheckoutAuthSection";
 import AddressLine1Autocomplete from "@/components/checkout/AddressLine1Autocomplete";
-import CheckoutPayPalSection from "@/components/checkout/CheckoutPayPalSection";
 import Card from "@/components/ui/Card";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
@@ -28,8 +27,17 @@ import {
   shippingForSubtotal,
 } from "@/lib/checkout";
 import { formatUsd } from "@/lib/money";
-import { saveOrderToFirestore } from "@/lib/orders-store";
 import * as overlayChrome from "@/lib/overlayChrome";
+
+const CheckoutAuthSection = dynamic(
+  () => import("@/components/checkout/CheckoutAuthSection"),
+  { ssr: false },
+);
+
+const CheckoutPayPalSection = dynamic(
+  () => import("@/components/checkout/CheckoutPayPalSection"),
+  { ssr: false },
+);
 
 /**
  * @param {{
@@ -151,6 +159,7 @@ export default function CheckoutFlow({
       };
 
       try {
+        const { saveOrderToFirestore } = await import("@/lib/orders-store");
         await saveOrderToFirestore(savedOrder);
       } catch {
         /* checkout can still complete if Firestore is temporarily unavailable */

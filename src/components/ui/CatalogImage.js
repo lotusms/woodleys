@@ -12,6 +12,7 @@ import { normalizeCatalogImageSrc } from "@/lib/catalog/normalize-image-src";
  *   height?: number;
  *   sizes?: string;
  *   priority?: boolean;
+ *   loading?: "lazy" | "eager";
  *   className?: string;
  *   style?: React.CSSProperties;
  * }} props
@@ -24,6 +25,7 @@ export default function CatalogImage({
   height,
   sizes,
   priority = false,
+  loading,
   className = "",
   style,
 }) {
@@ -37,6 +39,7 @@ export default function CatalogImage({
         fill
         sizes={sizes ?? "(max-width: 1024px) 100vw, 50vw"}
         priority={priority}
+        loading={loading}
         quality={80}
         className={className}
         style={style}
@@ -55,6 +58,7 @@ export default function CatalogImage({
       height={resolvedHeight}
       sizes={sizes}
       priority={priority}
+      loading={loading}
       quality={80}
       className={className}
       style={{
