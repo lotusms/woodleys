@@ -4,22 +4,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  createDashboardProduct,
-  getDashboardProductByHandle,
-  updateDashboardProduct,
-} from "@/lib/catalog/firestore-products-browser";
+  createAdminProduct,
+  fetchAdminProduct,
+  updateAdminProduct,
+} from "@/lib/admin/products-client";
 import { slugifyProductHandle } from "@/lib/catalog/product-handle";
 import { normalizeProductPricingForSave, resolveProductPricing } from "@/lib/catalog/product-pricing";
-import { listAllCatalogCollectionOptions } from "@/lib/catalog/collections-meta";
+import {
+  filterAssignableCollectionHandles,
+} from "@/lib/catalog/collections-meta";
+import { CATALOG_SECTIONS } from "@/lib/catalog/categories";
 import ProductPhotoField from "@/components/dashboard/ProductPhotoField";
 import DashboardFormSection from "@/components/dashboard/DashboardFormSection";
 import Checkbox from "@/components/ui/Checkbox";
 import { useAuth } from "@/context/AuthContext";
+import { useDashboardProducts } from "@/context/DashboardProductsContext";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
 import { isLightThemeId } from "@/theme";
 
-const collectionOptions = listAllCatalogCollectionOptions();
+const catalogSections = Object.entries(CATALOG_SECTIONS);
 
 const emptySpec = () => ({ label: "", value: "" });
 const emptyImage = () => ({ src: "", alt: "" });
@@ -40,9 +44,9 @@ function buildFormState(product) {
     quantity: String(product?.quantity ?? "0"),
     active: product?.active !== false,
     featured: Boolean(product?.featured),
-    collectionHandles: Array.isArray(product?.collectionHandles)
-      ? [...product.collectionHandles]
-      : [],
+    collectionHandles: filterAssignableCollectionHandles(
+      Array.isArray(product?.collectionHandles) ? product.collectionHandles : [],
+    ),
     image: product?.image?.src
       ? { src: String(product.image.src), alt: String(product.image.alt ?? "") }
       : emptyImage(),
@@ -72,6 +76,7 @@ export default function DashboardProductForm({ mode, handle }) {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const { user, loading: authLoading, accountLoading, isAdmin } = useAuth();
+  const { refresh, addProduct, replaceProduct } = useDashboardProducts();
   const [form, setForm] = useState(buildFormState(null));
   const [loading, setLoading] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
@@ -87,7 +92,7 @@ export default function DashboardProductForm({ mode, handle }) {
       setLoading(true);
       setError("");
       try {
-        const product = await getDashboardProductByHandle(handle);
+        const { product } = await fetchAdminProduct(handle);
         if (!cancelled) setForm(buildFormState(product));
       } catch (e) {
         if (!cancelled) {
@@ -137,7 +142,7 @@ export default function DashboardProductForm({ mode, handle }) {
       quantity: Math.max(0, Number.parseInt(form.quantity || "0", 10) || 0),
       active: form.active,
       featured: form.featured,
-      collectionHandles: form.collectionHandles,
+      collectionHandles: filterAssignableCollectionHandles(form.collectionHandles),
       image: form.image.src.trim()
         ? {
             src: form.image.src.trim(),
@@ -155,13 +160,17 @@ export default function DashboardProductForm({ mode, handle }) {
 
     try {
       if (mode === "create") {
-        const product = await createDashboardProduct(payload);
+        const { product } = await createAdminProduct(payload);
+        addProduct(product);
+        void refresh();
         router.push(`/dashboard/products/${encodeURIComponent(product.handle)}`);
         return;
       }
 
-      await updateDashboardProduct(handle, payload);
-      setSuccess("Product saved. Public product pages will update shortly.");
+      const { product } = await updateAdminProduct(handle, payload);
+      replaceProduct(product);
+      void refresh();
+      setSuccess("Product saved. Storefront collection pages will update shortly.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save product.");
     } finally {
@@ -304,16 +313,34 @@ export default function DashboardProductForm({ mode, handle }) {
         </DashboardFormSection>
 
         <DashboardFormSection title="Collections" light={light}>
-          <div className="grid max-h-56 gap-2 overflow-y-auto sm:grid-cols-2">
-            {collectionOptions.map((option) => (
-              <Checkbox
-                key={option.shopifyHandle}
-                variant="card"
-                checked={form.collectionHandles.includes(option.shopifyHandle)}
-                onChange={() => toggleCollection(option.shopifyHandle)}
-                label={option.title}
-                light={light}
-              />
+          <p className={`mb-4 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
+            Choose one or more sub-categories. Parent sections (for example
+            Engagement &amp; Wedding) are labels only — products are listed under
+            the specific styles below.
+          </p>
+          <div className="max-h-72 space-y-5 overflow-y-auto pr-1">
+            {catalogSections.map(([sectionKey, section]) => (
+              <div key={sectionKey}>
+                <p
+                  className={`mb-2 text-xs font-semibold uppercase tracking-[0.2em] ${
+                    light ? "text-stone-500" : "text-slate-400"
+                  }`}
+                >
+                  {section.title}
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {section.children.map((child) => (
+                    <Checkbox
+                      key={child.shopifyHandle}
+                      variant="card"
+                      checked={form.collectionHandles.includes(child.shopifyHandle)}
+                      onChange={() => toggleCollection(child.shopifyHandle)}
+                      label={child.title}
+                      light={light}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </DashboardFormSection>

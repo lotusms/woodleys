@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
 import { listDashboardProducts } from "@/lib/catalog/firestore-products-browser";
 import { useAuth } from "@/context/AuthContext";
 
-/** @type {React.Context<null | { products: Record<string, unknown>[]; loading: boolean; refresh: () => Promise<void>; replaceProduct: (product: Record<string, unknown>) => void; removeProduct: (handle: string) => void }>} */
+/** @type {React.Context<null | { products: Record<string, unknown>[]; loading: boolean; refresh: () => Promise<void>; replaceProduct: (product: Record<string, unknown>) => void; removeProduct: (handle: string) => void; addProduct: (product: Record<string, unknown>) => void }>} */
 const DashboardProductsContext = createContext(null);
 
 export function DashboardProductsProvider({ children }) {
@@ -53,6 +53,17 @@ export function DashboardProductsProvider({ children }) {
     setProducts((prev) => prev.filter((item) => item.handle !== handle));
   }, []);
 
+  const addProduct = useCallback((product) => {
+    setProducts((prev) => {
+      if (prev.some((item) => item.handle === product.handle)) {
+        return prev.map((item) =>
+          item.handle === product.handle ? product : item,
+        );
+      }
+      return [product, ...prev];
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       products,
@@ -60,9 +71,10 @@ export function DashboardProductsProvider({ children }) {
       refresh,
       replaceProduct,
       removeProduct,
+      addProduct,
       isProductsRoute,
     }),
-    [products, loading, refresh, replaceProduct, removeProduct, isProductsRoute],
+    [products, loading, refresh, replaceProduct, removeProduct, addProduct, isProductsRoute],
   );
 
   return (

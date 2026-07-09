@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import {
   deleteFirestoreProduct,
@@ -58,6 +59,13 @@ export async function PATCH(request, { params }) {
 
   try {
     const product = await updateFirestoreProduct(productHandle, body ?? {});
+
+    revalidateTag("catalog-products");
+    revalidateTag(`product-${productHandle}`);
+    for (const collectionHandle of product.collectionHandles ?? []) {
+      revalidateTag(`collection-${collectionHandle}`);
+    }
+
     return NextResponse.json({ product });
   } catch (e) {
     console.error("[admin/products/[handle] PATCH]", e);
@@ -83,6 +91,10 @@ export async function DELETE(request, { params }) {
 
   try {
     await deleteFirestoreProduct(productHandle);
+
+    revalidateTag("catalog-products");
+    revalidateTag(`product-${productHandle}`);
+
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[admin/products/[handle] DELETE]", e);

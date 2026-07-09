@@ -11,6 +11,7 @@ import {
 import { getFirebaseDb } from "@firebase/client";
 import { slugifyProductHandle } from "./product-handle";
 import { normalizeProductPricingForSave } from "./product-pricing";
+import { filterAssignableCollectionHandles } from "./collections-meta";
 import {
   firestoreDocToProductDetail,
   PRODUCTS_COLLECTION,
@@ -100,7 +101,7 @@ export async function updateDashboardProduct(handle, patch) {
     updates.featuredOrder = Number(patch.featuredOrder);
   }
   if (patch.collectionHandles !== undefined) {
-    updates.collectionHandles = [...new Set(patch.collectionHandles.map(String).filter(Boolean))];
+    updates.collectionHandles = filterAssignableCollectionHandles(patch.collectionHandles);
   }
   if (patch.image !== undefined) {
     updates.image = patch.image?.src ? patch.image : null;
@@ -141,9 +142,9 @@ export async function createDashboardProduct(input) {
   const now = new Date().toISOString();
   const pricing = normalizeProductPricingForSave(input.priceUsd, input.salePriceUsd);
   const description = String(input.description ?? "").trim();
-  const collectionHandles = Array.isArray(input.collectionHandles)
-    ? [...new Set(input.collectionHandles.map(String).filter(Boolean))]
-    : [];
+  const collectionHandles = filterAssignableCollectionHandles(
+    Array.isArray(input.collectionHandles) ? input.collectionHandles : [],
+  );
 
   const docData = {
     handle,

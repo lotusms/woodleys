@@ -8,7 +8,7 @@ import {
   deleteDashboardProduct,
   updateDashboardProduct,
 } from "@/lib/catalog/firestore-products-browser";
-import { listAllCatalogCollectionOptions } from "@/lib/catalog/collections-meta";
+import { listAllCatalogCollectionOptions, getCatalogCollectionMeta } from "@/lib/catalog/collections-meta";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardProducts } from "@/context/DashboardProductsContext";
 import DashboardDeleteProductDialog from "@/components/dashboard/DashboardDeleteProductDialog";
@@ -30,6 +30,11 @@ import { isLightThemeId } from "@/theme";
 const collectionTitleByHandle = Object.fromEntries(
   listAllCatalogCollectionOptions().map((c) => [c.shopifyHandle, c.title]),
 );
+
+/** @param {string} handle */
+function collectionLabel(handle) {
+  return collectionTitleByHandle[handle] ?? getCatalogCollectionMeta(handle).title ?? handle;
+}
 
 /**
  * @param {boolean} light
@@ -114,7 +119,7 @@ function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
             <p className={`mt-1 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
               {collections.length > 0
                 ? collections
-                    .map((h) => collectionTitleByHandle[h] ?? h)
+                    .map((h) => collectionLabel(h))
                     .join(" · ")
                 : "No collection assigned"}
             </p>
@@ -275,7 +280,7 @@ function DashboardProductsPageContent() {
 
   const activeCategoryLabel =
     activeCollection !== PRODUCTS_FILTER_ALL
-      ? (collectionTitleByHandle[activeCollection] ?? activeCollection)
+      ? collectionLabel(activeCollection)
       : (PRODUCTS_CATEGORY_NAV.find((item) => item.key === activeSection)?.label ??
         "All products");
 

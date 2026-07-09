@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import {
   createFirestoreProduct,
@@ -73,6 +74,12 @@ export async function POST(request) {
       images: body.images ?? [],
       specs: body.specs ?? [],
     });
+
+    revalidateTag("catalog-products");
+    revalidateTag(`product-${product.handle}`);
+    for (const collectionHandle of product.collectionHandles ?? []) {
+      revalidateTag(`collection-${collectionHandle}`);
+    }
 
     return NextResponse.json({ product }, { status: 201 });
   } catch (e) {

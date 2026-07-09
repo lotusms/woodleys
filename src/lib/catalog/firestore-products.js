@@ -4,7 +4,7 @@ import {
   isFirebaseAdminAuthError,
 } from "@/lib/firebase-admin-server";
 import { HOME_FEATURED_PRODUCT_HANDLES } from "@/config/featured-products";
-import { getCatalogCollectionMeta } from "./collections-meta";
+import { getCatalogCollectionMeta, filterAssignableCollectionHandles } from "./collections-meta";
 import { listAllMockCatalogProducts } from "./mock-catalog";
 import {
   isFirestoreRestConfigured,
@@ -220,9 +220,9 @@ export async function createFirestoreProduct(input) {
   }
 
   const now = new Date().toISOString();
-  const collectionHandles = Array.isArray(input.collectionHandles)
-    ? [...new Set(input.collectionHandles.map(String).filter(Boolean))]
-    : [];
+  const collectionHandles = filterAssignableCollectionHandles(
+    Array.isArray(input.collectionHandles) ? input.collectionHandles : [],
+  );
 
   await ensureCatalogCollectionDocs(db, collectionHandles);
 
@@ -280,7 +280,7 @@ export async function updateFirestoreProduct(handle, patch) {
   }
 
   const collectionHandles = patch.collectionHandles
-    ? [...new Set(patch.collectionHandles.map(String).filter(Boolean))]
+    ? filterAssignableCollectionHandles(patch.collectionHandles)
     : undefined;
 
   if (collectionHandles) {
