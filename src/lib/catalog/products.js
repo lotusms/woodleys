@@ -18,6 +18,8 @@ import {
   getAllCatalogInventory,
   getCachedCatalogProduct,
   getCachedCollectionProducts,
+  getFeaturedFirestoreProducts,
+  getRecentFirestoreProducts,
   getSuppressedProductHandles,
 } from "./catalog-cache";
 import {
@@ -249,11 +251,13 @@ export async function getNewReleaseProducts({
   handles,
 } = {}) {
   try {
-    const fromDb = await getActiveProductsList();
-    if (fromDb.length > 0) {
-      return sortCatalogProducts(fromDb, "newest")
-        .slice(0, limit)
-        .map(toHomeCatalogProduct);
+    const [recent, suppressed] = await Promise.all([
+      getRecentFirestoreProducts(limit),
+      getSuppressedProductHandles(),
+    ]);
+    const active = recent.filter((product) => !suppressed.has(product.handle));
+    if (active.length > 0) {
+      return active.map(toHomeCatalogProduct);
     }
   } catch (e) {
     console.error("[catalog] new release products:", e);
@@ -287,20 +291,7 @@ export async function getFeaturedProducts(
   fallbackHandles = HOME_FEATURED_PRODUCT_HANDLES,
 ) {
   try {
-    const [inventory, suppressed] = await Promise.all([
-      getAllCatalogInventory(),
-      getSuppressedProductHandles(),
-    ]);
-
-    const featured = inventory
-      .filter(
-        (product) =>
-          product.active &&
-          product.featured &&
-          !suppressed.has(product.handle),
-      )
-      .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
-
+    const featured = await getFeaturedFirestoreProducts();
     if (featured.length > 0) {
       return featured.map(toHomeCatalogProduct);
     }

@@ -154,6 +154,93 @@ export async function listFirestoreProducts(opts = {}) {
   return filtered;
 }
 
+/** Active featured products — uses a targeted Firestore query when Admin SDK is available. */
+export async function listFeaturedFirestoreProducts() {
+  const products = await withFirestoreRead(
+    async () => {
+      const db = getFirebaseAdminDb();
+      const snap = await db
+        .collection(PRODUCTS_COLLECTION)
+        .where("featured", "==", true)
+        .get();
+
+      return snap.docs
+        .map((doc) =>
+          firestoreDocToProductDetail(doc.data(), doc.id, { includeInactive: true }),
+        )
+        .filter(Boolean);
+    },
+    async () => {
+      const docs = await restListProductDocuments();
+      return docs
+        .map((doc) =>
+          firestoreDocToProductDetail(doc.data, doc.id, { includeInactive: true }),
+        )
+        .filter((product) => product && product.featured && product.active);
+    },
+  );
+
+  return products
+    .filter((product) => product.active)
+    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
+}
+
+/**
+ * Most recently created active products — targeted query when Admin SDK is available.
+ * @param {number} [limit]
+ */
+export async function listRecentFirestoreProducts(limit = 10) {
+  const fetchLimit = Math.max(limit * 3, 30);
+
+  const products = await withFirestoreRead(
+    async () => {
+      const db = getFirebaseAdminDb();
+      try {
+        const snap = await db
+          .collection(PRODUCTS_COLLECTION)
+          .orderBy("createdAt", "desc")
+          .limit(fetchLimit)
+          .get();
+
+        return snap.docs
+          .map((doc) =>
+            firestoreDocToProductDetail(doc.data(), doc.id, { includeInactive: true }),
+          )
+          .filter(Boolean);
+      } catch {
+        const snap = await db.collection(PRODUCTS_COLLECTION).get();
+        return snap.docs
+          .map((doc) =>
+            firestoreDocToProductDetail(doc.data(), doc.id, { includeInactive: true }),
+          )
+          .filter(Boolean)
+          .sort((a, b) => {
+            const aTime = Date.parse(String(a.createdAt ?? 0));
+            const bTime = Date.parse(String(b.createdAt ?? 0));
+            return bTime - aTime;
+          })
+          .slice(0, fetchLimit);
+      }
+    },
+    async () => {
+      const docs = await restListProductDocuments();
+      return docs
+        .map((doc) =>
+          firestoreDocToProductDetail(doc.data, doc.id, { includeInactive: true }),
+        )
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aTime = Date.parse(String(a.createdAt ?? 0));
+          const bTime = Date.parse(String(b.createdAt ?? 0));
+          return bTime - aTime;
+        })
+        .slice(0, fetchLimit);
+    },
+  );
+
+  return products.filter((product) => product.active).slice(0, limit);
+}
+
 /**
  * @param {string} collectionHandle
  */

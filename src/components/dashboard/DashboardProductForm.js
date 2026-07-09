@@ -176,9 +176,9 @@ export default function DashboardProductForm({ mode, handle }) {
       if (mode === "create") {
         const { product } = await createAdminProduct(payload);
         addProduct(product);
-        void refresh();
+        await refresh();
         setForm(buildFormState(null));
-        router.push("/dashboard/products");
+        router.replace("/dashboard/products?created=1");
         return;
       }
 

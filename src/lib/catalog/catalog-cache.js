@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import { listFirestoreProducts } from "./firestore-products";
+import { listFirestoreProducts, listFeaturedFirestoreProducts, listRecentFirestoreProducts } from "./firestore-products";
 import {
   listSuppressedProductHandles,
 } from "./catalog-suppressions";
@@ -82,38 +82,41 @@ function mergeActiveSeedProducts(products, suppressed = new Set(), inactiveHandl
   return merged;
 }
 
-const loadActiveProducts = cache(async () => {
-  const FIRESTORE_TIMEOUT_MS = 2500;
+const FIRESTORE_TIMEOUT_MS = 10000;
 
+const loadFirestoreInventory = cache(async () => {
   try {
-    const [products, suppressed] = await Promise.all([
-      Promise.race([
-        listFirestoreProducts({ activeOnly: true }),
-        new Promise((resolve) => {
-          setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
-        }),
-      ]),
-      listSuppressedProductHandles(),
-    ]);
-
-    const allProducts = await Promise.race([
+    const products = await Promise.race([
       listFirestoreProducts(),
       new Promise((resolve) => {
         setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
       }),
     ]);
 
+    return products ?? [];
+  } catch {
+    return [];
+  }
+});
+
+const loadActiveProducts = cache(async () => {
+  try {
+    const [products, suppressed] = await Promise.all([
+      loadFirestoreInventory(),
+      listSuppressedProductHandles(),
+    ]);
+
+    const activeProducts = products.filter((product) => product.active);
     const inactiveHandles = new Set(
-      (allProducts ?? [])
-        .filter((product) => !product.active)
-        .map((product) => product.handle),
+      products.filter((product) => !product.active).map((product) => product.handle),
     );
 
-    if (!products || products.length === 0) {
+    if (activeProducts.length === 0) {
       return mergeActiveSeedProducts([], suppressed, inactiveHandles);
     }
+
     return mergeActiveSeedProducts(
-      products.filter((product) => !suppressed.has(product.handle)),
+      activeProducts.filter((product) => !suppressed.has(product.handle)),
       suppressed,
       inactiveHandles,
     );
@@ -129,28 +132,50 @@ export const getActiveProductsList = unstable_cache(
   { revalidate: 60, tags: ["catalog-products"] },
 );
 
-const loadAllCatalogInventory = cache(async () => {
-  const FIRESTORE_TIMEOUT_MS = 2500;
-
-  try {
-    const products = await Promise.race([
-      listFirestoreProducts(),
-      new Promise((resolve) => {
-        setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
-      }),
-    ]);
-
-    if (!products) return [];
-    return products;
-  } catch {
-    return [];
-  }
-});
+const loadAllCatalogInventory = cache(async () => loadFirestoreInventory());
 
 /** Full Firestore inventory (active + inactive) for collection merge and admin overrides. */
 export const getAllCatalogInventory = unstable_cache(
   async () => loadAllCatalogInventory(),
   ["catalog-all-inventory"],
+  { revalidate: 60, tags: ["catalog-products"] },
+);
+
+const loadFeaturedFirestoreProducts = cache(async () => {
+  try {
+    const [products, suppressed] = await Promise.all([
+      listFeaturedFirestoreProducts(),
+      listSuppressedProductHandles(),
+    ]);
+    return products.filter((product) => !suppressed.has(product.handle));
+  } catch {
+    return [];
+  }
+});
+
+/** Featured active products for the homepage showroom slider. */
+export const getFeaturedFirestoreProducts = unstable_cache(
+  async () => loadFeaturedFirestoreProducts(),
+  ["catalog-featured-firestore"],
+  { revalidate: 60, tags: ["catalog-products"] },
+);
+
+const loadRecentFirestoreProducts = cache(async (limit = 10) => {
+  try {
+    const [products, suppressed] = await Promise.all([
+      listRecentFirestoreProducts(limit),
+      listSuppressedProductHandles(),
+    ]);
+    return products.filter((product) => !suppressed.has(product.handle));
+  } catch {
+    return [];
+  }
+});
+
+/** Recently created active products for the homepage new-arrivals slider. */
+export const getRecentFirestoreProducts = unstable_cache(
+  async (limit = 10) => loadRecentFirestoreProducts(limit),
+  ["catalog-recent-firestore"],
   { revalidate: 60, tags: ["catalog-products"] },
 );
 

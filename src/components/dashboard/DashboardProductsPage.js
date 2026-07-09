@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiAddLine, RiSearchLine, RiStarFill, RiStarLine } from "react-icons/ri";
 import { deleteAdminProduct, updateAdminProduct } from "@/lib/admin/products-client";
@@ -233,6 +233,14 @@ function DashboardProductsPageContent() {
   const activeCollection = searchParams.get("collection") || PRODUCTS_FILTER_ALL;
   const searchQuery = searchParams.get("q") || "";
   const sortKey = normalizeProductsSort(searchParams.get("sort"));
+
+  useEffect(() => {
+    if (searchParams.get("created") !== "1") return;
+    setSuccess("Product created. It will appear on the storefront shortly.");
+    router.replace(buildProductsPageHref({ section: activeSection, collection: activeCollection, query: searchQuery, sort: sortKey }), {
+      scroll: false,
+    });
+  }, [searchParams, router, activeSection, activeCollection, searchQuery, sortKey]);
 
   const handleToggle = useCallback(
     async (handle, patch) => {
