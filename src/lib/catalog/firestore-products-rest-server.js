@@ -123,9 +123,10 @@ function collectionQueryBody(collectionHandle) {
 }
 
 /**
+ * @param {string} collectionId
  * @param {string} [pageToken]
  */
-async function listAllProductDocuments(pageToken) {
+async function listAllCollectionDocuments(collectionId, pageToken) {
   if (!restConfigured()) return [];
 
   const params = new URLSearchParams({
@@ -134,7 +135,7 @@ async function listAllProductDocuments(pageToken) {
   });
   if (pageToken) params.set("pageToken", pageToken);
 
-  const url = `${baseUrl()}/${PRODUCTS_COLLECTION}?${params}`;
+  const url = `${baseUrl()}/${collectionId}?${params}`;
   const res = await fetch(url, { next: { revalidate: 60 } });
   if (!res.ok) {
     const text = await res.text();
@@ -147,11 +148,18 @@ async function listAllProductDocuments(pageToken) {
     : [];
 
   if (payload.nextPageToken) {
-    const more = await listAllProductDocuments(payload.nextPageToken);
+    const more = await listAllCollectionDocuments(collectionId, payload.nextPageToken);
     return [...docs, ...more];
   }
 
   return docs;
+}
+
+/**
+ * @param {string} [pageToken]
+ */
+async function listAllProductDocuments(pageToken) {
+  return listAllCollectionDocuments(PRODUCTS_COLLECTION, pageToken);
 }
 
 export function isFirestoreRestConfigured() {
@@ -160,6 +168,14 @@ export function isFirestoreRestConfigured() {
 
 export async function restListProductDocuments() {
   return listAllProductDocuments();
+}
+
+/**
+ * @param {string} collectionId
+ */
+export async function restListCollectionDocumentIds(collectionId) {
+  const docs = await listAllCollectionDocuments(collectionId);
+  return docs.map((doc) => doc.id);
 }
 
 /**

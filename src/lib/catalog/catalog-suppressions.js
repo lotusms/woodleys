@@ -1,0 +1,76 @@
+import {
+  getFirebaseAdminDb,
+  hasFirebaseAdminCredentials,
+  isFirebaseAdminAuthError,
+} from "@/lib/firebase-admin-server";
+import {
+  isFirestoreRestConfigured,
+  restListCollectionDocumentIds,
+} from "./firestore-products-rest-server";
+import { CATALOG_SUPPRESSIONS_COLLECTION } from "./product-firestore-map";
+
+export { CATALOG_SUPPRESSIONS_COLLECTION } from "./product-firestore-map";
+
+/**
+ * @template T
+ * @param {() => Promise<T>} adminRead
+ * @param {() => Promise<T>} restRead
+ */
+async function withFirestoreRead(adminRead, restRead) {
+  if (hasFirebaseAdminCredentials()) {
+    try {
+      return await adminRead();
+    } catch (error) {
+      if (isFirebaseAdminAuthError(error) && isFirestoreRestConfigured()) {
+        return restRead();
+      }
+      throw error;
+    }
+  }
+
+  if (isFirestoreRestConfigured()) {
+    return restRead();
+  }
+
+  return new Set();
+}
+
+/**
+ * Records a permanently deleted product handle so seed/mock fallbacks stay hidden.
+ *
+ * @param {string} handle
+ */
+export async function suppressProductHandle(handle) {
+  if (!handle) return;
+
+  const db = getFirebaseAdminDb();
+  const now = new Date().toISOString();
+  await db.collection(CATALOG_SUPPRESSIONS_COLLECTION).doc(handle).set({
+    handle,
+    suppressedAt: now,
+  });
+}
+
+/** @returns {Promise<Set<string>>} */
+export async function listSuppressedProductHandles() {
+  return withFirestoreRead(
+    async () => {
+      const db = getFirebaseAdminDb();
+      const snap = await db.collection(CATALOG_SUPPRESSIONS_COLLECTION).get();
+      return new Set(snap.docs.map((doc) => doc.id));
+    },
+    async () => {
+      const ids = await restListCollectionDocumentIds(CATALOG_SUPPRESSIONS_COLLECTION);
+      return new Set(ids);
+    },
+  );
+}
+
+/**
+ * @param {import("./product-types").CatalogProduct[]} products
+ * @param {Set<string>} suppressed
+ */
+export function filterSuppressedCatalogProducts(products, suppressed) {
+  if (!suppressed?.size) return products;
+  return products.filter((product) => !suppressed.has(product.handle));
+}

@@ -172,8 +172,8 @@ export function ordersSelect(light) {
 
 export function ordersGhostButton(light) {
   return light
-    ? "rounded-xl border border-stone-400/60 bg-white px-4 py-2.5 text-sm font-medium text-stone-800 transition hover:border-amber-500/45 hover:bg-amber-50/80"
-    : "rounded-xl border border-slate-600/50 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/35 hover:bg-slate-800/80";
+    ? "cursor-pointer rounded-xl border border-stone-400/60 bg-white px-4 py-2.5 text-sm font-medium text-stone-800 transition hover:border-amber-500/45 hover:bg-amber-50/80 disabled:cursor-not-allowed disabled:opacity-60"
+    : "cursor-pointer rounded-xl border border-slate-600/50 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/35 hover:bg-slate-800/80 disabled:cursor-not-allowed disabled:opacity-60";
 }
 
 /** Dashboard form — add row (amber) */

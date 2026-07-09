@@ -58,6 +58,19 @@ async function adminFetch(path, init = {}, options = {}) {
   return data;
 }
 
+export async function refreshStorefrontCatalog() {
+  try {
+    await Promise.race([
+      adminFetch("/api/admin/revalidate-catalog", { method: "POST" }),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("revalidate timeout")), 8000);
+      }),
+    ]);
+  } catch {
+    // Storefront may lag briefly when Admin credentials are unavailable.
+  }
+}
+
 export function fetchAdminProducts() {
   return adminFetch("/api/admin/products");
 }
@@ -67,13 +80,16 @@ export function fetchAdminProducts() {
  */
 export async function createAdminProduct(payload) {
   try {
-    return await adminFetch("/api/admin/products", {
+    const result = await adminFetch("/api/admin/products", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+    await refreshStorefrontCatalog();
+    return result;
   } catch (error) {
     if (!isAdminServerUnavailable(error)) throw error;
     const product = await createDashboardProduct(payload);
+    await refreshStorefrontCatalog();
     return { product };
   }
 }
@@ -98,13 +114,16 @@ export async function fetchAdminProduct(handle) {
  */
 export async function updateAdminProduct(handle, patch) {
   try {
-    return await adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`, {
+    const result = await adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`, {
       method: "PATCH",
       body: JSON.stringify(patch),
     });
+    await refreshStorefrontCatalog();
+    return result;
   } catch (error) {
     if (!isAdminServerUnavailable(error)) throw error;
     const product = await updateDashboardProduct(handle, patch);
+    await refreshStorefrontCatalog();
     return { product };
   }
 }
@@ -112,8 +131,20 @@ export async function updateAdminProduct(handle, patch) {
 /**
  * @param {string} handle
  */
-export function deleteAdminProduct(handle) {
-  return adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`, {
-    method: "DELETE",
-  });
+export async function deleteAdminProduct(handle) {
+  try {
+    const result = await adminFetch(`/api/admin/products/${encodeURIComponent(handle)}`, {
+      method: "DELETE",
+    });
+    await refreshStorefrontCatalog();
+    return result;
+  } catch (error) {
+    if (!isAdminServerUnavailable(error)) throw error;
+    const { deleteDashboardProduct } = await import(
+      "@/lib/catalog/firestore-products-browser"
+    );
+    await deleteDashboardProduct(handle);
+    await refreshStorefrontCatalog();
+    return { ok: true };
+  }
 }

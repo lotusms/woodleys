@@ -55,6 +55,13 @@ service cloud.firestore {
       allow write: if isShopAdmin();
     }
 
+    match /catalogSuppressions/{handle} {
+      allow read: if true;
+      allow create, update: if isShopAdmin()
+        && request.resource.data.handle == handle;
+      allow delete: if isShopAdmin();
+    }
+
     // Integration secrets — server (Admin SDK) only; dashboard uses /api/admin/settings.
     match /siteSettings/{docId} {
       allow read, write: if false;

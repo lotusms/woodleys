@@ -15,6 +15,7 @@ import { filterAssignableCollectionHandles } from "./collections-meta";
 import {
   firestoreDocToProductDetail,
   PRODUCTS_COLLECTION,
+  CATALOG_SUPPRESSIONS_COLLECTION,
 } from "./product-firestore-map";
 
 /**
@@ -32,11 +33,16 @@ function sortDashboardProducts(products) {
 
 export async function listDashboardProducts() {
   const db = getFirebaseDb();
-  const snap = await getDocs(collection(db, PRODUCTS_COLLECTION));
+  const [productSnap, suppressionSnap] = await Promise.all([
+    getDocs(collection(db, PRODUCTS_COLLECTION)),
+    getDocs(collection(db, CATALOG_SUPPRESSIONS_COLLECTION)),
+  ]);
 
-  const products = snap.docs
+  const suppressed = new Set(suppressionSnap.docs.map((docSnap) => docSnap.id));
+
+  const products = productSnap.docs
     .map((d) => firestoreDocToProductDetail(d.data(), d.id, { includeInactive: true }))
-    .filter(Boolean);
+    .filter((product) => product && !suppressed.has(product.handle));
 
   return sortDashboardProducts(products);
 }
@@ -96,7 +102,16 @@ export async function updateDashboardProduct(handle, patch) {
     updates.quantity = Math.max(0, Number(patch.quantity));
   }
   if (patch.active !== undefined) updates.active = Boolean(patch.active);
-  if (patch.featured !== undefined) updates.featured = Boolean(patch.featured);
+  if (patch.featured !== undefined) {
+    updates.featured = Boolean(patch.featured);
+    if (
+      updates.featured &&
+      patch.featuredOrder === undefined &&
+      !snap.data()?.featured
+    ) {
+      updates.featuredOrder = Date.now();
+    }
+  }
   if (patch.featuredOrder !== undefined) {
     updates.featuredOrder = Number(patch.featuredOrder);
   }
@@ -185,9 +200,14 @@ export async function deleteDashboardProduct(handle) {
   const db = getFirebaseDb();
   const ref = doc(db, PRODUCTS_COLLECTION, handle);
   const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    throw new Error("Product not found.");
-  }
+  const now = new Date().toISOString();
 
-  await deleteDoc(ref);
+  await setDoc(doc(db, CATALOG_SUPPRESSIONS_COLLECTION, handle), {
+    handle,
+    suppressedAt: now,
+  });
+
+  if (snap.exists()) {
+    await deleteDoc(ref);
+  }
 }

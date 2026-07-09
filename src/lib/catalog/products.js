@@ -15,8 +15,10 @@ import { isFirebaseAdminAuthError } from "@/lib/firebase-admin-server";
 import { isShopifyIntegrationCatalogEnabled } from "@/lib/shopify/integration-config";
 import {
   getActiveProductsList,
+  getAllCatalogInventory,
   getCachedCatalogProduct,
   getCachedCollectionProducts,
+  getSuppressedProductHandles,
 } from "./catalog-cache";
 import {
   getProductByHandle as getShopifyProductByHandle,
@@ -26,79 +28,32 @@ import { withNormalizedProse } from "@/lib/prose";
 import {
   isLegacyRingPreviewHandle,
   isRingSampleProductHandle,
-  RING_SAMPLE_COLLECTION_HANDLES,
 } from "./ring-sample-products.js";
 import { isBulovaSampleProductHandle } from "./bulova-sample-products.js";
 import { normalizeCatalogImage } from "./normalize-image-src.js";
-
-/**
- * @param {string} collectionHandle
- * @returns {Promise<import("./product-types").CatalogProduct[]>}
- */
-async function getLocalDatabaseProducts(collectionHandle) {
-  try {
-    const all = await getActiveProductsList();
-    return all.filter(
-      (product) =>
-        Array.isArray(product.collectionHandles) &&
-        product.collectionHandles.includes(collectionHandle),
-    );
-  } catch (e) {
-    if (!isFirebaseAdminAuthError(e)) {
-      console.error("[catalog] local products by collection:", collectionHandle, e);
-    }
-    return [];
-  }
-}
-
-/**
- * @param {string} handle
- * @returns {Promise<import("./product-types").CatalogProductDetail | null>}
- */
-async function getLocalDatabaseProductByHandle(handle) {
-  try {
-    return await getFirestoreProductByHandle(handle);
-  } catch (e) {
-    if (!isFirebaseAdminAuthError(e)) {
-      console.error("[catalog] local product by handle:", handle, e);
-    }
-    return null;
-  }
-}
-
-/**
- * Seed catalog collections are served from in-memory definitions (fast path).
- *
- * @param {string} collectionHandle
- * @returns {Promise<import("./product-types").CatalogProduct[]>}
- */
-async function getSeedCollectionProducts(collectionHandle) {
-  const mocks = getMockProductsByCollectionHandle(collectionHandle);
-  return mocks.map((mock) => withNormalizedProse(mock));
-}
+import { HOME_FEATURED_PRODUCT_HANDLES, HOME_NEW_RELEASE_HANDLES, HOME_NEW_RELEASE_LIMIT } from "@/config/featured-products";
+import { mergeCollectionStorefrontProducts, splitCollectionInventory } from "./collection-storefront";
 
 /**
  * @param {string} collectionHandle
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
 async function fetchCollectionProductsUncached(collectionHandle) {
-  if (
-    RING_SAMPLE_COLLECTION_HANDLES.includes(collectionHandle) ||
-    collectionHandle === "bulova"
-  ) {
-    return getSeedCollectionProducts(collectionHandle);
-  }
+  const [inventory, suppressed] = await Promise.all([
+    getAllCatalogInventory(),
+    getSuppressedProductHandles(),
+  ]);
+  const { activeInCollection, inactiveHandlesInCollection } =
+    splitCollectionInventory(inventory, collectionHandle, suppressed);
 
-  const fromDb = await getLocalDatabaseProducts(collectionHandle);
-  const activeFromDb = fromDb.filter(
-    (product) =>
-      !isLegacyRingPreviewHandle(product.handle) &&
-      !isMockPreviewHandle(product.handle),
+  const merged = mergeCollectionStorefrontProducts(
+    collectionHandle,
+    activeInCollection,
+    suppressed,
+    inactiveHandlesInCollection,
   );
-  if (activeFromDb.length > 0) {
-    return activeFromDb.map((p) =>
-      withNormalizedProse({ ...p, source: /** @type {const} */ ("local") }),
-    );
+  if (merged.length > 0) {
+    return merged;
   }
 
   if (process.env.SHOPIFY_CATALOG_ENABLED === "true") {
@@ -112,17 +67,11 @@ async function fetchCollectionProductsUncached(collectionHandle) {
     }
   }
 
-  const mocks = getMockProductsByCollectionHandle(collectionHandle);
-  if (mocks.length > 0) {
-    return mocks.map((p) => withNormalizedProse(p));
-  }
-
   return [];
 }
 
 /**
- * Products for a collection page. Firestore (admin inventory) first, then Shopify when
- * explicitly enabled, then mock preview listings.
+ * Products for a collection page — seed catalog listings plus admin inventory.
  *
  * @param {string} collectionHandle
  * @param {{ title?: string; description?: string; image?: { src: string; alt: string } }} [meta]
@@ -153,17 +102,33 @@ export const getCatalogProductByHandleRequest = cache(async function getCatalogP
 ) {
   if (!handle) return null;
 
+  const suppressed = await getSuppressedProductHandles();
+  if (suppressed.has(handle)) return null;
+
   if (isLegacyRingPreviewHandle(handle)) {
     return null;
+  }
+
+  let firestoreProduct = null;
+  try {
+    firestoreProduct = await getFirestoreProductByHandle(handle, {
+      includeInactive: true,
+    });
+  } catch (e) {
+    if (!isFirebaseAdminAuthError(e)) {
+      console.error("[catalog] product by handle:", handle, e);
+    }
+  }
+
+  if (firestoreProduct) {
+    if (!firestoreProduct.active) return null;
+    return withNormalizedProse(firestoreProduct);
   }
 
   if (isRingSampleProductHandle(handle) || isBulovaSampleProductHandle(handle)) {
     const mock = getMockProductByHandle(handle);
     if (mock) return withNormalizedProse(mock);
   }
-
-  const fromDb = await getLocalDatabaseProductByHandle(handle);
-  if (fromDb) return withNormalizedProse(fromDb);
 
   if (process.env.SHOPIFY_CATALOG_ENABLED === "true" && !isMockPreviewHandle(handle)) {
     if (await isShopifyIntegrationCatalogEnabled()) {
@@ -279,17 +244,10 @@ function toHomeCatalogProduct(product) {
  * @param {{ limit?: number; handles?: readonly string[] }} [opts]
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
-export async function getNewReleaseProducts({ limit = 12, handles } = {}) {
-  if (handles?.length) {
-    const resolved = await Promise.all(
-      handles.map((handle) => getCatalogProductByHandle(handle)),
-    );
-    return resolved
-      .filter(Boolean)
-      .map(toHomeCatalogProduct)
-      .slice(0, limit);
-  }
-
+export async function getNewReleaseProducts({
+  limit = HOME_NEW_RELEASE_LIMIT,
+  handles,
+} = {}) {
   try {
     const fromDb = await getActiveProductsList();
     if (fromDb.length > 0) {
@@ -301,6 +259,18 @@ export async function getNewReleaseProducts({ limit = 12, handles } = {}) {
     console.error("[catalog] new release products:", e);
   }
 
+  const fallbackHandles =
+    handles?.length ? handles : HOME_NEW_RELEASE_HANDLES;
+  if (fallbackHandles.length > 0) {
+    const resolved = await Promise.all(
+      fallbackHandles.map((handle) => getCatalogProductByHandle(handle)),
+    );
+    const found = resolved.filter(Boolean);
+    if (found.length > 0) {
+      return found.map(toHomeCatalogProduct).slice(0, limit);
+    }
+  }
+
   const mocks = sortCatalogProducts(listAllMockCatalogProducts(), "newest");
   return mocks.slice(0, limit).map((product) => ({
     ...toHomeCatalogProduct({ ...product, source: /** @type {const} */ ("mock") }),
@@ -308,12 +278,27 @@ export async function getNewReleaseProducts({ limit = 12, handles } = {}) {
 }
 
 /**
- * Homepage showcase — Firestore featured products first, then config handles.
+ * Featured active products for the homepage showroom slider.
  *
  * @param {readonly string[]} [fallbackHandles]
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
  */
-export async function getFeaturedProducts(fallbackHandles = []) {
+export async function getFeaturedProducts(
+  fallbackHandles = HOME_FEATURED_PRODUCT_HANDLES,
+) {
+  try {
+    const all = await getActiveProductsList();
+    const featured = all
+      .filter((product) => product.featured && product.active !== false)
+      .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
+
+    if (featured.length > 0) {
+      return featured.map(toHomeCatalogProduct);
+    }
+  } catch (e) {
+    console.error("[catalog] featured products:", e);
+  }
+
   if (!fallbackHandles?.length) return [];
 
   const resolved = await Promise.all(

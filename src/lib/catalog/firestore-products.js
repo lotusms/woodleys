@@ -16,8 +16,9 @@ import {
   firestoreDocToProductDetail,
   PRODUCTS_COLLECTION,
   CATALOG_COLLECTIONS_COLLECTION,
+  CATALOG_SUPPRESSIONS_COLLECTION,
 } from "./product-firestore-map";
-import { slugifyProductHandle } from "./product-handle";
+import { listSuppressedProductHandles } from "./catalog-suppressions";
 import { normalizeProductPricingForSave } from "./product-pricing";
 
 export { PRODUCTS_COLLECTION, CATALOG_COLLECTIONS_COLLECTION } from "./product-firestore-map";
@@ -315,7 +316,16 @@ export async function updateFirestoreProduct(handle, patch) {
     updates.quantity = Math.max(0, Number(patch.quantity));
   }
   if (patch.active !== undefined) updates.active = Boolean(patch.active);
-  if (patch.featured !== undefined) updates.featured = Boolean(patch.featured);
+  if (patch.featured !== undefined) {
+    updates.featured = Boolean(patch.featured);
+    if (
+      updates.featured &&
+      patch.featuredOrder === undefined &&
+      !snap.data()?.featured
+    ) {
+      updates.featuredOrder = Date.now();
+    }
+  }
   if (patch.featuredOrder !== undefined) {
     updates.featuredOrder = Number(patch.featuredOrder);
   }
@@ -338,7 +348,14 @@ export async function updateFirestoreProduct(handle, patch) {
  * @param {string} handle
  */
 export async function deleteFirestoreProduct(handle) {
+  if (!handle) return;
+
   const db = getFirebaseAdminDb();
+  await db.collection(CATALOG_SUPPRESSIONS_COLLECTION).doc(handle).set({
+    handle,
+    suppressedAt: new Date().toISOString(),
+  });
+
   await db.collection(PRODUCTS_COLLECTION).doc(handle).delete();
 }
 
@@ -352,10 +369,16 @@ export async function syncCatalogProductsFromMock() {
   const db = getFirebaseAdminDb();
   const mockProducts = listAllMockCatalogProducts();
   const featuredSet = new Set(HOME_FEATURED_PRODUCT_HANDLES);
+  const suppressed = await listSuppressedProductHandles();
   let created = 0;
   let skipped = 0;
 
   for (const mock of mockProducts) {
+    if (suppressed.has(mock.handle)) {
+      skipped += 1;
+      continue;
+    }
+
     const ref = db.collection(PRODUCTS_COLLECTION).doc(mock.handle);
     const snap = await ref.get();
     if (snap.exists) {

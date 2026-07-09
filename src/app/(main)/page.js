@@ -4,7 +4,7 @@ import HomeHeroStatic from "@/components/home/HomeHeroStatic";
 import HomeHeroClientGate from "@/components/home/HomeHeroClientGate";
 import HomeWhyWoodleys from "@/components/home/HomeWhyWoodleys";
 import HomeShowroomFallback from "@/components/home/HomeShowroomFallback";
-import { defaultMetadata, HOME_FEATURED_PRODUCT_HANDLES, HOME_NEW_RELEASE_HANDLES } from "@/config";
+import { defaultMetadata, HOME_NEW_RELEASE_LIMIT } from "@/config";
 import { getFeaturedProducts, getNewReleaseProducts } from "@/lib/catalog/products";
 
 const HomeShowroomHighlights = dynamic(
@@ -34,8 +34,8 @@ export const metadata = {
 
 export default async function Home() {
   const [featuredProducts, newReleaseProducts] = await Promise.all([
-    getFeaturedProducts(HOME_FEATURED_PRODUCT_HANDLES),
-    getNewReleaseProducts({ handles: HOME_NEW_RELEASE_HANDLES }),
+    getFeaturedProducts(),
+    getNewReleaseProducts({ limit: HOME_NEW_RELEASE_LIMIT }),
   ]);
 
   return (

@@ -2,6 +2,7 @@ import { normalizeDescriptionHtml, normalizeProsePunctuation } from "@/lib/prose
 
 export const PRODUCTS_COLLECTION = "products";
 export const CATALOG_COLLECTIONS_COLLECTION = "catalogCollections";
+export const CATALOG_SUPPRESSIONS_COLLECTION = "catalogSuppressions";
 
 /**
  * @param {Record<string, unknown>} data

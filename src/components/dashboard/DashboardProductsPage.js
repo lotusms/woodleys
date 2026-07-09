@@ -4,10 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiAddLine, RiSearchLine, RiStarFill, RiStarLine } from "react-icons/ri";
-import {
-  deleteDashboardProduct,
-  updateDashboardProduct,
-} from "@/lib/catalog/firestore-products-browser";
+import { deleteAdminProduct, updateAdminProduct } from "@/lib/admin/products-client";
 import { listAllCatalogCollectionOptions, getCatalogCollectionMeta } from "@/lib/catalog/collections-meta";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardProducts } from "@/context/DashboardProductsContext";
@@ -134,9 +131,13 @@ function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
             <button
               type="button"
               disabled={busy}
-              onClick={() =>
-                onToggle(handle, { featured: !product.featured, active: true })
-              }
+              onClick={() => {
+                void onToggle(handle, {
+                  featured: !product.featured,
+                  active: true,
+                  ...(!product.featured ? { featuredOrder: Date.now() } : {}),
+                });
+              }}
               className={dash.ordersGhostButton(light)}
               aria-label={
                 product.featured ? "Remove from featured" : "Mark as featured"
@@ -156,13 +157,15 @@ function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
           <button
             type="button"
             disabled={busy}
-            onClick={() => onToggle(handle, { active: !product.active })}
+            onClick={() => {
+              void onToggle(handle, { active: !product.active });
+            }}
             className={
               isActive
                 ? dash.ordersGhostButton(light)
                 : light
-                  ? "rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-60"
-                  : "rounded-xl bg-amber-400/90 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-300 disabled:opacity-60"
+                  ? "cursor-pointer rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  : "cursor-pointer rounded-xl bg-amber-400/90 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
             }
           >
             {isActive ? "Deactivate" : "Activate"}
@@ -180,8 +183,8 @@ function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
               onClick={() => onRequestDelete(product)}
               className={
                 light
-                  ? "rounded-xl border border-red-400/70 bg-white px-4 py-2.5 text-sm font-medium text-red-700 transition hover:border-red-500 hover:bg-red-50 disabled:opacity-60"
-                  : "rounded-xl border border-red-500/45 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-950/40 disabled:opacity-60"
+                  ? "cursor-pointer rounded-xl border border-red-400/70 bg-white px-4 py-2.5 text-sm font-medium text-red-700 transition hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  : "cursor-pointer rounded-xl border border-red-500/45 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-60"
               }
             >
               Delete
@@ -218,7 +221,7 @@ function DashboardProductsPageContent() {
   const themeId = useDocumentThemeId();
   const light = isLightThemeId(themeId);
   const { user, loading: authLoading, accountLoading, isAdmin } = useAuth();
-  const { products, loading, replaceProduct, removeProduct } =
+  const { products, loading, replaceProduct, removeProduct, refresh } =
     useDashboardProducts();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -237,8 +240,8 @@ function DashboardProductsPageContent() {
       setError("");
       setSuccess("");
       try {
-        const data = await updateDashboardProduct(handle, patch);
-        replaceProduct(data);
+        const { product } = await updateAdminProduct(handle, patch);
+        replaceProduct(product);
         setSuccess("Product updated.");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not update product.");
@@ -257,17 +260,18 @@ function DashboardProductsPageContent() {
     setError("");
     setSuccess("");
     try {
-      await deleteDashboardProduct(handle);
+      await deleteAdminProduct(handle);
       removeProduct(handle);
       setDeleteTarget(null);
       setSuccess("Product deleted permanently.");
+      void refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not delete product.");
     } finally {
       setDeleting(false);
       setBusyHandle("");
     }
-  }, [deleteTarget, removeProduct]);
+  }, [deleteTarget, removeProduct, refresh]);
 
   const filtered = useMemo(() => {
     const matched = filterDashboardProducts(products, {

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import {
+  revalidateAfterProductChange,
+  revalidateAfterProductDelete,
+} from "@/lib/admin/revalidate-catalog-server";
 import {
   deleteFirestoreProduct,
   getFirestoreProductByHandle,
@@ -60,11 +63,7 @@ export async function PATCH(request, { params }) {
   try {
     const product = await updateFirestoreProduct(productHandle, body ?? {});
 
-    revalidateTag("catalog-products");
-    revalidateTag(`product-${productHandle}`);
-    for (const collectionHandle of product.collectionHandles ?? []) {
-      revalidateTag(`collection-${collectionHandle}`);
-    }
+    revalidateAfterProductChange(product);
 
     return NextResponse.json({ product });
   } catch (e) {
@@ -90,10 +89,16 @@ export async function DELETE(request, { params }) {
   }
 
   try {
+    const product = await getFirestoreProductByHandle(productHandle, {
+      includeInactive: true,
+    });
+
     await deleteFirestoreProduct(productHandle);
 
-    revalidateTag("catalog-products");
-    revalidateTag(`product-${productHandle}`);
+    revalidateAfterProductDelete(
+      productHandle,
+      product?.collectionHandles ?? [],
+    );
 
     return NextResponse.json({ ok: true });
   } catch (e) {

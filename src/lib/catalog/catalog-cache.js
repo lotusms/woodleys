@@ -2,10 +2,14 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { listFirestoreProducts } from "./firestore-products";
 import {
+  listSuppressedProductHandles,
+} from "./catalog-suppressions";
+import { mergeCollectionStorefrontProducts, splitCollectionInventory } from "./collection-storefront";
+import { listAllCatalogCollectionOptions } from "./collections-meta";
+import {
   getMockProductByHandle,
   getMockProductsByCollectionHandle,
   isMockPreviewHandle,
-  listAllMockCatalogProducts,
 } from "./mock-catalog";
 import { isBulovaSampleProductHandle } from "./bulova-sample-products.js";
 import { RING_SAMPLE_COLLECTION_HANDLES } from "./ring-sample-products.js";
@@ -31,13 +35,14 @@ function shouldHideFromStorefront(handle) {
 }
 
 /** @param {import("./product-types").CatalogProduct[]} products */
-function mergeActiveSeedProducts(products) {
+function mergeActiveSeedProducts(products, suppressed = new Set(), inactiveHandles = new Set()) {
   /** @type {import("./product-types").CatalogProduct[]} */
   const merged = [];
   const handles = new Set();
 
   for (const product of products) {
     if (shouldHideFromStorefront(product.handle)) continue;
+    if (suppressed.has(product.handle)) continue;
 
     if (
       isRingSampleProductHandle(product.handle) ||
@@ -45,7 +50,12 @@ function mergeActiveSeedProducts(products) {
     ) {
       const mock = getMockProductByHandle(product.handle);
       if (mock) {
-        merged.push({ ...withSeedCollectionHandles(mock), active: true });
+        merged.push({
+          ...withSeedCollectionHandles(mock),
+          active: true,
+          featured: Boolean(product.featured),
+          featuredOrder: product.featuredOrder,
+        });
         handles.add(mock.handle);
         continue;
       }
@@ -57,7 +67,13 @@ function mergeActiveSeedProducts(products) {
 
   for (const collectionHandle of ["fine-rings", "bulova"]) {
     for (const mock of getMockProductsByCollectionHandle(collectionHandle)) {
-      if (handles.has(mock.handle)) continue;
+      if (
+        handles.has(mock.handle) ||
+        suppressed.has(mock.handle) ||
+        inactiveHandles.has(mock.handle)
+      ) {
+        continue;
+      }
       merged.push({ ...withSeedCollectionHandles(mock), active: true });
       handles.add(mock.handle);
     }
@@ -67,18 +83,40 @@ function mergeActiveSeedProducts(products) {
 }
 
 const loadActiveProducts = cache(async () => {
-  const FIRESTORE_TIMEOUT_MS = 900;
+  const FIRESTORE_TIMEOUT_MS = 2500;
 
   try {
-    const products = await Promise.race([
-      listFirestoreProducts({ activeOnly: true }),
+    const [products, suppressed] = await Promise.all([
+      Promise.race([
+        listFirestoreProducts({ activeOnly: true }),
+        new Promise((resolve) => {
+          setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
+        }),
+      ]),
+      listSuppressedProductHandles(),
+    ]);
+
+    const allProducts = await Promise.race([
+      listFirestoreProducts(),
       new Promise((resolve) => {
         setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
       }),
     ]);
 
-    if (!products || products.length === 0) return [];
-    return mergeActiveSeedProducts(products);
+    const inactiveHandles = new Set(
+      (allProducts ?? [])
+        .filter((product) => !product.active)
+        .map((product) => product.handle),
+    );
+
+    if (!products || products.length === 0) {
+      return mergeActiveSeedProducts([], suppressed, inactiveHandles);
+    }
+    return mergeActiveSeedProducts(
+      products.filter((product) => !suppressed.has(product.handle)),
+      suppressed,
+      inactiveHandles,
+    );
   } catch {
     return [];
   }
@@ -91,26 +129,56 @@ export const getActiveProductsList = unstable_cache(
   { revalidate: 60, tags: ["catalog-products"] },
 );
 
+const loadAllCatalogInventory = cache(async () => {
+  const FIRESTORE_TIMEOUT_MS = 2500;
+
+  try {
+    const products = await Promise.race([
+      listFirestoreProducts(),
+      new Promise((resolve) => {
+        setTimeout(() => resolve(null), FIRESTORE_TIMEOUT_MS);
+      }),
+    ]);
+
+    if (!products) return [];
+    return products;
+  } catch {
+    return [];
+  }
+});
+
+/** Full Firestore inventory (active + inactive) for collection merge and admin overrides. */
+export const getAllCatalogInventory = unstable_cache(
+  async () => loadAllCatalogInventory(),
+  ["catalog-all-inventory"],
+  { revalidate: 60, tags: ["catalog-products"] },
+);
+
+export const getSuppressedProductHandles = unstable_cache(
+  async () => listSuppressedProductHandles(),
+  ["catalog-suppressed-handles"],
+  { revalidate: 60, tags: ["catalog-products"] },
+);
+
 /** Product counts keyed by collection handle (one cached scan instead of N queries). */
 export const getCollectionProductCounts = unstable_cache(
   async () => {
-    const products = await getActiveProductsList();
+    const [inventory, suppressed] = await Promise.all([
+      getAllCatalogInventory(),
+      getSuppressedProductHandles(),
+    ]);
     /** @type {Record<string, number>} */
     const counts = {};
 
-    if (products.length > 0) {
-      for (const product of products) {
-        for (const handle of product.collectionHandles || []) {
-          counts[handle] = (counts[handle] || 0) + 1;
-        }
-      }
-      return counts;
-    }
-
-    for (const mock of listAllMockCatalogProducts()) {
-      for (const handle of mock.collectionHandles || []) {
-        counts[handle] = (counts[handle] || 0) + 1;
-      }
+    for (const { shopifyHandle } of listAllCatalogCollectionOptions()) {
+      const { activeInCollection, inactiveHandlesInCollection } =
+        splitCollectionInventory(inventory, shopifyHandle, suppressed);
+      counts[shopifyHandle] = mergeCollectionStorefrontProducts(
+        shopifyHandle,
+        activeInCollection,
+        suppressed,
+        inactiveHandlesInCollection,
+      ).length;
     }
 
     return counts;
