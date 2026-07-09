@@ -305,11 +305,11 @@ export async function createFirestoreProduct(input) {
   const existing = await db.collection(PRODUCTS_COLLECTION).doc(handle).get();
   const suppressed = await listSuppressedProductHandles();
 
-  if (existing.exists() && !suppressed.has(handle)) {
+  if (existing.exists && !suppressed.has(handle)) {
     throw new Error(`A product with handle "${handle}" already exists.`);
   }
 
-  if (existing.exists() && suppressed.has(handle)) {
+  if (existing.exists && suppressed.has(handle)) {
     await clearProductSuppression(handle);
   }
 
