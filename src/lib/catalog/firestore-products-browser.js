@@ -12,6 +12,7 @@ import { getFirebaseDb } from "@firebase/client";
 import { slugifyProductHandle } from "./product-handle";
 import { normalizeProductPricingForSave } from "./product-pricing";
 import { filterAssignableCollectionHandles } from "./collections-meta";
+import { parseMainProductImageInput } from "@/lib/admin/product-image-input";
 import {
   firestoreDocToProductDetail,
   PRODUCTS_COLLECTION,
@@ -160,6 +161,10 @@ export async function createDashboardProduct(input) {
   const collectionHandles = filterAssignableCollectionHandles(
     Array.isArray(input.collectionHandles) ? input.collectionHandles : [],
   );
+  const image = parseMainProductImageInput(input);
+  if (!image?.src) {
+    throw new Error("A main product image is required.");
+  }
 
   const docData = {
     handle,
@@ -174,7 +179,7 @@ export async function createDashboardProduct(input) {
     featured: Boolean(input.featured),
     featuredOrder: Number(input.featuredOrder ?? Date.now()),
     collectionHandles,
-    image: input.image?.src ? input.image : null,
+    image,
     images: Array.isArray(input.images) ? input.images.filter((img) => img?.src) : [],
     specs: Array.isArray(input.specs)
       ? input.specs.filter((s) => s?.label && s?.value)

@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createAdminProduct,
   fetchAdminProduct,
   updateAdminProduct,
 } from "@/lib/admin/products-client";
+import { buildMainProductImagePayload } from "@/lib/admin/product-image-input";
 import { slugifyProductHandle } from "@/lib/catalog/product-handle";
 import { normalizeProductPricingForSave, resolveProductPricing } from "@/lib/catalog/product-pricing";
 import {
@@ -83,9 +84,14 @@ export default function DashboardProductForm({ mode, handle }) {
   const [mainPhotoUploading, setMainPhotoUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const mainPhotoSrcRef = useRef("");
 
   const hasMainImage = Boolean(form.image.src.trim());
   const canSubmit = hasMainImage && !mainPhotoUploading && !saving;
+
+  useEffect(() => {
+    mainPhotoSrcRef.current = form.image.src;
+  }, [form.image.src]);
 
   useEffect(() => {
     if (mode !== "edit" || !handle) return;
@@ -127,7 +133,16 @@ export default function DashboardProductForm({ mode, handle }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!form.image.src.trim()) {
+
+    const domImageSrc =
+      event.currentTarget instanceof HTMLFormElement
+        ? event.currentTarget
+            .querySelector("[data-main-photo-url]")
+            ?.value?.trim() ?? ""
+        : "";
+
+    const mainImage = buildMainProductImagePayload(form, domImageSrc || mainPhotoSrcRef.current);
+    if (!mainImage?.src) {
       setError("Add a main product photo before saving.");
       return;
     }
@@ -157,14 +172,9 @@ export default function DashboardProductForm({ mode, handle }) {
       featured: form.featured,
       ...(mode === "create" && form.featured ? { featuredOrder: Date.now() } : {}),
       collectionHandles: filterAssignableCollectionHandles(form.collectionHandles),
-      image: form.image.src.trim()
-        ? {
-            src: form.image.src.trim(),
-            alt: form.image.alt.trim() || form.title.trim(),
-          }
-        : null,
+      image: mainImage,
       images: form.images
-        .filter((img) => img.src.trim())
+        .filter((img) => img.src.trim() && img.src.trim() !== mainImage.src)
         .map((img) => ({
           src: img.src.trim(),
           alt: img.alt.trim() || form.title.trim(),
@@ -229,7 +239,7 @@ export default function DashboardProductForm({ mode, handle }) {
         </p>
       ) : null}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <DashboardFormSection title="Product details" light={light}>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block sm:col-span-2">
@@ -365,13 +375,16 @@ export default function DashboardProductForm({ mode, handle }) {
             src={form.image.src}
             alt={form.image.alt}
             required
+            markAsMainPhoto
             onUploadingChange={setMainPhotoUploading}
-            onSrcChange={(value) =>
+            onSrcChange={(value) => {
+              mainPhotoSrcRef.current = value;
+              setError("");
               setForm((prev) => ({
                 ...prev,
                 image: { ...prev.image, src: value },
-              }))
-            }
+              }));
+            }}
             onAltChange={(value) =>
               setForm((prev) => ({
                 ...prev,

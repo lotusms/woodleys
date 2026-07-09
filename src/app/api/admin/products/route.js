@@ -7,6 +7,7 @@ import {
   syncCatalogProductsFromMock,
 } from "@/lib/catalog/firestore-products";
 import { slugifyProductHandle } from "@/lib/catalog/product-handle";
+import { parseMainProductImageInput } from "@/lib/admin/product-image-input";
 
 export async function GET(request) {
   const auth = await requireAdmin(request);
@@ -51,9 +52,8 @@ export async function POST(request) {
     return NextResponse.json({ error: "title is required" }, { status: 400 });
   }
 
-  const imageSrc =
-    typeof body?.image?.src === "string" ? body.image.src.trim() : "";
-  if (!imageSrc) {
+  const image = parseMainProductImageInput(body);
+  if (!image?.src) {
     return NextResponse.json(
       { error: "A main product image is required." },
       { status: 400 },
@@ -79,7 +79,7 @@ export async function POST(request) {
       featured: body.featured,
       featuredOrder: body.featuredOrder,
       collectionHandles: body.collectionHandles ?? [],
-      image: body.image,
+      image,
       images: body.images ?? [],
       specs: body.specs ?? [],
     });

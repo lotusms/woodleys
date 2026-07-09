@@ -58,6 +58,7 @@ function ProductImagePreview({ src, alt = "", light, label = "Photo preview" }) 
  *   onRemove?: () => void;
  *   storageFolder?: string;
  *   required?: boolean;
+ *   markAsMainPhoto?: boolean;
  *   onUploadingChange?: (uploading: boolean) => void;
  * }} props
  */
@@ -75,6 +76,7 @@ export default function ProductPhotoField({
   onRemove,
   storageFolder = "",
   required = false,
+  markAsMainPhoto = false,
   onUploadingChange,
 }) {
   const inputId = useId();
@@ -236,12 +238,14 @@ export default function ProductPhotoField({
             ) : null}
           </span>
           <input
-            type="url"
+            type="text"
+            inputMode="url"
+            autoComplete="off"
+            {...(markAsMainPhoto ? { "data-main-photo-url": "" } : {})}
             value={src}
             onChange={(e) => onSrcChange(e.target.value)}
             placeholder="https://… or upload above"
             className={inputClassName}
-            required={required}
             aria-required={required}
           />
         </label>
