@@ -287,9 +287,18 @@ export async function getFeaturedProducts(
   fallbackHandles = HOME_FEATURED_PRODUCT_HANDLES,
 ) {
   try {
-    const all = await getActiveProductsList();
-    const featured = all
-      .filter((product) => product.featured && product.active !== false)
+    const [inventory, suppressed] = await Promise.all([
+      getAllCatalogInventory(),
+      getSuppressedProductHandles(),
+    ]);
+
+    const featured = inventory
+      .filter(
+        (product) =>
+          product.active &&
+          product.featured &&
+          !suppressed.has(product.handle),
+      )
       .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
 
     if (featured.length > 0) {

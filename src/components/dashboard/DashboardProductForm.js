@@ -155,6 +155,7 @@ export default function DashboardProductForm({ mode, handle }) {
       quantity: Math.max(0, Number.parseInt(form.quantity || "0", 10) || 0),
       active: form.active,
       featured: form.featured,
+      ...(mode === "create" && form.featured ? { featuredOrder: Date.now() } : {}),
       collectionHandles: filterAssignableCollectionHandles(form.collectionHandles),
       image: form.image.src.trim()
         ? {
@@ -176,14 +177,15 @@ export default function DashboardProductForm({ mode, handle }) {
         const { product } = await createAdminProduct(payload);
         addProduct(product);
         void refresh();
-        router.push(`/dashboard/products/${encodeURIComponent(product.handle)}`);
+        setForm(buildFormState(null));
+        router.push("/dashboard/products");
         return;
       }
 
       const { product } = await updateAdminProduct(handle, payload);
       replaceProduct(product);
       void refresh();
-      setSuccess("Product saved. Storefront collection pages will update shortly.");
+      setSuccess("Product saved. Storefront pages will update shortly.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save product.");
     } finally {
