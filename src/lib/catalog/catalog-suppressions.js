@@ -35,6 +35,13 @@ async function withFirestoreRead(adminRead, restRead) {
   return new Set();
 }
 
+/** @param {unknown} handles */
+export function toSuppressedHandleSet(handles) {
+  if (handles instanceof Set) return handles;
+  if (Array.isArray(handles)) return new Set(handles.filter(Boolean));
+  return new Set();
+}
+
 /**
  * Records a permanently deleted product handle so seed/mock fallbacks stay hidden.
  *
@@ -71,6 +78,7 @@ export async function listSuppressedProductHandles() {
  * @param {Set<string>} suppressed
  */
 export function filterSuppressedCatalogProducts(products, suppressed) {
-  if (!suppressed?.size) return products;
-  return products.filter((product) => !suppressed.has(product.handle));
+  const suppressedSet = toSuppressedHandleSet(suppressed);
+  if (!suppressedSet.size) return products;
+  return products.filter((product) => !suppressedSet.has(product.handle));
 }

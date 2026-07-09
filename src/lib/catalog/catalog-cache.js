@@ -3,6 +3,7 @@ import { cache } from "react";
 import { listFirestoreProducts, listFeaturedFirestoreProducts, listRecentFirestoreProducts } from "./firestore-products";
 import {
   listSuppressedProductHandles,
+  toSuppressedHandleSet,
 } from "./catalog-suppressions";
 import { mergeCollectionStorefrontProducts, splitCollectionInventory } from "./collection-storefront";
 import { listAllCatalogCollectionOptions } from "./collections-meta";
@@ -179,11 +180,16 @@ export const getRecentFirestoreProducts = unstable_cache(
   { revalidate: 60, tags: ["catalog-products"] },
 );
 
-export const getSuppressedProductHandles = unstable_cache(
-  async () => listSuppressedProductHandles(),
+const readSuppressedProductHandles = unstable_cache(
+  async () => [...(await listSuppressedProductHandles())],
   ["catalog-suppressed-handles"],
   { revalidate: 60, tags: ["catalog-products"] },
 );
+
+/** @returns {Promise<Set<string>>} */
+export async function getSuppressedProductHandles() {
+  return toSuppressedHandleSet(await readSuppressedProductHandles());
+}
 
 /** Product counts keyed by collection handle (one cached scan instead of N queries). */
 export const getCollectionProductCounts = unstable_cache(
