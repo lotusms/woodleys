@@ -170,7 +170,7 @@ export default function DashboardProductForm({ mode, handle }) {
       quantity: Math.max(0, Number.parseInt(form.quantity || "0", 10) || 0),
       active: form.active,
       featured: form.featured,
-      ...(mode === "create" && form.featured ? { featuredOrder: Date.now() } : {}),
+      ...(form.featured ? { featuredOrder: Date.now() } : { featuredOrder: 0 }),
       collectionHandles: filterAssignableCollectionHandles(form.collectionHandles),
       image: mainImage,
       images: form.images

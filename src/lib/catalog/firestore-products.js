@@ -18,7 +18,7 @@ import {
   CATALOG_COLLECTIONS_COLLECTION,
   CATALOG_SUPPRESSIONS_COLLECTION,
 } from "./product-firestore-map";
-import { listSuppressedProductHandles } from "./catalog-suppressions";
+import { listSuppressedProductHandles, clearProductSuppression } from "./catalog-suppressions";
 import { normalizeProductPricingForSave } from "./product-pricing";
 
 export { PRODUCTS_COLLECTION, CATALOG_COLLECTIONS_COLLECTION } from "./product-firestore-map";
@@ -182,7 +182,7 @@ export async function listFeaturedFirestoreProducts() {
 
   return products
     .filter((product) => product.active)
-    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
+    .sort((a, b) => (b.featuredOrder ?? 0) - (a.featuredOrder ?? 0));
 }
 
 /**
@@ -303,8 +303,14 @@ export async function createFirestoreProduct(input) {
   }
 
   const existing = await db.collection(PRODUCTS_COLLECTION).doc(handle).get();
-  if (existing.exists) {
+  const suppressed = await listSuppressedProductHandles();
+
+  if (existing.exists() && !suppressed.has(handle)) {
     throw new Error(`A product with handle "${handle}" already exists.`);
+  }
+
+  if (existing.exists() && suppressed.has(handle)) {
+    await clearProductSuppression(handle);
   }
 
   const now = new Date().toISOString();
@@ -438,12 +444,17 @@ export async function deleteFirestoreProduct(handle) {
   if (!handle) return;
 
   const db = getFirebaseAdminDb();
+  const productRef = db.collection(PRODUCTS_COLLECTION).doc(handle);
+  const snap = await productRef.get();
+
+  if (snap.exists) {
+    await productRef.delete();
+  }
+
   await db.collection(CATALOG_SUPPRESSIONS_COLLECTION).doc(handle).set({
     handle,
     suppressedAt: new Date().toISOString(),
   });
-
-  await db.collection(PRODUCTS_COLLECTION).doc(handle).delete();
 }
 
 /**

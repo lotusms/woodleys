@@ -18,8 +18,6 @@ import {
   getAllCatalogInventory,
   getCachedCatalogProduct,
   getCachedCollectionProducts,
-  getFeaturedFirestoreProducts,
-  getRecentFirestoreProducts,
   getSuppressedProductHandles,
 } from "./catalog-cache";
 import {
@@ -36,6 +34,44 @@ import { normalizeCatalogImage } from "./normalize-image-src.js";
 import { HOME_FEATURED_PRODUCT_HANDLES, HOME_NEW_RELEASE_HANDLES, HOME_NEW_RELEASE_LIMIT } from "@/config/featured-products";
 import { mergeCollectionStorefrontProducts, splitCollectionInventory } from "./collection-storefront";
 
+const mockCatalogHandles = cache(() =>
+  new Set(listAllMockCatalogProducts().map((product) => product.handle)),
+);
+
+/** Active storefront products for homepage sections. */
+async function getHomepageActiveProducts() {
+  let inventory = await getAllCatalogInventory();
+  if (inventory.length === 0) {
+    inventory = await getActiveProductsList();
+  }
+  return inventory.filter((product) => product.active);
+}
+
+/**
+ * Dashboard-created products first (newest first), then seeded catalog pieces.
+ * @param {import("./product-types").CatalogProduct[]} products
+ */
+function orderFreshArrivalProducts(products) {
+  const mockHandles = mockCatalogHandles();
+  const custom = products.filter((product) => !mockHandles.has(product.handle));
+  const seeded = products.filter((product) => mockHandles.has(product.handle));
+
+  return [
+    ...sortCatalogProducts(custom, "newest"),
+    ...sortCatalogProducts(seeded, "newest"),
+  ];
+}
+
+/**
+ * Newest featured pieces first in the showroom slider.
+ * @param {import("./product-types").CatalogProduct[]} products
+ */
+function orderFeaturedProducts(products) {
+  return [...products].sort(
+    (a, b) => (b.featuredOrder ?? 0) - (a.featuredOrder ?? 0),
+  );
+}
+
 /**
  * @param {string} collectionHandle
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
@@ -46,7 +82,7 @@ async function fetchCollectionProductsUncached(collectionHandle) {
     getSuppressedProductHandles(),
   ]);
   const { activeInCollection, inactiveHandlesInCollection } =
-    splitCollectionInventory(inventory, collectionHandle, suppressed);
+    splitCollectionInventory(inventory, collectionHandle);
 
   const merged = mergeCollectionStorefrontProducts(
     collectionHandle,
@@ -105,8 +141,6 @@ export const getCatalogProductByHandleRequest = cache(async function getCatalogP
   if (!handle) return null;
 
   const suppressed = await getSuppressedProductHandles();
-  if (suppressed.has(handle)) return null;
-
   if (isLegacyRingPreviewHandle(handle)) {
     return null;
   }
@@ -126,6 +160,8 @@ export const getCatalogProductByHandleRequest = cache(async function getCatalogP
     if (!firestoreProduct.active) return null;
     return withNormalizedProse(firestoreProduct);
   }
+
+  if (suppressed.has(handle)) return null;
 
   if (isRingSampleProductHandle(handle) || isBulovaSampleProductHandle(handle)) {
     const mock = getMockProductByHandle(handle);
@@ -251,13 +287,10 @@ export async function getNewReleaseProducts({
   handles,
 } = {}) {
   try {
-    const [recent, suppressed] = await Promise.all([
-      getRecentFirestoreProducts(limit),
-      getSuppressedProductHandles(),
-    ]);
-    const active = recent.filter((product) => !suppressed.has(product.handle));
-    if (active.length > 0) {
-      return active.map(toHomeCatalogProduct);
+    const active = await getHomepageActiveProducts();
+    const ordered = orderFreshArrivalProducts(active);
+    if (ordered.length > 0) {
+      return ordered.slice(0, limit).map(toHomeCatalogProduct);
     }
   } catch (e) {
     console.error("[catalog] new release products:", e);
@@ -291,7 +324,8 @@ export async function getFeaturedProducts(
   fallbackHandles = HOME_FEATURED_PRODUCT_HANDLES,
 ) {
   try {
-    const featured = await getFeaturedFirestoreProducts();
+    const active = await getHomepageActiveProducts();
+    const featured = orderFeaturedProducts(active.filter((product) => product.featured));
     if (featured.length > 0) {
       return featured.map(toHomeCatalogProduct);
     }

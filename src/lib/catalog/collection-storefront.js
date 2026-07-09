@@ -37,7 +37,6 @@ export function mergeCollectionStorefrontProducts(
 
   for (const product of activeInCollection) {
     if (isLegacyRingPreviewHandle(product.handle)) continue;
-    if (suppressed.has(product.handle)) continue;
 
     byHandle.set(
       product.handle,
@@ -53,10 +52,9 @@ export function mergeCollectionStorefrontProducts(
  * @param {string} collectionHandle
  * @param {Set<string>} [suppressed]
  */
-export function splitCollectionInventory(inventory, collectionHandle, suppressed = new Set()) {
+export function splitCollectionInventory(inventory, collectionHandle) {
   const inCollection = inventory.filter(
     (product) =>
-      !suppressed.has(product.handle) &&
       Array.isArray(product.collectionHandles) &&
       product.collectionHandles.includes(collectionHandle),
   );

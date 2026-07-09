@@ -43,7 +43,21 @@ export async function listDashboardProducts() {
 
   const products = productSnap.docs
     .map((d) => firestoreDocToProductDetail(d.data(), d.id, { includeInactive: true }))
-    .filter((product) => product && !suppressed.has(product.handle));
+    .filter(Boolean);
+
+  // Orphan cleanup: suppression tombstones only apply after permanent delete.
+  // If the product document still exists, clear the stale tombstone.
+  const staleSuppressions = products
+    .map((product) => product.handle)
+    .filter((handle) => suppressed.has(handle));
+
+  if (staleSuppressions.length > 0) {
+    await Promise.all(
+      staleSuppressions.map((handle) =>
+        deleteDoc(doc(db, CATALOG_SUPPRESSIONS_COLLECTION, handle)),
+      ),
+    );
+  }
 
   return sortDashboardProducts(products);
 }
@@ -151,8 +165,16 @@ export async function createDashboardProduct(input) {
 
   const ref = doc(db, PRODUCTS_COLLECTION, handle);
   const existing = await getDoc(ref);
-  if (existing.exists()) {
+  const suppressionRef = doc(db, CATALOG_SUPPRESSIONS_COLLECTION, handle);
+  const suppressionSnap = await getDoc(suppressionRef);
+  const isSuppressed = suppressionSnap.exists();
+
+  if (existing.exists() && !isSuppressed) {
     throw new Error(`A product with handle "${handle}" already exists.`);
+  }
+
+  if (existing.exists() && isSuppressed) {
+    await deleteDoc(suppressionRef);
   }
 
   const now = new Date().toISOString();
@@ -207,12 +229,12 @@ export async function deleteDashboardProduct(handle) {
   const snap = await getDoc(ref);
   const now = new Date().toISOString();
 
+  if (snap.exists()) {
+    await deleteDoc(ref);
+  }
+
   await setDoc(doc(db, CATALOG_SUPPRESSIONS_COLLECTION, handle), {
     handle,
     suppressedAt: now,
   });
-
-  if (snap.exists()) {
-    await deleteDoc(ref);
-  }
 }

@@ -43,7 +43,6 @@ function mergeActiveSeedProducts(products, suppressed = new Set(), inactiveHandl
 
   for (const product of products) {
     if (shouldHideFromStorefront(product.handle)) continue;
-    if (suppressed.has(product.handle)) continue;
 
     if (
       isRingSampleProductHandle(product.handle) ||
@@ -117,7 +116,7 @@ const loadActiveProducts = cache(async () => {
     }
 
     return mergeActiveSeedProducts(
-      activeProducts.filter((product) => !suppressed.has(product.handle)),
+      activeProducts,
       suppressed,
       inactiveHandles,
     );
@@ -144,11 +143,7 @@ export const getAllCatalogInventory = unstable_cache(
 
 const loadFeaturedFirestoreProducts = cache(async () => {
   try {
-    const [products, suppressed] = await Promise.all([
-      listFeaturedFirestoreProducts(),
-      listSuppressedProductHandles(),
-    ]);
-    return products.filter((product) => !suppressed.has(product.handle));
+    return await listFeaturedFirestoreProducts();
   } catch {
     return [];
   }
@@ -163,11 +158,7 @@ export const getFeaturedFirestoreProducts = unstable_cache(
 
 const loadRecentFirestoreProducts = cache(async (limit = 10) => {
   try {
-    const [products, suppressed] = await Promise.all([
-      listRecentFirestoreProducts(limit),
-      listSuppressedProductHandles(),
-    ]);
-    return products.filter((product) => !suppressed.has(product.handle));
+    return await listRecentFirestoreProducts(limit);
   } catch {
     return [];
   }
@@ -203,7 +194,7 @@ export const getCollectionProductCounts = unstable_cache(
 
     for (const { shopifyHandle } of listAllCatalogCollectionOptions()) {
       const { activeInCollection, inactiveHandlesInCollection } =
-        splitCollectionInventory(inventory, shopifyHandle, suppressed);
+        splitCollectionInventory(inventory, shopifyHandle);
       counts[shopifyHandle] = mergeCollectionStorefrontProducts(
         shopifyHandle,
         activeInCollection,

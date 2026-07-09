@@ -43,7 +43,8 @@ export function toSuppressedHandleSet(handles) {
 }
 
 /**
- * Records a permanently deleted product handle so seed/mock fallbacks stay hidden.
+ * Records a permanently deleted handle so seed/mock fallbacks stay hidden.
+ * Internal only — not shown in the dashboard as a product status.
  *
  * @param {string} handle
  */
@@ -56,6 +57,14 @@ export async function suppressProductHandle(handle) {
     handle,
     suppressedAt: now,
   });
+}
+
+/** @param {string} handle */
+export async function clearProductSuppression(handle) {
+  if (!handle) return;
+
+  const db = getFirebaseAdminDb();
+  await db.collection(CATALOG_SUPPRESSIONS_COLLECTION).doc(handle).delete();
 }
 
 /** @returns {Promise<Set<string>>} */
