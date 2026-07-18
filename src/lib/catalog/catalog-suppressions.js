@@ -17,18 +17,28 @@ export { CATALOG_SUPPRESSIONS_COLLECTION } from "./product-firestore-map";
  * @param {() => Promise<T>} restRead
  */
 async function withFirestoreRead(adminRead, restRead) {
+  const restOk = isFirestoreRestConfigured();
+
   if (hasFirebaseAdminCredentials()) {
     try {
       return await adminRead();
     } catch (error) {
-      if (isFirebaseAdminAuthError(error) && isFirestoreRestConfigured()) {
+      // Prefer REST over failing the page when Admin creds are missing/broken.
+      if (restOk && isFirebaseAdminAuthError(error)) {
+        return restRead();
+      }
+      if (restOk) {
+        console.warn(
+          "[catalog] suppressions Admin read failed; using REST fallback:",
+          error instanceof Error ? error.message : error,
+        );
         return restRead();
       }
       throw error;
     }
   }
 
-  if (isFirestoreRestConfigured()) {
+  if (restOk) {
     return restRead();
   }
 

@@ -38,13 +38,9 @@ const mockCatalogHandles = cache(() =>
   new Set(listAllMockCatalogProducts().map((product) => product.handle)),
 );
 
-/** Active storefront products for homepage sections. */
+/** Active storefront products for homepage sections (excludes preview-* placeholders). */
 async function getHomepageActiveProducts() {
-  let inventory = await getAllCatalogInventory();
-  if (inventory.length === 0) {
-    inventory = await getActiveProductsList();
-  }
-  return inventory.filter((product) => product.active);
+  return getActiveProductsList();
 }
 
 /**
@@ -299,23 +295,34 @@ export async function getNewReleaseProducts({
   const fallbackHandles =
     handles?.length ? handles : HOME_NEW_RELEASE_HANDLES;
   if (fallbackHandles.length > 0) {
-    const resolved = await Promise.all(
-      fallbackHandles.map((handle) => getCatalogProductByHandle(handle)),
-    );
-    const found = resolved.filter(Boolean);
-    if (found.length > 0) {
-      return found.map(toHomeCatalogProduct).slice(0, limit);
+    try {
+      const resolved = await Promise.all(
+        fallbackHandles.map((handle) => getCatalogProductByHandle(handle)),
+      );
+      const found = resolved.filter(Boolean);
+      if (found.length > 0) {
+        return found.map(toHomeCatalogProduct).slice(0, limit);
+      }
+    } catch (e) {
+      console.error("[catalog] new release products fallback:", e);
     }
   }
 
-  const mocks = sortCatalogProducts(listAllMockCatalogProducts(), "newest");
-  return mocks.slice(0, limit).map((product) => ({
-    ...toHomeCatalogProduct({ ...product, source: /** @type {const} */ ("mock") }),
-  }));
+  try {
+    const mocks = sortCatalogProducts(listAllMockCatalogProducts(), "newest");
+    return mocks.slice(0, limit).map((product) => ({
+      ...toHomeCatalogProduct({ ...product, source: /** @type {const} */ ("mock") }),
+    }));
+  } catch (e) {
+    console.error("[catalog] new release products mock fallback:", e);
+    return [];
+  }
 }
 
 /**
  * Featured active products for the homepage showroom slider.
+ * Uses dashboard `featured` flags when present; otherwise falls back to
+ * {@link HOME_FEATURED_PRODUCT_HANDLES}. Preview placeholders never appear here.
  *
  * @param {readonly string[]} [fallbackHandles]
  * @returns {Promise<import("./product-types").CatalogProduct[]>}
@@ -325,7 +332,9 @@ export async function getFeaturedProducts(
 ) {
   try {
     const active = await getHomepageActiveProducts();
-    const featured = orderFeaturedProducts(active.filter((product) => product.featured));
+    const featured = orderFeaturedProducts(
+      active.filter((product) => product.featured),
+    );
     if (featured.length > 0) {
       return featured.map(toHomeCatalogProduct);
     }
@@ -335,9 +344,13 @@ export async function getFeaturedProducts(
 
   if (!fallbackHandles?.length) return [];
 
-  const resolved = await Promise.all(
-    fallbackHandles.map((handle) => getCatalogProductByHandle(handle)),
-  );
-
-  return resolved.filter(Boolean).map(toHomeCatalogProduct);
+  try {
+    const resolved = await Promise.all(
+      fallbackHandles.map((handle) => getCatalogProductByHandle(handle)),
+    );
+    return resolved.filter(Boolean).map(toHomeCatalogProduct);
+  } catch (e) {
+    console.error("[catalog] featured products fallback:", e);
+    return [];
+  }
 }

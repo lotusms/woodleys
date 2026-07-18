@@ -1,14 +1,16 @@
 import { initializeApp, getApps, cert, applicationDefault } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { existsSync } from "node:fs";
 import { FIRESTORE_DATABASE_ID } from "@firebase/config";
 
 let dbInstance = null;
 
-/** True when a service account JSON or ADC path is configured. */
+/** True when a usable service account JSON or ADC path is configured. */
 export function hasFirebaseAdminCredentials() {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim()) return true;
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim()) return true;
+  const adcPath = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
+  if (adcPath && existsSync(adcPath)) return true;
   return false;
 }
 
@@ -23,11 +25,22 @@ export function isFirebaseAdminAuthError(error) {
     error && typeof error === "object" && "code" in error
       ? String(/** @type {{ code?: unknown }} */ (error).code).toLowerCase()
       : "";
+  const causeCode =
+    error &&
+    typeof error === "object" &&
+    "cause" in error &&
+    error.cause &&
+    typeof error.cause === "object" &&
+    "code" in error.cause
+      ? String(/** @type {{ code?: unknown }} */ (error.cause).code).toLowerCase()
+      : "";
 
   return (
     code === "2" ||
     code === "unknown" ||
     code === "unauthenticated" ||
+    code === "enoent" ||
+    causeCode === "enoent" ||
     msg.includes("unable to detect a project id") ||
     msg.includes("could not load the default credentials") ||
     msg.includes("firebase_service_account") ||
@@ -36,7 +49,9 @@ export function isFirebaseAdminAuthError(error) {
     msg.includes("getting metadata from plugin failed") ||
     msg.includes("error fetching access token") ||
     msg.includes("invalid jwt signature") ||
-    msg.includes("account not found")
+    msg.includes("account not found") ||
+    msg.includes("does not exist, or it is not a file") ||
+    msg.includes("enoent")
   );
 }
 
@@ -67,10 +82,15 @@ export function getFirebaseAdminApp() {
   const projectId = resolveProjectId();
 
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim()) {
-    return initializeApp({
-      credential: applicationDefault(),
-      ...(projectId ? { projectId } : {}),
-    });
+    const adcPath = process.env.GOOGLE_APPLICATION_CREDENTIALS.trim();
+    if (!existsSync(adcPath)) {
+      // Fall through to project-id-only init (or throw) so REST reads can take over.
+    } else {
+      return initializeApp({
+        credential: applicationDefault(),
+        ...(projectId ? { projectId } : {}),
+      });
+    }
   }
 
   if (projectId) {
