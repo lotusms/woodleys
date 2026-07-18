@@ -28,7 +28,7 @@ function NavLink({ href, label, prefix }) {
 
 export default function DesktopMainNav() {
   return (
-    <PopoverGroup className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 xl:gap-x-6">
+    <PopoverGroup className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-2 xl:gap-x-4 2xl:gap-x-5">
       {mainNav.map((item) => {
         const hasDropdown =
           (item.children && item.children.length > 0) ||

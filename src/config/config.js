@@ -7,10 +7,22 @@ export const orgNameShort = "Woodley's";
 export const orgTagline = "Fine jewelry trusted since 1948";
 export const orgLocation = "Beaumont, California";
 export const orgEstablished = 1948;
-export const orgPhone = "(951) 845-1234";
+export const orgPhone = "(951) 845-1395";
 export const orgPhoneTel = orgPhone.replace(/\D/g, "");
 export const orgEmail = "info@woodleyjewelers.com";
 export const orgAddress = "Beaumont, California";
+
+/** Footer Visit column social profiles. */
+export const orgSocialLinks = [
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/woodleysjewelers",
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/woodleysjewelers/",
+  },
+];
 
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://woodleyjewelers.com";

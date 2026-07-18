@@ -5,7 +5,7 @@ import PageLayout from "@/components/PageLayout";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useCart } from "@/context/CartContext";
-import { orderTotal, shippingForSubtotal } from "@/lib/checkout";
+import { orderTotal, shippingForSubtotal, shippingPolicyNote } from "@/lib/checkout";
 import { formatUsd } from "@/lib/money";
 
 function lineImageSrc(line) {
@@ -140,6 +140,9 @@ export default function CartPageContent() {
                 {shippingUsd === 0 ? "Complimentary" : formatUsd(shippingUsd)}
               </dd>
             </div>
+            <p className="text-xs leading-relaxed text-site-secondary">
+              {shippingPolicyNote(subtotalUsd)}
+            </p>
             <div className="flex justify-between gap-4 border-t border-stone-200/80 pt-4 text-base font-semibold text-site-fg">
               <dt>Total</dt>
               <dd className="tabular-nums text-warm-gold-dark">{formatUsd(totalUsd)}</dd>

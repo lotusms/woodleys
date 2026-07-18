@@ -1,4 +1,7 @@
-import { CATALOG_SECTIONS } from "./categories.js";
+import {
+  CATALOG_SECTIONS,
+  walkCategoryEntries,
+} from "./categories.js";
 
 /**
  * @typedef {{ shopifyHandle: string; title: string; sectionKey: string; slug?: string }} CatalogCollectionOption
@@ -13,6 +16,8 @@ export function isParentCatalogSectionHandle(shopifyHandle) {
 
 /**
  * Leaf collections only — products cannot be assigned to a parent section handle.
+ * Parent diamond origins (`natural-diamonds`, `lab-grown-diamonds`) remain assignable
+ * for “all stones of this origin”; shape children are also assignable for pricing.
  * @param {string[]} handles
  */
 export function filterAssignableCollectionHandles(handles) {
@@ -30,16 +35,26 @@ export function filterAssignableCollectionHandles(handles) {
 export function listAssignableCatalogCollectionOptions() {
   /** @type {CatalogCollectionOption[]} */
   const options = [];
+  /** @type {Set<string>} */
+  const seen = new Set();
 
   for (const [sectionKey, section] of Object.entries(CATALOG_SECTIONS)) {
-    for (const child of section.children) {
+    if (section.hub === "audience") continue;
+
+    walkCategoryEntries(section.children, (child, slugPath) => {
+      if (child.derived || seen.has(child.shopifyHandle)) return;
+      seen.add(child.shopifyHandle);
+      const parentTitle =
+        slugPath.length > 1
+          ? section.children.find((c) => c.slug === slugPath[0])?.title
+          : null;
       options.push({
         shopifyHandle: child.shopifyHandle,
-        title: child.title,
+        title: parentTitle ? `${parentTitle} · ${child.title}` : child.title,
         sectionKey,
-        slug: child.slug,
+        slug: slugPath.join("/"),
       });
-    }
+    });
   }
 
   return options;
@@ -49,22 +64,29 @@ export function listAssignableCatalogCollectionOptions() {
 export function listAllCatalogCollectionOptions() {
   /** @type {CatalogCollectionOption[]} */
   const options = [];
+  /** @type {Set<string>} */
+  const seen = new Set();
 
   for (const [sectionKey, section] of Object.entries(CATALOG_SECTIONS)) {
-    options.push({
-      shopifyHandle: section.shopifyHandle,
-      title: section.title,
-      sectionKey,
-    });
+    if (!seen.has(section.shopifyHandle)) {
+      seen.add(section.shopifyHandle);
+      options.push({
+        shopifyHandle: section.shopifyHandle,
+        title: section.title,
+        sectionKey,
+      });
+    }
 
-    for (const child of section.children) {
+    walkCategoryEntries(section.children, (child, slugPath) => {
+      if (child.derived || seen.has(child.shopifyHandle)) return;
+      seen.add(child.shopifyHandle);
       options.push({
         shopifyHandle: child.shopifyHandle,
         title: `${section.title}, ${child.title}`,
         sectionKey,
-        slug: child.slug,
+        slug: slugPath.join("/"),
       });
-    }
+    });
   }
 
   return options;
@@ -83,17 +105,21 @@ export function getCatalogCollectionMeta(shopifyHandle) {
         description: section.description,
       };
     }
-    for (const child of section.children) {
+    /** @type {ReturnType<typeof getCatalogCollectionMeta> | null} */
+    let found = null;
+    walkCategoryEntries(section.children, (child, slugPath) => {
+      if (found) return;
       if (child.shopifyHandle === shopifyHandle) {
-        return {
+        found = {
           shopifyHandle,
           title: child.title,
           sectionKey,
-          slug: child.slug,
+          slug: slugPath.join("/"),
           description: child.description,
         };
       }
-    }
+    });
+    if (found) return found;
   }
   return {
     shopifyHandle,

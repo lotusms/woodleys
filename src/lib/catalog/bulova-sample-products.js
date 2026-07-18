@@ -221,6 +221,7 @@ export function buildBulovaSampleProducts() {
       seoTitle: def.seoTitle,
       metaDescription: def.metaDescription,
       source: /** @type {const} */ ("mock"),
+      audience: /** @type {const} */ ("unisex"),
     };
   });
 }

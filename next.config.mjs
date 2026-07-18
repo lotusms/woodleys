@@ -49,6 +49,16 @@ const nextConfig = {
       { source: "/shop", destination: "/shop-all", permanent: true },
       { source: "/appointments", destination: "/contact", permanent: true },
       { source: "/work", destination: "/", permanent: true },
+      // Legacy flat diamond shape URLs → diamonds hub (choose natural or lab-grown)
+      { source: "/diamonds/round", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/oval", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/emerald", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/pear", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/cushion", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/princess", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/radiant", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/marquise", destination: "/diamonds", permanent: true },
+      { source: "/diamonds/heart", destination: "/diamonds", permanent: true },
     ];
   },
 };

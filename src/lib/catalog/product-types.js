@@ -14,6 +14,7 @@
  *   image?: { src: string; alt: string };
  *   availableForSale: boolean;
  *   source: CatalogProductSource;
+ *   audience?: import("./product-audience").ProductAudience;
  *   createdAt?: string;
  *   popularity?: number;
  * }} CatalogProduct

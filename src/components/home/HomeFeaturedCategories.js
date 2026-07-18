@@ -38,10 +38,9 @@ export default function HomeFeaturedCategories() {
 
             <div className="max-w-xl space-y-5 text-base leading-relaxed text-stone-700 sm:text-lg sm:leading-8">
               <p>
-                Six paths into what we do best: engagement and wedding, diamonds,
-                custom design, everyday fine jewelry, watches, and lifelong care.
-                Each collection is curated in our showroom, meant to be explored
-                at your pace.
+                Browse by jewelry type, then choose Women&apos;s or Men&apos;s
+                where it matters. Engagement, diamonds, custom design, and care
+                stay easy to find at your pace.
               </p>
               <Link
                 href="/shop-all"

@@ -172,6 +172,10 @@ function buildProductDoc(product, now) {
     active: product.active !== false,
     featured: Boolean(product.featured),
     featuredOrder: Number(product.featuredOrder ?? Date.now()),
+    audience:
+      product.audience === "women" || product.audience === "men" || product.audience === "unisex"
+        ? product.audience
+        : "unisex",
     collectionHandles: [...new Set(product.collectionHandles)],
     image,
     images,

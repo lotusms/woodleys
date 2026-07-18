@@ -1,4 +1,4 @@
-import { CATALOG_SECTIONS } from "@/lib/catalog/categories";
+import { CATALOG_SECTIONS, walkCategoryEntries } from "@/lib/catalog/categories";
 
 export const PRODUCTS_FILTER_ALL = "all";
 export const PRODUCTS_FILTER_UNCATEGORIZED = "uncategorized";
@@ -18,10 +18,12 @@ export const PRODUCTS_CATEGORY_NAV = [
 export function sectionCollectionHandles(sectionKey) {
   const section = CATALOG_SECTIONS[sectionKey];
   if (!section) return [];
-  return [
-    section.shopifyHandle,
-    ...section.children.map((child) => child.shopifyHandle),
-  ];
+  /** @type {string[]} */
+  const handles = [section.shopifyHandle];
+  walkCategoryEntries(section.children, (child) => {
+    handles.push(child.shopifyHandle);
+  });
+  return handles;
 }
 
 /**
@@ -31,10 +33,19 @@ export function sectionCollectionHandles(sectionKey) {
 export function sectionSubcategories(sectionKey) {
   const section = CATALOG_SECTIONS[sectionKey];
   if (!section) return [];
-  return section.children.map((child) => ({
-    shopifyHandle: child.shopifyHandle,
-    title: child.title,
-  }));
+  /** @type {{ shopifyHandle: string; title: string }[]} */
+  const items = [];
+  walkCategoryEntries(section.children, (child, slugPath) => {
+    const parent =
+      slugPath.length > 1
+        ? section.children.find((c) => c.slug === slugPath[0])
+        : null;
+    items.push({
+      shopifyHandle: child.shopifyHandle,
+      title: parent ? `${parent.title} · ${child.title}` : child.title,
+    });
+  });
+  return items;
 }
 
 /**

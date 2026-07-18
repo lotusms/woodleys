@@ -95,20 +95,17 @@ export default function DashboardSettingsPage({ light }) {
   const [error, setError] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [shopifyTestMessage, setShopifyTestMessage] = useState("");
-  const [stullerTestMessage, setStullerTestMessage] = useState("");
 
   const [shopifyStoreDomain, setShopifyStoreDomain] = useState("");
   const [shopifyStorefrontAccessToken, setShopifyStorefrontAccessToken] = useState("");
   const [shopifyClientId, setShopifyClientId] = useState("");
   const [shopifyClientSecret, setShopifyClientSecret] = useState("");
   const [shopifyCatalogEnabled, setShopifyCatalogEnabled] = useState(false);
-  const [stullerEmbedUrl, setStullerEmbedUrl] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
 
   const applySettings = useCallback((settings) => {
     setShopifyStoreDomain(settings.shopifyStoreDomain || "");
     setShopifyCatalogEnabled(Boolean(settings.shopifyCatalogEnabled));
-    setStullerEmbedUrl(settings.stullerEmbedUrl || "");
     setShopifyStorefrontAccessToken(settings.secrets?.shopifyStorefrontAccessToken || "");
     setShopifyClientId(settings.secrets?.shopifyClientId || "");
     setShopifyClientSecret(settings.secrets?.shopifyClientSecret || "");
@@ -122,7 +119,6 @@ export default function DashboardSettingsPage({ light }) {
       shopifyClientId,
       shopifyClientSecret,
       shopifyCatalogEnabled,
-      stullerEmbedUrl,
     }),
     [
       shopifyStoreDomain,
@@ -130,7 +126,6 @@ export default function DashboardSettingsPage({ light }) {
       shopifyClientId,
       shopifyClientSecret,
       shopifyCatalogEnabled,
-      stullerEmbedUrl,
     ],
   );
 
@@ -177,7 +172,6 @@ export default function DashboardSettingsPage({ light }) {
     setTestBusy(target);
     setError("");
     if (target === "shopify") setShopifyTestMessage("");
-    if (target === "stuller") setStullerTestMessage("");
 
     try {
       const result = await testAdminIntegration(target, formPayload(), {
@@ -192,8 +186,6 @@ export default function DashboardSettingsPage({ light }) {
       const message = result.message || (result.ok ? "Connection succeeded." : "Test failed.");
       if (target === "shopify") {
         setShopifyTestMessage(message);
-      } else {
-        setStullerTestMessage(message);
       }
 
       if (!result.ok && result.error) {
@@ -202,7 +194,6 @@ export default function DashboardSettingsPage({ light }) {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Test failed.";
       if (target === "shopify") setShopifyTestMessage(msg);
-      else setStullerTestMessage(msg);
     } finally {
       setTestBusy(null);
     }
@@ -213,8 +204,8 @@ export default function DashboardSettingsPage({ light }) {
       <div className="mb-8">
         <h1 className={dash.dashboardPageTitle(light)}>Settings</h1>
         <p className={`mt-3 max-w-3xl ${dash.dashboardPageSubtitle(light)}`}>
-          Connect Shopify and Stuller for the storefront. Values saved here are
-          stored securely in Firestore and applied across the site. No redeploy
+          Connect Shopify for the storefront. Values saved here are stored
+          securely in Firestore and applied across the site. No redeploy
           required.
         </p>
         {updatedAt ? (
@@ -237,7 +228,6 @@ export default function DashboardSettingsPage({ light }) {
 
       {!loading ? (
         <>
-          <div className="grid gap-8 lg:grid-cols-2">
           <DashboardFormSection
             light={light}
             title="Shopify"
@@ -358,46 +348,6 @@ export default function DashboardSettingsPage({ light }) {
               </div>
             </div>
           </DashboardFormSection>
-
-          <DashboardFormSection light={light} title="Stuller showcase">
-            <div className="space-y-5">
-              <SettingsField
-                light={light}
-                id="stuller-embed-url"
-                label="Embed URL"
-                value={stullerEmbedUrl}
-                onChange={setStullerEmbedUrl}
-                placeholder="https://…jewelershowcase.com/"
-                hint="From Stuller Showcase → Embed. Appears on Shop All inside your site layout."
-              />
-
-              <StatusBanner
-                light={light}
-                tone={stullerTestMessage.includes("reachable") || stullerTestMessage.includes("valid") ? "success" : "neutral"}
-                message={stullerTestMessage}
-              />
-
-              <div className="flex flex-wrap gap-3 pt-1">
-                <PrimaryButton
-                  type="button"
-                  disabled={testBusy === "stuller"}
-                  className="px-5 py-2.5"
-                  onClick={() => handleTest("stuller", false)}
-                >
-                  {testBusy === "stuller" ? "Testing…" : "Test URL"}
-                </PrimaryButton>
-                <button
-                  type="button"
-                  disabled={testBusy === "stuller"}
-                  onClick={() => handleTest("stuller", true)}
-                  className={dash.ordersGhostButton(light)}
-                >
-                  Test & save
-                </button>
-              </div>
-            </div>
-          </DashboardFormSection>
-          </div>
 
           <div id="account-security" className="scroll-mt-8 grid gap-8 lg:grid-cols-2">
             <DashboardFormSection light={light} title="Account security">

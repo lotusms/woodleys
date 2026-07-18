@@ -25,6 +25,7 @@ import {
   ORDER_STORAGE_KEY,
   orderTotal,
   shippingForSubtotal,
+  shippingPolicyNote,
 } from "@/lib/checkout";
 import { formatUsd } from "@/lib/money";
 import * as overlayChrome from "@/lib/overlayChrome";
@@ -472,6 +473,9 @@ export default function CheckoutFlow({
                   {shippingUsd === 0 ? "Complimentary" : formatUsd(shippingUsd)}
                 </dd>
               </div>
+              <p className={`text-xs leading-relaxed ${overlayChrome.checkoutSummaryMuted(light)}`}>
+                {shippingPolicyNote(subtotalUsd)}
+              </p>
               <div
                 className={`flex justify-between border-t pt-4 text-base font-semibold ${overlayChrome.checkoutSummaryTotalBorder(light)}`}
               >

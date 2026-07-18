@@ -1,12 +1,44 @@
+import { diamondShapeLinksForOrigin } from "../../config/diamond-shapes.js";
 import { BULOVA_CATEGORY_IMAGE } from "./bulova-sample-products.js";
 import { RING_CATEGORY_IMAGE } from "./ring-sample-products.js";
-
 /**
  * Catalog taxonomy — structured for Shopify collection handles when connected.
  * Each entry maps to a future Shopify collection handle via `shopifyHandle`.
+ *
+ * Audience hubs (`women`, `men`) reuse type collection handles and filter by
+ * product `audience`. Their children are `derived` so they are not duplicated
+ * in the admin collection checklist.
+ *
+ * Diamond origins nest shape children so natural vs lab-grown can be priced
+ * separately per cut (`natural-round-diamonds`, `lab-grown-round-diamonds`, …).
  */
 
-/** @typedef {{ slug: string; title: string; description: string; shopifyHandle: string; image?: { src: string; alt: string } }} CategoryEntry */
+/**
+ * @typedef {{
+ *   slug: string;
+ *   title: string;
+ *   description: string;
+ *   shopifyHandle: string;
+ *   image?: { src: string; alt: string };
+ *   audience?: import("./product-audience").ProductAudience;
+ *   sourceHandles?: string[];
+ *   derived?: boolean;
+ *   children?: CategoryEntry[];
+ * }} CategoryEntry
+ */
+
+/**
+ * @typedef {{
+ *   title: string;
+ *   eyebrow: string;
+ *   description: string;
+ *   shopifyHandle: string;
+ *   intro: string;
+ *   children: CategoryEntry[];
+ *   audience?: import("./product-audience").ProductAudience;
+ *   hub?: "audience";
+ * }} CatalogSection
+ */
 
 const editorialImages = {
   engagement:
@@ -22,8 +54,171 @@ const editorialImages = {
     "https://woodleyjewelers.com/cdn/shop/files/4DC717D9-AFDD-4A66-90A3-F442E4225EDF_800x800@2x.jpg?v=1639025504",
 };
 
-/** @type {Record<string, { title: string; eyebrow: string; description: string; shopifyHandle: string; intro: string; children: CategoryEntry[] }>} */
+/** @type {Record<string, CatalogSection>} */
 export const CATALOG_SECTIONS = {
+  women: {
+    title: "Women",
+    eyebrow: "Her collection",
+    description:
+      "Fine jewelry, watches, and bridal pieces selected for women, from everyday gold to engagement styles.",
+    shopifyHandle: "women",
+    hub: "audience",
+    audience: "women",
+    intro:
+      "Browse by jewelry type or begin with bridal. Every piece can also be explored under Engagement, Fine Jewelry, and Watches when you prefer shopping by category.",
+    children: [
+      {
+        slug: "rings",
+        title: "Rings",
+        description: "Stackable bands, statement rings, and everyday gold and gemstone styles for her.",
+        shopifyHandle: "fine-rings",
+        audience: "women",
+        derived: true,
+        image: RING_CATEGORY_IMAGE,
+      },
+      {
+        slug: "necklaces",
+        title: "Necklaces",
+        description: "Chains and necklaces in gold and platinum with thoughtful proportion.",
+        shopifyHandle: "necklaces",
+        audience: "women",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Fine jewelry necklace" },
+      },
+      {
+        slug: "pendants",
+        title: "Pendants",
+        description: "Pendants and charms with room for personalization.",
+        shopifyHandle: "pendants",
+        audience: "women",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Gold pendant on a chain" },
+      },
+      {
+        slug: "earrings",
+        title: "Earrings",
+        description: "Studs, drops, and hoops in balanced scale for daily wear.",
+        shopifyHandle: "earrings",
+        audience: "women",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Fine jewelry earrings" },
+      },
+      {
+        slug: "bracelets",
+        title: "Bracelets",
+        description: "Bracelets and bangles with secure clasps and lasting finish.",
+        shopifyHandle: "bracelets",
+        audience: "women",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Fine jewelry bracelet" },
+      },
+      {
+        slug: "watches",
+        title: "Watches",
+        description: "Women's timepieces from Bulova, Citizen, and Seiko.",
+        shopifyHandle: "watches",
+        sourceHandles: ["bulova", "citizen", "seiko"],
+        audience: "women",
+        derived: true,
+        image: BULOVA_CATEGORY_IMAGE,
+      },
+      {
+        slug: "engagement-rings",
+        title: "Engagement Rings",
+        description: "Solitaire, halo, three-stone, and vintage-inspired engagement styles.",
+        shopifyHandle: "engagement-wedding",
+        sourceHandles: [
+          "solitaire-rings",
+          "halo-rings",
+          "three-stone-rings",
+          "vintage-inspired-rings",
+        ],
+        audience: "women",
+        derived: true,
+        image: {
+          src: editorialImages.engagement,
+          alt: "Engagement ring with diamond center stone",
+        },
+      },
+      {
+        slug: "wedding-bands",
+        title: "Wedding Bands",
+        description: "Women's wedding bands in precious metals, plain, pavé, or engraved.",
+        shopifyHandle: "wedding-bands",
+        audience: "women",
+        derived: true,
+        image: RING_CATEGORY_IMAGE,
+      },
+    ],
+  },
+  men: {
+    title: "Men",
+    eyebrow: "His collection",
+    description:
+      "Rings, bracelets, watches, and wedding bands selected for men, refined pieces meant for daily wear and lasting occasions.",
+    shopifyHandle: "men",
+    hub: "audience",
+    audience: "men",
+    intro:
+      "Start with rings and watches, or choose a wedding band. Prefer shopping by brand or category? Fine Jewelry and Watches remain available on their own.",
+    children: [
+      {
+        slug: "rings",
+        title: "Rings",
+        description: "Signets, bands, and everyday rings sized and styled for him.",
+        shopifyHandle: "fine-rings",
+        audience: "men",
+        derived: true,
+        image: RING_CATEGORY_IMAGE,
+      },
+      {
+        slug: "bracelets",
+        title: "Bracelets",
+        description: "Bracelets and cuffs with secure clasps and lasting finish.",
+        shopifyHandle: "bracelets",
+        audience: "men",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Men's bracelet" },
+      },
+      {
+        slug: "necklaces",
+        title: "Necklaces",
+        description: "Chains and pendants with clean proportion for everyday wear.",
+        shopifyHandle: "necklaces",
+        audience: "men",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Men's necklace" },
+      },
+      {
+        slug: "earrings",
+        title: "Earrings",
+        description: "Studs and hoops sized for a confident, everyday look.",
+        shopifyHandle: "earrings",
+        audience: "men",
+        derived: true,
+        image: { src: editorialImages.fine, alt: "Men's earrings" },
+      },
+      {
+        slug: "watches",
+        title: "Watches",
+        description: "Men's timepieces from Bulova, Citizen, and Seiko.",
+        shopifyHandle: "watches",
+        sourceHandles: ["bulova", "citizen", "seiko"],
+        audience: "men",
+        derived: true,
+        image: BULOVA_CATEGORY_IMAGE,
+      },
+      {
+        slug: "wedding-bands",
+        title: "Wedding Bands",
+        description: "Men's wedding bands in precious metals, classic and contemporary.",
+        shopifyHandle: "wedding-bands",
+        audience: "men",
+        derived: true,
+        image: RING_CATEGORY_IMAGE,
+      },
+    ],
+  },
   "engagement-wedding": {
     title: "Engagement & Wedding",
     eyebrow: "Bridal",
@@ -91,92 +286,46 @@ export const CATALOG_SECTIONS = {
     title: "Diamonds",
     eyebrow: "Stones",
     description:
-      "Natural and lab-grown diamonds, presented clearly so you can choose with confidence.",
+      "Natural and lab-grown diamonds, presented clearly so you can choose with confidence. Browse by origin, then by shape to compare cuts and pricing.",
     shopifyHandle: "diamonds",
     intro:
-      "We guide you through origin, cut, and shape, never rushing a decision that deserves time.",
+      "Start with natural or lab-grown, then choose a shape. Each cut has its own collection so pricing stays clear and specific.",
     children: [
       {
         slug: "natural-diamonds",
         title: "Natural Diamonds",
         description:
-          "Earth-formed diamonds selected for beauty, proportion, and integrity of origin.",
+          "Earth-formed diamonds selected for beauty, proportion, and integrity of origin. Browse by shape to compare cuts and pricing.",
         shopifyHandle: "natural-diamonds",
         image: {
           src: editorialImages.diamond,
           alt: "Natural diamond displayed for inspection",
         },
+        children: diamondShapeLinksForOrigin("natural-diamonds").map((shape) => ({
+          slug: shape.slug,
+          title: shape.title,
+          description: shape.description,
+          shopifyHandle: shape.shopifyHandle,
+          image: shape.image,
+        })),
       },
       {
         slug: "lab-grown-diamonds",
         title: "Lab-Grown Diamonds",
         description:
-          "Laboratory-grown diamonds with the same optical properties, offered with transparent guidance.",
+          "Laboratory-grown diamonds with the same optical properties, offered with transparent guidance. Browse by shape to compare cuts and pricing.",
         shopifyHandle: "lab-grown-diamonds",
         image: {
           src: editorialImages.diamond,
           alt: "Lab-grown diamond in a refined setting",
         },
-      },
-      {
-        slug: "round",
-        title: "Round",
-        description: "Classic round brilliant cuts prized for even sparkle.",
-        shopifyHandle: "round-diamonds",
-        image: {
-          src: editorialImages.diamond,
-          alt: "Round brilliant diamond",
-        },
-      },
-      {
-        slug: "oval",
-        title: "Oval",
-        description: "Elongated silhouette with generous surface area and soft presence.",
-        shopifyHandle: "oval-diamonds",
-        image: {
-          src: editorialImages.diamond,
-          alt: "Oval diamond",
-        },
-      },
-      {
-        slug: "emerald",
-        title: "Emerald Cut",
-        description: "Step-cut facets and a quiet, architectural elegance.",
-        shopifyHandle: "emerald-cut-diamonds",
-        image: {
-          src: editorialImages.diamond,
-          alt: "Emerald cut diamond",
-        },
-      },
-      {
-        slug: "pear",
-        title: "Pear",
-        description: "Teardrop form that reads both romantic and distinctive.",
-        shopifyHandle: "pear-diamonds",
-        image: {
-          src: editorialImages.diamond,
-          alt: "Pear shaped diamond",
-        },
-      },
-      {
-        slug: "cushion",
-        title: "Cushion",
-        description: "Soft corners with a pillow-like facet pattern.",
-        shopifyHandle: "cushion-diamonds",
-        image: {
-          src: editorialImages.diamond,
-          alt: "Cushion cut diamond",
-        },
-      },
-      {
-        slug: "princess",
-        title: "Princess",
-        description: "Square outline with brilliant faceting for lively reflection.",
-        shopifyHandle: "princess-diamonds",
-        image: {
-          src: editorialImages.diamond,
-          alt: "Princess cut diamond",
-        },
+        children: diamondShapeLinksForOrigin("lab-grown-diamonds").map((shape) => ({
+          slug: shape.slug,
+          title: shape.title,
+          description: shape.description,
+          shopifyHandle: shape.shopifyHandle,
+          image: shape.image,
+        })),
       },
     ],
   },
@@ -273,10 +422,11 @@ export const CATALOG_SECTIONS = {
   watches: {
     title: "Watches",
     eyebrow: "Timepieces",
-    description: "Authorized styles from Bulova, Citizen, and Seiko, presented with informed guidance.",
+    description:
+      "Authorized styles from Bulova, Citizen, and Seiko, plus carefully selected vintage watches.",
     shopifyHandle: "watches",
     intro:
-      "A watch is both instrument and personal statement. We help you select and care for yours.",
+      "A watch is both instrument and personal statement. Browse new authorized brands or explore our vintage selection by maker.",
     children: [
       {
         slug: "bulova",
@@ -298,6 +448,76 @@ export const CATALOG_SECTIONS = {
         description: "Japanese precision from dress watches to sport models.",
         shopifyHandle: "seiko",
         image: { src: editorialImages.watch, alt: "Seiko watch" },
+      },
+      {
+        slug: "vintage-watches",
+        title: "Vintage Watches",
+        description:
+          "Pre-owned and estate timepieces selected for character, condition, and lasting appeal. Browse by brand.",
+        shopifyHandle: "vintage-watches",
+        image: {
+          src: editorialImages.watch,
+          alt: "Vintage watch with exposed movement",
+        },
+        children: [
+          {
+            slug: "rolex",
+            title: "Rolex",
+            description: "Vintage Rolex watches chosen for presence and provenance.",
+            shopifyHandle: "vintage-rolex",
+            image: {
+              src: editorialImages.watch,
+              alt: "Vintage Rolex watch",
+            },
+          },
+          {
+            slug: "omega",
+            title: "Omega",
+            description: "Classic Omega timepieces with enduring design.",
+            shopifyHandle: "vintage-omega",
+            image: {
+              src: editorialImages.watch,
+              alt: "Vintage Omega watch",
+            },
+          },
+          {
+            slug: "movado",
+            title: "Movado",
+            description: "Distinctive vintage Movado watches with modernist character.",
+            shopifyHandle: "vintage-movado",
+            image: {
+              src: editorialImages.watch,
+              alt: "Vintage Movado watch",
+            },
+          },
+          {
+            slug: "bulova",
+            title: "Bulova",
+            description: "Heritage Bulova watches from earlier eras of American watchmaking.",
+            shopifyHandle: "vintage-bulova",
+            image: BULOVA_CATEGORY_IMAGE,
+          },
+          {
+            slug: "accutron",
+            title: "Accutron",
+            description: "Vintage Accutron timepieces known for their distinctive tuning-fork precision.",
+            shopifyHandle: "vintage-accutron",
+            image: {
+              src: editorialImages.watch,
+              alt: "Vintage Accutron watch",
+            },
+          },
+          {
+            slug: "other",
+            title: "Other",
+            description: "Additional vintage watches beyond our featured brands.",
+            shopifyHandle: "vintage-other",
+            image: {
+              src: editorialImages.watch,
+              alt: "Vintage watch",
+            },
+          },
+        ],
       },
     ],
   },
@@ -362,17 +582,84 @@ export function getCatalogSection(sectionKey) {
   return CATALOG_SECTIONS[sectionKey] ?? null;
 }
 
+/** @param {string} sectionKey */
+export function isAudienceCatalogSection(sectionKey) {
+  return getCatalogSection(sectionKey)?.hub === "audience";
+}
+
+/**
+ * Walk every category entry (including nested children).
+ * @param {CategoryEntry[]} entries
+ * @param {(entry: CategoryEntry, slugPath: string[]) => void} visit
+ * @param {string[]} [prefix]
+ */
+export function walkCategoryEntries(entries, visit, prefix = []) {
+  if (!Array.isArray(entries)) return;
+  for (const entry of entries) {
+    const slugPath = [...prefix, entry.slug];
+    visit(entry, slugPath);
+    if (entry.children?.length) {
+      walkCategoryEntries(entry.children, visit, slugPath);
+    }
+  }
+}
+
+/**
+ * Resolve a nested catalog path such as `["natural-diamonds", "round"]`.
+ * @param {string} sectionKey
+ * @param {string[] | undefined} slugParts
+ * @returns {{
+ *   entry: CategoryEntry;
+ *   ancestors: CategoryEntry[];
+ *   slugPath: string[];
+ *   href: string;
+ * } | null}
+ */
+export function resolveCatalogEntry(sectionKey, slugParts) {
+  const section = getCatalogSection(sectionKey);
+  if (!section || !Array.isArray(slugParts) || slugParts.length === 0) {
+    return null;
+  }
+
+  /** @type {CategoryEntry[]} */
+  let list = section.children;
+  /** @type {CategoryEntry[]} */
+  const trail = [];
+
+  for (const part of slugParts) {
+    const next = list.find((c) => c.slug === part) ?? null;
+    if (!next) return null;
+    trail.push(next);
+    list = next.children ?? [];
+  }
+
+  const entry = trail[trail.length - 1];
+  return {
+    entry,
+    ancestors: trail.slice(0, -1),
+    slugPath: slugParts,
+    href: `/${sectionKey}/${slugParts.join("/")}`,
+  };
+}
+
 /** @param {string} sectionKey @param {string} slug */
 export function getCatalogEntry(sectionKey, slug) {
-  const section = getCatalogSection(sectionKey);
-  if (!section) return null;
-  return section.children.find((c) => c.slug === slug) ?? null;
+  return resolveCatalogEntry(sectionKey, [slug])?.entry ?? null;
 }
 
 export function getAllCatalogPaths() {
-  return Object.entries(CATALOG_SECTIONS).flatMap(([sectionKey, section]) =>
-    section.children.map((child) => ({ sectionKey, slug: child.slug })),
-  );
+  /** @type {{ sectionKey: string; slug: string; slugPath: string[] }[]} */
+  const paths = [];
+  for (const [sectionKey, section] of Object.entries(CATALOG_SECTIONS)) {
+    walkCategoryEntries(section.children, (_entry, slugPath) => {
+      paths.push({
+        sectionKey,
+        slug: slugPath[slugPath.length - 1],
+        slugPath,
+      });
+    });
+  }
+  return paths;
 }
 
 /**
@@ -381,6 +668,7 @@ export function getAllCatalogPaths() {
  */
 export function getCatalogMetaByShopifyHandle(shopifyHandle) {
   for (const section of Object.values(CATALOG_SECTIONS)) {
+    if (section.hub === "audience") continue;
     if (section.shopifyHandle === shopifyHandle) {
       const image = section.children[0]?.image;
       return {
@@ -389,15 +677,19 @@ export function getCatalogMetaByShopifyHandle(shopifyHandle) {
         image,
       };
     }
-    for (const child of section.children) {
+    /** @type {{ title: string; description: string; image?: { src: string; alt: string } } | null} */
+    let found = null;
+    walkCategoryEntries(section.children, (child) => {
+      if (found || child.derived) return;
       if (child.shopifyHandle === shopifyHandle) {
-        return {
+        found = {
           title: child.title,
           description: child.description,
           image: child.image,
         };
       }
-    }
+    });
+    if (found) return found;
   }
   return { title: "Collection", description: "" };
 }
@@ -408,6 +700,7 @@ export function getCatalogMetaByShopifyHandle(shopifyHandle) {
  */
 export function getCatalogPathForShopifyHandle(shopifyHandle) {
   for (const [sectionKey, section] of Object.entries(CATALOG_SECTIONS)) {
+    if (section.hub === "audience") continue;
     if (section.shopifyHandle === shopifyHandle) {
       return {
         href: `/${sectionKey}`,
@@ -415,14 +708,18 @@ export function getCatalogPathForShopifyHandle(shopifyHandle) {
       };
     }
 
-    for (const child of section.children) {
+    /** @type {{ href: string; label: string } | null} */
+    let found = null;
+    walkCategoryEntries(section.children, (child, slugPath) => {
+      if (found || child.derived) return;
       if (child.shopifyHandle === shopifyHandle) {
-        return {
-          href: `/${sectionKey}/${child.slug}`,
+        found = {
+          href: `/${sectionKey}/${slugPath.join("/")}`,
           label: child.title,
         };
       }
-    }
+    });
+    if (found) return found;
   }
 
   return null;
@@ -436,18 +733,32 @@ export const SHOP_ALL_HERO = {
 
 export const HOME_FEATURED_CATEGORIES = [
   {
-    title: "Engagement & Wedding",
+    title: "Engagement",
     href: "/engagement-wedding",
-    description: "Solitaires, halos, vintage-inspired settings, and wedding bands.",
+    description: "Solitaires, halos, vintage-inspired settings, and custom design.",
     image: editorialImages.engagement,
     alt: "Engagement ring with diamond center stone",
   },
   {
-    title: "Diamonds",
-    href: "/diamonds",
-    description: "Natural and lab-grown diamonds in every classic shape.",
-    image: editorialImages.diamond,
-    alt: "Brilliant cut diamond",
+    title: "Rings",
+    href: "/fine-jewelry/rings",
+    description: "Women's and men's rings, from everyday gold to statement styles.",
+    image: RING_CATEGORY_IMAGE.src,
+    alt: RING_CATEGORY_IMAGE.alt,
+  },
+  {
+    title: "Necklaces",
+    href: "/fine-jewelry/necklaces",
+    description: "Chains, pendants, and necklaces for her and for him.",
+    image: editorialImages.fine,
+    alt: "Fine jewelry necklace",
+  },
+  {
+    title: "Watches",
+    href: "/watches",
+    description: "Bulova, Citizen, and Seiko timepieces for women and men.",
+    image: BULOVA_CATEGORY_IMAGE.src,
+    alt: BULOVA_CATEGORY_IMAGE.alt,
   },
   {
     title: "Custom Jewelry",
@@ -455,20 +766,6 @@ export const HOME_FEATURED_CATEGORIES = [
     description: "Collaborative design with bench jewelers who listen first.",
     image: editorialImages.custom,
     alt: "Custom jewelry being crafted at the bench",
-  },
-  {
-    title: "Fine Jewelry",
-    href: "/fine-jewelry",
-    description: "Rings, necklaces, earrings, and bracelets for every day.",
-    image: RING_CATEGORY_IMAGE.src,
-    alt: RING_CATEGORY_IMAGE.alt,
-  },
-  {
-    title: "Watches",
-    href: "/watches",
-    description: "Bulova, Citizen, and Seiko timepieces.",
-    image: BULOVA_CATEGORY_IMAGE.src,
-    alt: BULOVA_CATEGORY_IMAGE.alt,
   },
   {
     title: "Services",

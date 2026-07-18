@@ -51,7 +51,7 @@ export function saveAdminSettings(payload) {
 }
 
 /**
- * @param {"shopify" | "stuller"} target
+ * @param {"shopify"} target
  * @param {Record<string, unknown>} payload
  * @param {{ saveOnSuccess?: boolean }} [opts]
  */

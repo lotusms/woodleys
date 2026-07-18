@@ -412,7 +412,8 @@ export default function CartDrawer() {
                     </span>
                   </div>
                   <p className="mt-3 text-xs leading-relaxed text-site-secondary">
-                    Shipping and taxes calculated at checkout.
+                    Free shipping on orders over $500. Under $500: $15 flat-rate
+                    shipping per item. Taxes calculated at checkout.
                   </p>
                   {checkoutError ? (
                     <p className="mt-3 text-sm text-red-700" role="alert">

@@ -71,6 +71,7 @@ async function withFirestoreRead(adminRead, restRead) {
  *   active: boolean;
  *   featured: boolean;
  *   featuredOrder?: number;
+ *   audience?: import("./product-audience").ProductAudience;
  *   collectionHandles: string[];
  *   image?: { src: string; alt: string };
  *   images: { src: string; alt: string }[];
@@ -355,6 +356,10 @@ export async function createFirestoreProduct(input) {
     active: input.active !== false,
     featured: Boolean(input.featured),
     featuredOrder: Number(input.featuredOrder ?? Date.now()),
+    audience:
+      input.audience === "women" || input.audience === "men" || input.audience === "unisex"
+        ? input.audience
+        : "unisex",
     collectionHandles,
     image: input.image?.src ? input.image : undefined,
     images: Array.isArray(input.images)
@@ -431,6 +436,12 @@ export async function updateFirestoreProduct(handle, patch) {
   }
   if (patch.featuredOrder !== undefined) {
     updates.featuredOrder = Number(patch.featuredOrder);
+  }
+  if (patch.audience !== undefined) {
+    updates.audience =
+      patch.audience === "women" || patch.audience === "men" || patch.audience === "unisex"
+        ? patch.audience
+        : "unisex";
   }
   if (collectionHandles !== undefined) {
     updates.collectionHandles = collectionHandles;

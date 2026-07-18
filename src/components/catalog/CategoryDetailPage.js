@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CategoryPageLayout from "@/components/catalog/CategoryPageLayout";
+import CategoryGrid from "@/components/catalog/CategoryGrid";
 import CatalogProductSection from "@/components/catalog/CatalogProductSection";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { sitePageTitle } from "@/config";
@@ -10,13 +11,57 @@ const heroSecondaryClass =
 /**
  * @param {{
  *   sectionKey: string;
- *   section: import("@/lib/catalog/categories").CATALOG_SECTIONS[string];
+ *   section: import("@/lib/catalog/categories").CatalogSection;
  *   entry: import("@/lib/catalog/categories").CategoryEntry;
+ *   ancestors?: import("@/lib/catalog/categories").CategoryEntry[];
+ *   slugPath?: string[];
  *   products: import("@/lib/catalog/product-types").CatalogProduct[];
  * }} props
  */
-export default function CategoryDetailPage({ sectionKey, section, entry, products }) {
+export default function CategoryDetailPage({
+  sectionKey,
+  section,
+  entry,
+  ancestors = [],
+  slugPath = [entry.slug],
+  products,
+}) {
   const emptyMessage = `No products in ${entry.title} yet.`;
+  const parentHref =
+    ancestors.length > 0
+      ? `/${sectionKey}/${ancestors.map((a) => a.slug).join("/")}`
+      : `/${sectionKey}`;
+  const parentLabel =
+    ancestors.length > 0 ? ancestors[ancestors.length - 1].title : section.title;
+
+  const breadcrumbs = [
+    { label: section.title, href: `/${sectionKey}` },
+    ...ancestors.map((ancestor, index) => ({
+      label: ancestor.title,
+      href: `/${sectionKey}/${ancestors
+        .slice(0, index + 1)
+        .map((a) => a.slug)
+        .join("/")}`,
+    })),
+    { label: entry.title },
+  ];
+
+  const shapeItems =
+    Array.isArray(entry.children) && entry.children.length > 0
+      ? entry.children.map((child) => ({
+          title: child.title,
+          description: child.description,
+          href: `/${sectionKey}/${[...slugPath, child.slug].join("/")}`,
+          image: child.image?.src,
+          alt: child.image?.alt,
+        }))
+      : [];
+
+  const isDiamondOrigin =
+    sectionKey === "diamonds" &&
+    (entry.slug === "natural-diamonds" || entry.slug === "lab-grown-diamonds");
+  const isVintageWatches =
+    sectionKey === "watches" && entry.slug === "vintage-watches";
 
   return (
     <CategoryPageLayout
@@ -24,15 +69,12 @@ export default function CategoryDetailPage({ sectionKey, section, entry, product
       title={entry.title}
       subtitle={entry.description}
       heroImage={entry.image}
-      breadcrumbs={[
-        { label: section.title, href: `/${sectionKey}` },
-        { label: entry.title },
-      ]}
+      breadcrumbs={breadcrumbs}
       actions={
         <>
           <PrimaryButton href="/shop-all">Browse catalog</PrimaryButton>
-          <Link href={`/${sectionKey}`} className={heroSecondaryClass}>
-            All {section.title}
+          <Link href={parentHref} className={heroSecondaryClass}>
+            {ancestors.length > 0 ? parentLabel : `All ${section.title}`}
           </Link>
         </>
       }
@@ -50,40 +92,35 @@ export default function CategoryDetailPage({ sectionKey, section, entry, product
         </div>
       ) : null}
 
-      {sectionKey === "diamonds" &&
-      (entry.slug === "natural-diamonds" || entry.slug === "lab-grown-diamonds") ? (
-        <div className="mb-14 grid gap-6 md:grid-cols-2">
-          <div className="rounded-sm border border-stone-200/80 bg-white p-8 shadow-sm shadow-stone-900/5">
-            <h2 className="font-serif text-xl text-site-fg">Natural diamonds</h2>
-            <p className="mt-3 text-sm leading-relaxed text-site-secondary">
-              Formed over millennia. Each stone carries its own character. We
-              explain origin and grading in plain language.
-            </p>
-            <Link
-              href="/diamonds/natural-diamonds"
-              className="mt-5 inline-block text-sm font-medium text-warm-gold-dark underline-offset-4 hover:underline"
-            >
-              Explore natural diamonds
-            </Link>
+      {shapeItems.length > 0 ? (
+        <div className="mb-16">
+          <div className="border-b border-stone-200/80 pb-8">
+            <h2 className="font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
+              {isDiamondOrigin
+                ? "Browse by shape"
+                : isVintageWatches
+                  ? "Browse by brand"
+                  : `Within ${entry.title}`}
+            </h2>
+            {isDiamondOrigin ? (
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
+                Choose a cut to compare stones and pricing for this origin.
+              </p>
+            ) : null}
+            {isVintageWatches ? (
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
+                Choose a maker to explore our vintage selection.
+              </p>
+            ) : null}
           </div>
-          <div className="rounded-sm border border-stone-200/80 bg-white p-8 shadow-sm shadow-stone-900/5">
-            <h2 className="font-serif text-xl text-site-fg">Lab-grown diamonds</h2>
-            <p className="mt-3 text-sm leading-relaxed text-site-secondary">
-              Created in controlled environments with identical optical
-              properties. We help you compare options without pressure.
-            </p>
-            <Link
-              href="/diamonds/lab-grown-diamonds"
-              className="mt-5 inline-block text-sm font-medium text-warm-gold-dark underline-offset-4 hover:underline"
-            >
-              Explore lab-grown diamonds
-            </Link>
+          <div className="mt-10">
+            <CategoryGrid items={shapeItems} />
           </div>
         </div>
       ) : null}
 
       <CatalogProductSection
-        label={entry.title}
+        label={shapeItems.length > 0 ? `All ${entry.title}` : entry.title}
         products={products}
         emptyMessage={emptyMessage}
       />

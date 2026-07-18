@@ -5,7 +5,6 @@ import {
   loadSiteIntegrations,
   saveSiteIntegrations,
   testShopifyConnection,
-  testStullerEmbedUrl,
   toAdminSettingsResponse,
 } from "@/lib/site-integrations";
 
@@ -21,9 +20,9 @@ export async function POST(request) {
   }
 
   const target = body?.target;
-  if (target !== "shopify" && target !== "stuller") {
+  if (target !== "shopify") {
     return NextResponse.json(
-      { error: 'target must be "shopify" or "stuller"' },
+      { error: 'target must be "shopify"' },
       { status: 400 },
     );
   }
@@ -31,11 +30,7 @@ export async function POST(request) {
   try {
     const current = await loadSiteIntegrations();
     const draft = buildIntegrationsDraft(current, body);
-
-    const result =
-      target === "shopify"
-        ? await testShopifyConnection(draft)
-        : await testStullerEmbedUrl(draft.stullerEmbedUrl);
+    const result = await testShopifyConnection(draft);
 
     if (body.saveOnSuccess === true && result.ok) {
       const saved = await saveSiteIntegrations(draft, auth.uid);

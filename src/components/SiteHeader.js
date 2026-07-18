@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
@@ -38,8 +39,8 @@ const DesktopMainNav = dynamic(
         className="flex min-h-6 w-full max-w-xl items-center justify-center gap-5"
         aria-hidden
       >
-        {["a", "b", "c", "d", "e", "f"].map((id) => (
-          <span key={id} className="h-3 w-14 rounded-full bg-stone-200/50" />
+        {["a", "b", "c", "d", "e", "f", "g", "h"].map((id) => (
+          <span key={id} className="h-3 w-10 rounded-full bg-stone-200/50" />
         ))}
       </div>
     ),
@@ -87,16 +88,20 @@ function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
         type="button"
         aria-expanded={expanded}
         aria-controls={panelId}
+        aria-label={
+          expanded ? `Collapse ${item.label} menu` : `Expand ${item.label} menu`
+        }
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-center justify-between gap-3 py-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
       >
         <span
           className={`font-serif text-2xl ${active ? "text-warm-gold-dark" : "text-site-fg"}`}
+          aria-hidden
         >
           {item.label}
         </span>
-        <span className="shrink-0 text-xs font-medium uppercase tracking-[0.2em] text-site-secondary">
-          {expanded ? "Close" : "Menu"}
+        <span className="shrink-0 text-xs font-medium uppercase tracking-[0.2em] text-site-secondary" aria-hidden>
+          {expanded ? "Close" : "Open"}
         </span>
       </button>
       {expanded ? (
@@ -105,7 +110,7 @@ function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
             <Link
               href={item.href}
               onClick={onNavigate}
-              className="block py-1 font-serif text-base text-site-fg hover:text-warm-gold-dark"
+              className="block py-1 font-serif text-base text-site-fg hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
             >
               View all {item.label}
             </Link>
@@ -114,23 +119,51 @@ function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
             ? item.groups.map((group) => (
                 <li key={group.heading ?? group.links[0]?.href}>
                   {group.heading ? (
-                    <p className="mb-1 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-site-secondary">
+                    <p className="mb-1.5 mt-3 text-sm font-semibold text-site-fg first:mt-0">
                       {group.heading}
                     </p>
                   ) : null}
-                  <ul className="mb-3 space-y-1.5" role="list">
-                    {group.links.map((link) => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          onClick={onNavigate}
-                          className="block py-1 text-sm text-site-fg hover:text-warm-gold-dark"
-                        >
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  {group.layout === "iconGrid" ? (
+                    <ul
+                      className="mb-3 grid grid-cols-3 gap-2"
+                      role="list"
+                    >
+                      {group.links.map((link) => (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            onClick={onNavigate}
+                            className="flex flex-col items-center rounded-sm px-1 py-2 text-center text-xs font-medium text-site-fg hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
+                          >
+                            {link.icon?.src ? (
+                              <Image
+                                src={link.icon.src}
+                                alt={link.icon.alt ?? ""}
+                                width={36}
+                                height={36}
+                                className="mb-1 h-9 w-9 object-contain"
+                              />
+                            ) : null}
+                            {link.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="mb-3 space-y-1.5" role="list">
+                      {group.links.map((link) => (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            onClick={onNavigate}
+                            className="block py-1 text-sm text-site-fg hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
+                          >
+                            {link.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               ))
             : childLinks.map((link) => (
@@ -138,7 +171,7 @@ function MobileAccordionItem({ item, pathname, onNavigate, index, open }) {
                   <Link
                     href={link.href}
                     onClick={onNavigate}
-                    className="block py-1 text-sm text-site-fg hover:text-warm-gold-dark"
+                    className="block py-1 text-sm text-site-fg hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
                   >
                     {link.label}
                   </Link>

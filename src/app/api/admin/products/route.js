@@ -78,6 +78,7 @@ export async function POST(request) {
       active: body.active,
       featured: body.featured,
       featuredOrder: body.featuredOrder,
+      audience: body.audience,
       collectionHandles: body.collectionHandles ?? [],
       image,
       images: body.images ?? [],

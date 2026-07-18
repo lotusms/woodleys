@@ -16,7 +16,6 @@ export async function GET() {
     console.error("[settings/public GET]", e);
     return NextResponse.json(
       {
-        stullerEmbedUrl: null,
         shopifyConfigured: false,
         shopifyCatalogEnabled: false,
         shopifyStoreDomain: null,

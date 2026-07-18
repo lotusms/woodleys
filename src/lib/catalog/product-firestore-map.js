@@ -47,6 +47,10 @@ export function firestoreDocToProductDetail(data, id, opts = {}) {
     active,
     featured: Boolean(data.featured),
     featuredOrder: Number(data.featuredOrder ?? 0),
+    audience:
+      data.audience === "women" || data.audience === "men" || data.audience === "unisex"
+        ? data.audience
+        : undefined,
     collectionHandles: Array.isArray(data.collectionHandles)
       ? data.collectionHandles.map(String)
       : [],

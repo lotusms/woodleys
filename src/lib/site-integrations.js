@@ -21,7 +21,6 @@ const cache = { data: null, loadedAt: 0 };
  *   shopifyClientId: string;
  *   shopifyClientSecret: string;
  *   shopifyCatalogEnabled: boolean;
- *   stullerEmbedUrl: string;
  *   updatedAt?: string;
  *   updatedBy?: string;
  * }} SiteIntegrations
@@ -35,7 +34,6 @@ function envDefaults() {
     shopifyClientId: process.env.SHOPIFY_CLIENT_ID?.trim() || "",
     shopifyClientSecret: process.env.SHOPIFY_CLIENT_SECRET?.trim() || "",
     shopifyCatalogEnabled: process.env.SHOPIFY_CATALOG_ENABLED === "true",
-    stullerEmbedUrl: process.env.NEXT_PUBLIC_STULLER_EMBED_URL?.trim() || "",
   };
 }
 
@@ -60,7 +58,6 @@ function mergeIntegrations(stored, env) {
     shopifyCatalogEnabled: Boolean(
       stored?.shopifyCatalogEnabled ?? env.shopifyCatalogEnabled,
     ),
-    stullerEmbedUrl: pick("stullerEmbedUrl"),
     updatedAt:
       typeof stored?.updatedAt === "string" ? stored.updatedAt : undefined,
     updatedBy:
@@ -94,10 +91,6 @@ export function buildIntegrationsDraft(current, body) {
       typeof body.shopifyCatalogEnabled === "boolean"
         ? body.shopifyCatalogEnabled
         : current.shopifyCatalogEnabled,
-    stullerEmbedUrl:
-      typeof body.stullerEmbedUrl === "string"
-        ? body.stullerEmbedUrl.trim()
-        : current.stullerEmbedUrl,
   };
 }
 
@@ -171,7 +164,6 @@ export async function saveSiteIntegrations(patch, updatedBy) {
     "shopifyStorefrontAccessToken",
     "shopifyClientId",
     "shopifyClientSecret",
-    "stullerEmbedUrl",
   ];
 
   for (const key of stringFields) {
@@ -201,7 +193,6 @@ export function toAdminSettingsResponse(integrations) {
   return {
     shopifyStoreDomain: integrations.shopifyStoreDomain,
     shopifyCatalogEnabled: integrations.shopifyCatalogEnabled,
-    stullerEmbedUrl: integrations.stullerEmbedUrl,
     updatedAt: integrations.updatedAt ?? null,
     updatedBy: integrations.updatedBy ?? null,
     secrets: {
@@ -219,13 +210,11 @@ export function toAdminSettingsResponse(integrations) {
     envFallback: {
       shopifyStoreDomain: Boolean(env.shopifyStoreDomain),
       shopifyStorefrontAccessToken: Boolean(env.shopifyStorefrontAccessToken),
-      stullerEmbedUrl: Boolean(env.stullerEmbedUrl),
     },
     status: {
       shopifyConfigured: Boolean(
         integrations.shopifyStoreDomain && integrations.shopifyStorefrontAccessToken,
       ),
-      stullerConfigured: Boolean(integrations.stullerEmbedUrl),
     },
   };
 }
@@ -233,7 +222,6 @@ export function toAdminSettingsResponse(integrations) {
 /** @param {SiteIntegrations} integrations */
 export function toPublicSettingsResponse(integrations) {
   return {
-    stullerEmbedUrl: integrations.stullerEmbedUrl || null,
     shopifyConfigured: Boolean(
       integrations.shopifyStoreDomain && integrations.shopifyStorefrontAccessToken,
     ),
@@ -289,52 +277,4 @@ export async function testShopifyConnection(integrations) {
       ? `Connected to ${shopName}.`
       : "Storefront API connection succeeded.",
   };
-}
-
-/**
- * @param {string} embedUrl
- */
-export async function testStullerEmbedUrl(embedUrl) {
-  const trimmed = embedUrl?.trim();
-  if (!trimmed) {
-    return { ok: false, message: "Enter a Stuller embed URL." };
-  }
-
-  let parsed;
-  try {
-    parsed = new URL(trimmed);
-  } catch {
-    return { ok: false, message: "Enter a valid https URL for the Stuller embed." };
-  }
-
-  if (parsed.protocol !== "https:") {
-    return { ok: false, message: "Stuller embed URL must use https." };
-  }
-
-  try {
-    const res = await fetch(trimmed, {
-      method: "GET",
-      redirect: "follow",
-      signal: AbortSignal.timeout(8000),
-      headers: { Accept: "text/html" },
-    });
-
-    if (!res.ok) {
-      return {
-        ok: false,
-        message: `URL responded with HTTP ${res.status}. Confirm the showcase embed link with Stuller.`,
-      };
-    }
-
-    return {
-      ok: true,
-      message: "Embed URL is reachable. Save settings to show Stuller on Shop All.",
-    };
-  } catch {
-    return {
-      ok: true,
-      message:
-        "URL format looks valid. Save settings and the iframe will load it on Shop All (some hosts block server checks).",
-    };
-  }
 }

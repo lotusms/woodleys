@@ -15,6 +15,11 @@ import {
   filterAssignableCollectionHandles,
 } from "@/lib/catalog/collections-meta";
 import { CATALOG_SECTIONS } from "@/lib/catalog/categories";
+import {
+  PRODUCT_AUDIENCES,
+  audienceLabel,
+  normalizeProductAudience,
+} from "@/lib/catalog/product-audience";
 import ProductPhotoField from "@/components/dashboard/ProductPhotoField";
 import DashboardFormSection from "@/components/dashboard/DashboardFormSection";
 import Checkbox from "@/components/ui/Checkbox";
@@ -24,7 +29,9 @@ import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import * as dash from "@/lib/dashboardChrome";
 import { isLightThemeId } from "@/theme";
 
-const catalogSections = Object.entries(CATALOG_SECTIONS);
+const catalogSections = Object.entries(CATALOG_SECTIONS).filter(
+  ([, section]) => section.hub !== "audience",
+);
 
 const emptySpec = () => ({ label: "", value: "" });
 const emptyImage = () => ({ src: "", alt: "" });
@@ -45,6 +52,7 @@ function buildFormState(product) {
     quantity: String(product?.quantity ?? "0"),
     active: product?.active !== false,
     featured: Boolean(product?.featured),
+    audience: normalizeProductAudience(product?.audience) ?? "unisex",
     collectionHandles: filterAssignableCollectionHandles(
       Array.isArray(product?.collectionHandles) ? product.collectionHandles : [],
     ),
@@ -170,6 +178,7 @@ export default function DashboardProductForm({ mode, handle }) {
       quantity: Math.max(0, Number.parseInt(form.quantity || "0", 10) || 0),
       active: form.active,
       featured: form.featured,
+      audience: form.audience,
       ...(form.featured ? { featuredOrder: Date.now() } : { featuredOrder: 0 }),
       collectionHandles: filterAssignableCollectionHandles(form.collectionHandles),
       image: mainImage,
@@ -333,15 +342,56 @@ export default function DashboardProductForm({ mode, handle }) {
                   />
                 </div>
               </div>
+
+              <fieldset className="block">
+                <legend className={labelClass}>Audience</legend>
+                <p
+                  className={`mb-3 text-sm ${
+                    light ? "text-stone-600" : "text-slate-400"
+                  }`}
+                >
+                  Controls whether this piece appears under Women, Men, or both
+                  (unisex). Type collections above still apply.
+                </p>
+                <div
+                  className="flex flex-col gap-2"
+                  role="radiogroup"
+                  aria-label="Product audience"
+                >
+                  {PRODUCT_AUDIENCES.map((value) => (
+                    <label
+                      key={value}
+                      className={`flex cursor-pointer items-center gap-3 rounded-sm border px-3 py-2 text-sm transition ${
+                        form.audience === value
+                          ? light
+                            ? "border-warm-gold bg-champagne/50 text-site-fg"
+                            : "border-warm-gold bg-white/5 text-white"
+                          : light
+                            ? "border-stone-200 text-stone-700 hover:border-stone-300"
+                            : "border-slate-700 text-slate-300 hover:border-slate-500"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="product-audience"
+                        value={value}
+                        checked={form.audience === value}
+                        onChange={() => updateField("audience", value)}
+                        className="h-4 w-4 accent-[var(--site-primary,#b08d57)]"
+                      />
+                      <span>{audienceLabel(value)}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
             </div>
           </div>
         </DashboardFormSection>
 
         <DashboardFormSection title="Collections" light={light}>
           <p className={`mb-4 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}>
-            Choose one or more sub-categories. Parent sections (for example
-            Engagement &amp; Wedding) are labels only — products are listed under
-            the specific styles below.
+            Choose one or more sub-categories. Women and Men menus reuse these
+            collections and filter by audience. Parent sections are labels only.
           </p>
           <div className="max-h-72 space-y-5 overflow-y-auto pr-1">
             {catalogSections.map(([sectionKey, section]) => (
@@ -354,16 +404,29 @@ export default function DashboardProductForm({ mode, handle }) {
                   {section.title}
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {section.children.map((child) => (
-                    <Checkbox
-                      key={child.shopifyHandle}
-                      variant="card"
-                      checked={form.collectionHandles.includes(child.shopifyHandle)}
-                      onChange={() => toggleCollection(child.shopifyHandle)}
-                      label={child.title}
-                      light={light}
-                    />
-                  ))}
+                  {section.children.flatMap((child) => {
+                    const self = (
+                      <Checkbox
+                        key={child.shopifyHandle}
+                        variant="card"
+                        checked={form.collectionHandles.includes(child.shopifyHandle)}
+                        onChange={() => toggleCollection(child.shopifyHandle)}
+                        label={child.title}
+                        light={light}
+                      />
+                    );
+                    const nested = (child.children ?? []).map((shape) => (
+                      <Checkbox
+                        key={shape.shopifyHandle}
+                        variant="card"
+                        checked={form.collectionHandles.includes(shape.shopifyHandle)}
+                        onChange={() => toggleCollection(shape.shopifyHandle)}
+                        label={`${child.title} · ${shape.title}`}
+                        light={light}
+                      />
+                    ));
+                    return [self, ...nested];
+                  })}
                 </div>
               </div>
             ))}

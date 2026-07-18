@@ -3,7 +3,7 @@ import {
   buildRingSampleProducts,
   RING_SAMPLE_COLLECTION_HANDLES,
 } from "./ring-sample-products.js";
-import { CATALOG_SECTIONS } from "./categories.js";
+import { CATALOG_SECTIONS, walkCategoryEntries } from "./categories.js";
 import { HOME_FEATURED_PRODUCT_HANDLES } from "../../config/featured-products.js";
 
 const editorialImages = {
@@ -149,6 +149,8 @@ function registerCollection(handle, meta) {
 }
 
 for (const section of Object.values(CATALOG_SECTIONS)) {
+  if (section.hub === "audience") continue;
+
   const sectionImage = section.children[0]?.image;
   registerCollection(section.shopifyHandle, {
     title: section.title,
@@ -156,14 +158,16 @@ for (const section of Object.values(CATALOG_SECTIONS)) {
     image: sectionImage,
   });
 
-  for (const child of section.children) {
+  walkCategoryEntries(section.children, (child) => {
+    if (child.derived) return;
+
     if (child.shopifyHandle === "bulova") {
       const products = buildBulovaSampleProducts();
       mockByHandle.set("bulova", products);
       for (const product of products) {
         mockByProductHandle.set(product.handle, product);
       }
-      continue;
+      return;
     }
 
     if (RING_SAMPLE_COLLECTION_HANDLES.includes(child.shopifyHandle)) {
@@ -172,7 +176,7 @@ for (const section of Object.values(CATALOG_SECTIONS)) {
       for (const product of products) {
         mockByProductHandle.set(product.handle, product);
       }
-      continue;
+      return;
     }
 
     registerCollection(child.shopifyHandle, {
@@ -180,7 +184,7 @@ for (const section of Object.values(CATALOG_SECTIONS)) {
       description: child.description,
       image: child.image,
     });
-  }
+  });
 }
 
 /**

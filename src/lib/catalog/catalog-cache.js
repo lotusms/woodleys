@@ -55,6 +55,7 @@ function mergeActiveSeedProducts(products, suppressed = new Set(), inactiveHandl
           active: true,
           featured: Boolean(product.featured),
           featuredOrder: product.featuredOrder,
+          audience: product.audience ?? mock.audience ?? "unisex",
         });
         handles.add(mock.handle);
         continue;
@@ -74,7 +75,11 @@ function mergeActiveSeedProducts(products, suppressed = new Set(), inactiveHandl
       ) {
         continue;
       }
-      merged.push({ ...withSeedCollectionHandles(mock), active: true });
+      merged.push({
+        ...withSeedCollectionHandles(mock),
+        active: true,
+        audience: mock.audience ?? "unisex",
+      });
       handles.add(mock.handle);
     }
   }

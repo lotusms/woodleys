@@ -130,6 +130,12 @@ export async function updateDashboardProduct(handle, patch) {
   if (patch.featuredOrder !== undefined) {
     updates.featuredOrder = Number(patch.featuredOrder);
   }
+  if (patch.audience !== undefined) {
+    updates.audience =
+      patch.audience === "women" || patch.audience === "men" || patch.audience === "unisex"
+        ? patch.audience
+        : "unisex";
+  }
   if (patch.collectionHandles !== undefined) {
     updates.collectionHandles = filterAssignableCollectionHandles(patch.collectionHandles);
   }
@@ -200,6 +206,10 @@ export async function createDashboardProduct(input) {
     active: input.active !== false,
     featured: Boolean(input.featured),
     featuredOrder: Number(input.featuredOrder ?? Date.now()),
+    audience:
+      input.audience === "women" || input.audience === "men" || input.audience === "unisex"
+        ? input.audience
+        : "unisex",
     collectionHandles,
     image,
     images: Array.isArray(input.images) ? input.images.filter((img) => img?.src) : [],
