@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import {
   Dialog,
   DialogBackdrop,
@@ -8,12 +7,9 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeftIcon,
-  ShoppingBagIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ShoppingBagIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import CatalogImage from "@/components/ui/CatalogImage";
 import { useCart } from "@/context/CartContext";
@@ -26,16 +22,6 @@ import { lineImageAlt, lineImageSrc, productToCartPayload } from "@/lib/cart-lin
 import { getProductChargeUsd } from "@/lib/catalog/product-pricing";
 import { formatUsd } from "@/lib/money";
 import * as overlayChrome from "@/lib/overlayChrome";
-
-const CheckoutFlow = dynamic(
-  () => import("@/components/checkout/CheckoutFlow"),
-  {
-    ssr: false,
-    loading: () => (
-      <p className="text-sm text-site-secondary">Loading checkout…</p>
-    ),
-  },
-);
 
 /**
  * @param {{
@@ -53,15 +39,15 @@ function CartDrawerSuggestions({ products, cartSlugs, onAdd, onNavigate }) {
   if (suggestions.length === 0) return null;
 
   return (
-    <aside className="flex min-h-0 flex-col border-b border-stone-200/80 bg-champagne/20 lg:w-[42%] lg:border-b-0 lg:border-r">
-      <div className="shrink-0 px-5 py-5 sm:px-6 lg:px-8 lg:py-6">
-        <h2 className="font-serif text-xl font-medium tracking-[-0.02em] text-site-fg sm:text-2xl">
+    <aside className="flex min-h-0 flex-col border-b border-stone-200/80 bg-champagne/20 lg:w-[13.5rem] lg:shrink-0 lg:border-b-0 lg:border-r xl:w-[15rem]">
+      <div className="shrink-0 px-4 py-4 sm:px-5 lg:px-4 lg:py-5">
+        <h2 className="font-serif text-base font-medium leading-snug tracking-[-0.02em] text-site-fg sm:text-lg">
           We think you would like
         </h2>
       </div>
 
       <ul
-        className="flex min-h-0 flex-1 gap-4 overflow-x-auto px-5 pb-5 sm:px-6 lg:flex-col lg:gap-6 lg:overflow-y-auto lg:overflow-x-hidden lg:px-8 lg:pb-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-h-0 flex-1 gap-3 overflow-x-auto px-4 pb-4 sm:px-5 lg:flex-col lg:gap-4 lg:overflow-y-auto lg:overflow-x-hidden lg:px-4 lg:pb-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="list"
       >
         {suggestions.map((product) => {
@@ -74,7 +60,7 @@ function CartDrawerSuggestions({ products, cartSlugs, onAdd, onNavigate }) {
           return (
             <li
               key={product.id}
-              className="relative w-[min(72vw,14rem)] shrink-0 lg:w-full"
+              className="relative w-[min(58vw,10.5rem)] shrink-0 lg:w-full"
             >
               <Link
                 href={`/products/${product.handle}`}
@@ -88,38 +74,38 @@ function CartDrawerSuggestions({ products, cartSlugs, onAdd, onNavigate }) {
                       (typeof product.image === "object" && product.image?.alt) ||
                       product.title
                     }
-                    width={320}
-                    height={400}
-                    sizes="224px"
+                    width={240}
+                    height={300}
+                    sizes="168px"
                     className="aspect-[4/5] w-full object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[4/5] items-center justify-center text-xs uppercase tracking-[0.2em] text-site-secondary">
+                  <div className="flex aspect-[4/5] items-center justify-center text-[0.65rem] uppercase tracking-[0.2em] text-site-secondary">
                     No image
                   </div>
                 )}
               </Link>
 
-              <div className="mt-3 flex items-start justify-between gap-3">
+              <div className="mt-2 flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <Link
                     href={`/products/${product.handle}`}
                     onClick={onNavigate}
-                    className="block font-serif text-base leading-tight text-site-fg transition hover:text-warm-gold-dark"
+                    className="block font-serif text-sm leading-tight text-site-fg transition hover:text-warm-gold-dark"
                   >
                     {product.title}
                   </Link>
-                  <p className="mt-1 text-sm tabular-nums text-site-secondary">
+                  <p className="mt-0.5 text-xs tabular-nums text-site-secondary">
                     {formatUsd(priceUsd)}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => onAdd(product)}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-stone-300/80 bg-white text-site-fg transition hover:border-warm-gold hover:text-warm-gold-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center border border-stone-300/80 bg-white text-site-fg transition hover:border-warm-gold hover:text-warm-gold-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
                   aria-label={`Add ${product.title} to cart`}
                 >
-                  <ShoppingBagIcon className="h-4 w-4" aria-hidden />
+                  <ShoppingBagIcon className="h-3.5 w-3.5" aria-hidden />
                 </button>
               </div>
             </li>
@@ -131,6 +117,7 @@ function CartDrawerSuggestions({ products, cartSlugs, onAdd, onNavigate }) {
 }
 
 export default function CartDrawer() {
+  const router = useRouter();
   const {
     ready,
     isOpen,
@@ -143,7 +130,6 @@ export default function CartDrawer() {
   } = useCart();
   const { light } = useOverlayChrome();
   const [suggestions, setSuggestions] = useState([]);
-  const [step, setStep] = useState("cart");
   const [checkoutError, setCheckoutError] = useState("");
   const [redirectingCheckout, setRedirectingCheckout] = useState(false);
 
@@ -165,7 +151,6 @@ export default function CartDrawer() {
 
   useEffect(() => {
     if (isOpen) return undefined;
-    setStep("cart");
     setCheckoutError("");
     setRedirectingCheckout(false);
     return undefined;
@@ -242,7 +227,8 @@ export default function CartDrawer() {
     }
 
     if (localOnlyCart) {
-      setStep("checkout");
+      closeCart();
+      router.push("/checkout");
     }
   }
 
@@ -256,7 +242,7 @@ export default function CartDrawer() {
       <div className="fixed inset-0 flex justify-end">
         <DialogPanel transition className={overlayChrome.cartDrawerPanel(light)}>
           <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-            {step === "cart" && hasSuggestions ? (
+            {hasSuggestions ? (
               <CartDrawerSuggestions
                 products={suggestions}
                 cartSlugs={cartSlugs}
@@ -267,20 +253,9 @@ export default function CartDrawer() {
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <div className="flex shrink-0 items-center justify-between border-b border-stone-200/80 px-5 py-4 sm:px-6 lg:px-8">
-                {step === "checkout" ? (
-                  <button
-                    type="button"
-                    onClick={() => setStep("cart")}
-                    className="inline-flex items-center gap-2 font-serif text-xl font-medium tracking-[-0.02em] text-site-fg transition hover:text-warm-gold-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark sm:text-2xl"
-                  >
-                    <ArrowLeftIcon className="h-5 w-5 shrink-0" aria-hidden />
-                    Complete your order
-                  </button>
-                ) : (
-                  <DialogTitle className="font-serif text-xl font-medium tracking-[-0.02em] text-site-fg sm:text-2xl">
-                    Shopping cart
-                  </DialogTitle>
-                )}
+                <DialogTitle className="font-serif text-xl font-medium tracking-[-0.02em] text-site-fg sm:text-2xl">
+                  Shopping cart
+                </DialogTitle>
                 <button
                   type="button"
                   onClick={closeCart}
@@ -292,14 +267,7 @@ export default function CartDrawer() {
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 lg:px-8">
-                {step === "checkout" ? (
-                  <CheckoutFlow
-                    variant="drawer"
-                    skipShopifyRedirect
-                    onBackToCart={() => setStep("cart")}
-                    onComplete={closeCart}
-                  />
-                ) : !ready ? (
+                {!ready ? (
                   <p className="text-sm text-site-secondary">Loading cart…</p>
                 ) : lines.length === 0 ? (
                   <div className="py-8">
@@ -403,7 +371,7 @@ export default function CartDrawer() {
                 )}
               </div>
 
-              {step === "cart" && lines.length > 0 ? (
+              {lines.length > 0 ? (
                 <div className="shrink-0 border-t border-stone-200/80 px-5 py-5 sm:px-6 lg:px-8 lg:py-6">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-sm text-site-secondary">Subtotal</span>

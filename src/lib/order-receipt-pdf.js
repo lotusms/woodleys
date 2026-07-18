@@ -6,7 +6,7 @@ import {
   getPaymentMethodLabel,
 } from "@/lib/order-receipt";
 
-const LOGO_SRC = "/images/Woodley's Jewelers_Logo.svg";
+const LOGO_SRC = "/images/Woodley Logo Stack.svg";
 
 async function loadLogoPngDataUrl() {
   const res = await fetch(encodeURI(LOGO_SRC));
@@ -24,8 +24,8 @@ async function loadLogoPngDataUrl() {
       el.src = blobUrl;
     });
 
-    const width = img.naturalWidth || 508;
-    const height = img.naturalHeight || 184;
+    const width = img.naturalWidth || 428;
+    const height = img.naturalHeight || 505;
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -51,8 +51,8 @@ export async function downloadOrderReceiptPdf(order) {
 
   try {
     const logo = await loadLogoPngDataUrl();
-    const logoWidth = 200;
-    const logoHeight = logoWidth * (92 / 254);
+    const logoWidth = 96;
+    const logoHeight = logoWidth * (126.15 / 107.03);
     doc.addImage(logo, "PNG", margin, y, logoWidth, logoHeight);
     y += logoHeight + 18;
   } catch {

@@ -65,9 +65,9 @@ export default function VisitShowroomCta() {
             </div>
           </div>
 
-          <div className="hidden max-w-xs border-l border-white/15 pl-10 lg:block">
-            <SiteLogoImage height={92} className="opacity-40" />
-            <p className="mt-6 max-w-[12rem] text-sm leading-relaxed text-white/55">
+          <div className="hidden max-w-sm border-l border-white/15 pl-10 lg:block">
+            <SiteLogoImage height={168} tone="light" className="opacity-75" />
+            <p className="mt-6 max-w-[14rem] text-sm leading-relaxed text-white/55">
               Three generations of jewelers, one quiet showroom in {orgLocation}.
             </p>
           </div>

@@ -47,7 +47,7 @@ export default function NavCartLink({
       type="button"
       onClick={handleClick}
       aria-label={ariaLabel}
-      className={`${desktopNavItemClass} ml-1 border-l border-stone-200/70 pl-5 ${className} text-site-secondary hover:border-b-stone-300 hover:text-site-fg`}
+      className={`${desktopNavItemClass} shrink-0 text-site-secondary hover:border-b-stone-300 hover:text-site-fg ${className}`.trim()}
     >
       <ShoppingBagIcon className="h-4 w-4 shrink-0" aria-hidden />
       <span className="whitespace-nowrap tabular-nums">{formatUsd(subtotalUsd)}</span>

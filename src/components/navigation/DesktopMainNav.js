@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PopoverGroup } from "@headlessui/react";
 import DesktopNavDropdown from "@/components/navigation/DesktopNavDropdown";
-import NavCartLink from "@/components/navigation/NavCartLink";
 import { mainNav, isNavItemActive, desktopNavItemClass } from "@/config";
 
 function NavLink({ href, label, prefix }) {
@@ -28,7 +27,7 @@ function NavLink({ href, label, prefix }) {
 
 export default function DesktopMainNav() {
   return (
-    <PopoverGroup className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-2 xl:gap-x-4 2xl:gap-x-5">
+    <PopoverGroup className="flex flex-nowrap items-center justify-center gap-x-3 xl:gap-x-3.5 2xl:gap-x-5">
       {mainNav.map((item) => {
         const hasDropdown =
           (item.children && item.children.length > 0) ||
@@ -47,7 +46,6 @@ export default function DesktopMainNav() {
           />
         );
       })}
-      <NavCartLink />
     </PopoverGroup>
   );
 }

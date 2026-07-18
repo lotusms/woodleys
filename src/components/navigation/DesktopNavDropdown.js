@@ -189,10 +189,10 @@ function DesktopNavDropdownPanel({ item, open, close }) {
                     alt=""
                     fill
                     sizes="320px"
-                    className="object-cover object-center opacity-45"
+                    className="object-cover object-center opacity-[0.14]"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-white from-35% via-white/88 via-55% to-white/25" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white from-40% via-white/92 via-62% to-white/55" />
               </div>
             ) : null}
 

@@ -8,7 +8,7 @@ import {
   orgEmail,
   orgSocialLinks,
 } from "@/config";
-import { footerPageLinks, mainNav } from "@/config";
+import { footerPageLinks } from "@/config";
 
 const legalLinks = [
   { href: "/privacy-policy", label: "Privacy Policy" },
@@ -31,10 +31,10 @@ export default function SiteFooter() {
       id="site-footer"
       className="relative z-10 mt-auto w-full border-t border-stone-200/80 bg-champagne/40 py-16"
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 sm:px-10 lg:grid-cols-[1.3fr_0.9fr_0.9fr_1.1fr] lg:px-12">
-        <div>
-          <SiteLogo variant="footer" />
-          <p className="mt-5 max-w-sm text-sm leading-relaxed text-site-secondary">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 px-6 sm:px-10 md:grid-cols-2 md:gap-x-10 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,0.75fr)_minmax(0,0.75fr)] lg:gap-x-14 lg:px-12">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8 md:col-span-2 lg:col-span-1">
+          <SiteLogo variant="footer" className="shrink-0" />
+          <p className="min-w-0 flex-1 text-sm leading-relaxed text-site-secondary sm:pt-1">
             A family-owned fine jeweler in {orgLocation}, trusted since{" "}
             {orgEstablished}. Engagement rings, diamonds, custom design, watches,
             and expert care, presented with a quiet confidence in {orgLocation}.
@@ -42,7 +42,7 @@ export default function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-site-secondary">
+          <h2 className="text-xs font-bold uppercase tracking-[0.22em] text-site-fg">
             Visit
           </h2>
           <address className="mt-4 space-y-2 text-sm not-italic leading-relaxed text-site-fg">
@@ -84,7 +84,7 @@ export default function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-site-secondary">
+          <h2 className="text-xs font-bold uppercase tracking-[0.22em] text-site-fg">
             Other links
           </h2>
           <nav aria-label="Other links" className="mt-4 flex flex-col gap-2">
@@ -97,26 +97,6 @@ export default function SiteFooter() {
                 {item.label}
               </Link>
             ))}
-          </nav>
-        </div>
-
-        <div>
-          <h2 className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-site-secondary">
-            Collections
-          </h2>
-          <nav aria-label="Footer collections" className="mt-4">
-            <ul className="grid gap-2 sm:grid-cols-2" role="list">
-              {mainNav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-site-fg transition hover:text-warm-gold-dark"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </nav>
         </div>
       </div>

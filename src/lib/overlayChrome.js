@@ -72,8 +72,8 @@ export function checkoutDialogDrawerPanel(light) {
 /** Wide two-column cart drawer — recommendations + bag. */
 export function cartDrawerPanel(light) {
   return light
-    ? "flex h-full w-full max-w-[min(100vw,88rem)] flex-col bg-ivory shadow-2xl shadow-stone-900/15 ring-1 ring-stone-200/50 transition duration-300 data-closed:translate-x-full data-closed:opacity-0"
-    : "flex h-full w-full max-w-[min(100vw,88rem)] flex-col bg-slate-950 shadow-2xl transition duration-300 data-closed:translate-x-full data-closed:opacity-0";
+    ? "flex h-full w-full max-w-[min(100vw,42rem)] flex-col bg-ivory shadow-2xl shadow-stone-900/15 ring-1 ring-stone-200/50 transition duration-300 data-closed:translate-x-full data-closed:opacity-0 lg:max-w-[min(100vw,48rem)]"
+    : "flex h-full w-full max-w-[min(100vw,42rem)] flex-col bg-slate-950 shadow-2xl transition duration-300 data-closed:translate-x-full data-closed:opacity-0 lg:max-w-[min(100vw,48rem)]";
 }
 
 /** @param {boolean} light */
