@@ -20,7 +20,7 @@ export default function CategoryLandingPage({ sectionKey, section }) {
     alt: child.image?.alt,
   }));
 
-  const heroImage = section.children[0]?.image;
+  const heroImage = section.image ?? section.children[0]?.image;
   const isAudienceHub = section.hub === "audience";
   const isService = isServiceCatalogSection(section);
 

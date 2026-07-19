@@ -1,5 +1,6 @@
 "use client";
 
+import CatalogMetalFilter from "@/components/catalog/CatalogMetalFilter";
 import CatalogSortSelect from "@/components/catalog/CatalogSortSelect";
 
 /**
@@ -8,6 +9,12 @@ import CatalogSortSelect from "@/components/catalog/CatalogSortSelect";
  *   count?: number;
  *   sort: string;
  *   onSortChange: (value: string) => void;
+ *   metalFilter?: {
+ *     allHref: string;
+ *     allLabel?: string;
+ *     activeHref: string;
+ *     items: { title: string; href: string; symbol?: string; symbolClass?: string }[];
+ *   } | null;
  * }} props
  */
 export default function CatalogCollectionHeader({
@@ -15,6 +22,7 @@ export default function CatalogCollectionHeader({
   count,
   sort,
   onSortChange,
+  metalFilter = null,
 }) {
   const showCount = typeof count === "number" && count > 0;
 
@@ -36,12 +44,23 @@ export default function CatalogCollectionHeader({
           ) : null}
         </h2>
 
-        <CatalogSortSelect
-          id={`sort-${label.replace(/\s+/g, "-").toLowerCase()}`}
-          value={sort}
-          onChange={onSortChange}
-          className="shrink-0 self-start sm:self-center"
-        />
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+          <CatalogSortSelect
+            id={`sort-${label.replace(/\s+/g, "-").toLowerCase()}`}
+            value={sort}
+            onChange={onSortChange}
+            className="shrink-0"
+          />
+          {metalFilter?.items?.length ? (
+            <CatalogMetalFilter
+              allHref={metalFilter.allHref}
+              allLabel={metalFilter.allLabel}
+              activeHref={metalFilter.activeHref}
+              items={metalFilter.items}
+              className="shrink-0"
+            />
+          ) : null}
+        </div>
       </div>
     </div>
   );

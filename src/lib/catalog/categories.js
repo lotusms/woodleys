@@ -36,6 +36,42 @@ const ALL_RINGS_HERO = {
   alt: "Assorted fine jewelry rings in gold and gemstone styles",
 };
 
+/** Local category hero for Women's Rings. */
+const WOMEN_RINGS_HERO = {
+  src: "/images/heroes/women-rings.png",
+  alt: "Women's rings in gold and gemstones",
+};
+
+/** Local category hero for Women's Necklaces. */
+const WOMEN_NECKLACES_HERO = {
+  src: "/images/heroes/women-necklaces.png",
+  alt: "Women's necklaces and chains in gold",
+};
+
+/** Local category hero for Solitaire engagement rings. */
+const SOLITAIRE_HERO = {
+  src: "/images/heroes/solitaire.png",
+  alt: "Solitaire engagement ring with a single center diamond",
+};
+
+/** Local category hero for Halo engagement rings. */
+const HALO_HERO = {
+  src: "/images/heroes/halo.png",
+  alt: "Halo engagement ring with accent diamonds surrounding the center stone",
+};
+
+/** Local category hero for Three-Stone engagement rings. */
+const THREE_STONE_HERO = {
+  src: "/images/heroes/three-stone.png",
+  alt: "Three-stone engagement ring",
+};
+
+/** Local category hero for Vintage-Inspired engagement rings. */
+const VINTAGE_INSPIRED_HERO = {
+  src: "/images/heroes/vintage-inspired.png",
+  alt: "Vintage-inspired engagement ring with intricate metalwork",
+};
+
 /** Local category hero for Wedding Bands (bridal hub). */
 const WEDDING_BANDS_HERO = {
   src: "/images/heroes/wedding-bands.png",
@@ -78,6 +114,7 @@ const WEDDING_BANDS_HERO = {
  *   shopifyHandle: string;
  *   intro: string;
  *   children: CategoryEntry[];
+ *   image?: { src: string; alt: string };
  *   audience?: import("./product-audience").ProductAudience;
  *   hub?: "audience";
  *   presentation?: "catalog" | "service";
@@ -118,7 +155,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "fine-rings",
         audience: "women",
         derived: true,
-        image: ALL_RINGS_HERO,
+        image: WOMEN_RINGS_HERO,
       },
       {
         slug: "necklaces",
@@ -127,7 +164,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "necklaces",
         audience: "women",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Fine jewelry necklace" },
+        image: WOMEN_NECKLACES_HERO,
       },
       {
         slug: "pendants",
@@ -266,6 +303,7 @@ export const CATALOG_SECTIONS = {
     description:
       "Engagement rings and wedding bands selected with patience and care, elegant, enduring, and personal.",
     shopifyHandle: "engagement-wedding",
+    image: ENGAGEMENT_RINGS_HERO,
     intro:
       "From solitaire classics to vintage-inspired settings, each ring is chosen to honor your story without chasing trends.",
     children: [
@@ -275,10 +313,7 @@ export const CATALOG_SECTIONS = {
         description:
           "A single center stone in a refined setting, timeless focus on the diamond you choose.",
         shopifyHandle: "solitaire-rings",
-        image: {
-          src: "/images/hero-solitaire2.png",
-          alt: "Solitaire engagement ring with a single center diamond",
-        },
+        image: SOLITAIRE_HERO,
       },
       {
         slug: "halo",
@@ -286,10 +321,7 @@ export const CATALOG_SECTIONS = {
         description:
           "A center stone framed by a delicate halo of accent diamonds for gentle brilliance.",
         shopifyHandle: "halo-rings",
-        image: {
-          src: "/images/heroes/halo.png",
-          alt: "Halo engagement ring with accent diamonds surrounding the center stone",
-        },
+        image: HALO_HERO,
       },
       {
         slug: "three-stone",
@@ -297,10 +329,7 @@ export const CATALOG_SECTIONS = {
         description:
           "Past, present, and future represented in a balanced trilogy of stones.",
         shopifyHandle: "three-stone-rings",
-        image: {
-          src: "/images/heroes/three-stone.png",
-          alt: "Three-stone engagement ring",
-        },
+        image: THREE_STONE_HERO,
       },
       {
         slug: "vintage-inspired",
@@ -308,10 +337,7 @@ export const CATALOG_SECTIONS = {
         description:
           "Heritage details and milgrain finishes with the comfort of modern craftsmanship.",
         shopifyHandle: "vintage-inspired-rings",
-        image: {
-          src: "/images/heroes/vintage-inspired.png",
-          alt: "Vintage-inspired engagement ring with intricate metalwork",
-        },
+        image: VINTAGE_INSPIRED_HERO,
       },
       {
         slug: "wedding-bands",
@@ -438,6 +464,7 @@ export const CATALOG_SECTIONS = {
     description:
       "Rings, necklaces, earrings, and bracelets chosen for everyday elegance and special occasions.",
     shopifyHandle: "fine-jewelry",
+    image: ALL_RINGS_HERO,
     intro:
       "Refined pieces that sit comfortably in a jewelry wardrobe, understated, well made, and meant to last.",
     children: [

@@ -15,12 +15,19 @@ import {
  *   label: string;
  *   products: import("@/lib/catalog/product-types").CatalogProduct[];
  *   emptyMessage?: string;
+ *   metalFilter?: {
+ *     allHref: string;
+ *     allLabel?: string;
+ *     activeHref: string;
+ *     items: { title: string; href: string; symbol?: string; symbolClass?: string }[];
+ *   } | null;
  * }} props
  */
 export default function CatalogProductSection({
   label,
   products,
   emptyMessage,
+  metalFilter = null,
 }) {
   const [sort, setSort] = useState(DEFAULT_CATALOG_SORT);
 
@@ -36,6 +43,7 @@ export default function CatalogProductSection({
         count={products.length}
         sort={sort}
         onSortChange={setSort}
+        metalFilter={metalFilter}
       />
       <div className="mt-10">
         <ProductGrid products={sortedProducts} emptyMessage={emptyMessage} />

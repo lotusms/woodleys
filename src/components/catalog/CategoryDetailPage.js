@@ -123,6 +123,31 @@ export default function CategoryDetailPage({
   const metalItems = childItems.filter((item) => item.symbol);
   const otherItems = childItems.filter((item) => !item.symbol);
 
+  const currentHref = `/${sectionKey}/${slugPath.join("/")}`;
+  const parentEntry =
+    ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
+  const metalSource =
+    metalItems.length > 0
+      ? {
+          items: metalItems,
+          allHref: currentHref,
+          allLabel: "All metals",
+        }
+      : entry.metalFilter && parentEntry?.children?.length
+        ? {
+            items: parentEntry.children
+              .filter((child) => child.symbol)
+              .map((child) => ({
+                title: child.title,
+                href: `/${sectionKey}/${[...ancestors.map((a) => a.slug), child.slug].join("/")}`,
+                symbol: child.symbol,
+                symbolClass: child.symbolClass,
+              })),
+            allHref: parentHref,
+            allLabel: "All metals",
+          }
+        : null;
+
   const isDiamondOrigin =
     sectionKey === "diamonds" &&
     (entry.slug === "natural-diamonds" || entry.slug === "lab-grown-diamonds");
@@ -187,27 +212,21 @@ export default function CategoryDetailPage({
         </div>
       ) : null}
 
-      {metalItems.length > 0 ? (
-        <div className="mb-16">
-          <div className="border-b border-stone-200/80 pb-8">
-            <h2 className="font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
-              Shop by metal
-            </h2>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
-              Choose a metal to refine this collection.
-            </p>
-          </div>
-          <div className="mt-10">
-            <CategoryGrid items={metalItems} />
-          </div>
-        </div>
-      ) : null}
-
       {!isService ? (
         <CatalogProductSection
           label={childItems.length > 0 ? `All ${entry.title}` : entry.title}
           products={products}
           emptyMessage={emptyMessage}
+          metalFilter={
+            metalSource?.items.length
+              ? {
+                  allHref: metalSource.allHref,
+                  allLabel: metalSource.allLabel,
+                  activeHref: currentHref,
+                  items: metalSource.items,
+                }
+              : null
+          }
         />
       ) : null}
     </CategoryPageLayout>
