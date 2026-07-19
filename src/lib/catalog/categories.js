@@ -30,6 +30,12 @@ const WEDDING_BANDS_HERO = {
   src: "/images/heroes/wedding-bands.png",
   alt: "Wedding bands in yellow gold, white gold, and rose gold",
 };
+
+/** Local category hero for Women's Rings. */
+const WOMEN_RINGS_HERO = {
+  src: "/images/heroes/women-rings.png",
+  alt: "Women's rings in gold and gemstones",
+};
 /**
  * Catalog taxonomy — structured for Shopify collection handles when connected.
  * Each entry maps to a future Shopify collection handle via `shopifyHandle`.
@@ -107,7 +113,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "fine-rings",
         audience: "women",
         derived: true,
-        image: RING_CATEGORY_IMAGE,
+        image: WOMEN_RINGS_HERO,
       },
       {
         slug: "necklaces",
