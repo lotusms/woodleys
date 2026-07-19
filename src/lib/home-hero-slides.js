@@ -4,8 +4,9 @@ import { BULOVA_CATEGORY_IMAGE } from "@/lib/catalog/bulova-sample-products.js";
 export const HOME_HERO_SLIDES = [
   {
     id: "engagement",
-    image: "/images/hero-engagement.jpg",
-    imageAlt: "Engagement ring with brilliant diamond in an elegant setting",
+    image: "/images/heroes/solitaire.png",
+    imageAlt:
+      "Solitaire engagement rings in yellow gold, white gold, and rose gold with round, oval, and pear diamonds",
     heading: "A ring worthy of the moment you say yes",
     body: `Your engagement ring marks a promise you will carry for a lifetime. We help you choose a setting and stone with patience and care, so the ring you wear feels as meaningful as the marriage it represents.`,
     primaryLabel: "Engagement & Wedding",

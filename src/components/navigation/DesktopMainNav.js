@@ -4,46 +4,52 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PopoverGroup } from "@headlessui/react";
 import DesktopNavDropdown from "@/components/navigation/DesktopNavDropdown";
-import { mainNav, isNavItemActive, desktopNavItemClass } from "@/config";
+import {
+  mainNav,
+  isNavItemActive,
+  desktopNavItemClass,
+  getNavSections,
+} from "@/config";
+import {
+  navTriggerCurrentClass,
+  navTriggerIdleClass,
+} from "@/lib/navigation-tokens";
 
-function NavLink({ href, label, prefix }) {
+function NavLink({ item }) {
   const pathname = usePathname();
-  const active = isNavItemActive(pathname, { href, prefix });
+  const active = isNavItemActive(pathname, item);
 
   return (
     <Link
-      href={href}
+      href={item.href}
       aria-current={active ? "page" : undefined}
       className={`${desktopNavItemClass} ${
-        active
-          ? "border-warm-gold text-site-fg"
-          : "text-site-secondary hover:border-stone-300 hover:text-site-fg"
+        active ? navTriggerCurrentClass : navTriggerIdleClass
       }`}
     >
-      <span className="whitespace-nowrap">{label}</span>
+      <span className="whitespace-nowrap">{item.label}</span>
     </Link>
   );
 }
 
 export default function DesktopMainNav() {
   return (
-    <PopoverGroup className="flex flex-nowrap items-center justify-center gap-x-3 xl:gap-x-3.5 2xl:gap-x-5">
+    <PopoverGroup
+      as="ul"
+      role="list"
+      className="flex flex-nowrap items-center justify-center gap-x-3 xl:gap-x-3.5 2xl:gap-x-5"
+    >
       {mainNav.map((item) => {
-        const hasDropdown =
-          (item.children && item.children.length > 0) ||
-          (item.groups && item.groups.length > 0);
-
-        if (hasDropdown) {
-          return <DesktopNavDropdown key={item.href} item={item} />;
-        }
+        const hasDropdown = getNavSections(item).length > 0;
 
         return (
-          <NavLink
-            key={item.href}
-            href={item.href}
-            label={item.label}
-            prefix={item.prefix}
-          />
+          <li key={item.id || item.href} className="inline-flex">
+            {hasDropdown ? (
+              <DesktopNavDropdown item={item} />
+            ) : (
+              <NavLink item={item} />
+            )}
+          </li>
         );
       })}
     </PopoverGroup>

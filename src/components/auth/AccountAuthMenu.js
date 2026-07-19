@@ -11,9 +11,9 @@ import {
 import { UserIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
 import { openAdminDashboardOrNavigate } from "@/lib/auth-routing";
+import { headerUtilityPillClass } from "@/lib/navigation-tokens";
 
-const menuButtonClass =
-  "inline-flex shrink-0 items-center gap-2 rounded-full border border-stone-300/80 bg-white px-2.5 py-2 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-site-fg transition hover:border-warm-gold hover:bg-champagne focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-ivory sm:px-4 sm:text-[0.65rem] sm:tracking-[0.18em]";
+const menuButtonClass = headerUtilityPillClass;
 
 const menuItemsClass =
   "z-[130] w-52 origin-top-right rounded-xl border border-stone-200/80 bg-white/98 p-1.5 shadow-xl shadow-stone-900/10 backdrop-blur-md transition data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in";
@@ -59,7 +59,7 @@ export default function AccountAuthMenu({ onNavigate, className = "" }) {
     return <GuestAccountMenu onNavigate={onNavigate} className={className} />;
   }
 
-  const label = isAdmin ? "Admin" : "Account";
+  const label = "Account";
 
   return (
     <Menu as="div" className={`relative shrink-0 ${className}`.trim()}>
@@ -71,6 +71,15 @@ export default function AccountAuthMenu({ onNavigate, className = "" }) {
         anchor={{ to: "bottom end", gap: 8, padding: 12 }}
         className={menuItemsClass}
       >
+        <MenuItem>
+          <Link
+            href="/account"
+            onClick={onNavigate}
+            className={menuItemClass}
+          >
+            My account
+          </Link>
+        </MenuItem>
         {isAdmin ? (
           <MenuItem>
             <button
@@ -81,23 +90,13 @@ export default function AccountAuthMenu({ onNavigate, className = "" }) {
                 openAdminDashboardOrNavigate(router);
               }}
             >
-              Open portal
+              Admin Dashboard
               <span className="mt-0.5 block text-xs font-normal text-site-secondary">
                 Opens in a new tab
               </span>
             </button>
           </MenuItem>
-        ) : (
-          <MenuItem>
-            <Link
-              href="/account"
-              onClick={onNavigate}
-              className={menuItemClass}
-            >
-              My account
-            </Link>
-          </MenuItem>
-        )}
+        ) : null}
         <MenuItem>
           <button
             type="button"

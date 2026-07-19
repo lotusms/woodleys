@@ -1,6 +1,35 @@
 import { diamondShapeLinksForOrigin } from "../../config/diamond-shapes.js";
+import {
+  BRIDAL_METAL_SLUGS,
+  metalCategoryChildren,
+  metalsBySlug,
+} from "../../config/metals.js";
 import { BULOVA_CATEGORY_IMAGE } from "./bulova-sample-products.js";
 import { RING_CATEGORY_IMAGE } from "./ring-sample-products.js";
+
+/** Local category hero for Women's Engagement Rings. */
+const ENGAGEMENT_RINGS_HERO = {
+  src: "/images/heroes/engagement-rings.png",
+  alt: "Diamond engagement rings in yellow, white, and rose gold on stone",
+};
+
+/** Local category hero for Women's Wedding Bands. */
+const WOMEN_WEDDING_BANDS_HERO = {
+  src: "/images/heroes/women-wedding-bands.png",
+  alt: "Women's diamond wedding bands in yellow gold, white gold, and rose gold",
+};
+
+/** Local category hero for Men's Wedding Bands. */
+const MEN_WEDDING_BANDS_HERO = {
+  src: "/images/heroes/mens-wedding-bands.png",
+  alt: "Men's wedding bands in yellow gold, white gold, and alternative metals",
+};
+
+/** Local category hero for Wedding Bands (bridal hub). */
+const WEDDING_BANDS_HERO = {
+  src: "/images/heroes/wedding-bands.png",
+  alt: "Wedding bands in yellow gold, white gold, and rose gold",
+};
 /**
  * Catalog taxonomy — structured for Shopify collection handles when connected.
  * Each entry maps to a future Shopify collection handle via `shopifyHandle`.
@@ -23,6 +52,9 @@ import { RING_CATEGORY_IMAGE } from "./ring-sample-products.js";
  *   audience?: import("./product-audience").ProductAudience;
  *   sourceHandles?: string[];
  *   derived?: boolean;
+ *   metalFilter?: string;
+ *   symbol?: string;
+ *   symbolClass?: string;
  *   children?: CategoryEntry[];
  * }} CategoryEntry
  */
@@ -37,6 +69,7 @@ import { RING_CATEGORY_IMAGE } from "./ring-sample-products.js";
  *   children: CategoryEntry[];
  *   audience?: import("./product-audience").ProductAudience;
  *   hub?: "audience";
+ *   presentation?: "catalog" | "service";
  * }} CatalogSection
  */
 
@@ -135,10 +168,7 @@ export const CATALOG_SECTIONS = {
         ],
         audience: "women",
         derived: true,
-        image: {
-          src: editorialImages.engagement,
-          alt: "Engagement ring with diamond center stone",
-        },
+        image: ENGAGEMENT_RINGS_HERO,
       },
       {
         slug: "wedding-bands",
@@ -147,7 +177,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "wedding-bands",
         audience: "women",
         derived: true,
-        image: RING_CATEGORY_IMAGE,
+        image: WOMEN_WEDDING_BANDS_HERO,
       },
     ],
   },
@@ -215,7 +245,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "wedding-bands",
         audience: "men",
         derived: true,
-        image: RING_CATEGORY_IMAGE,
+        image: MEN_WEDDING_BANDS_HERO,
       },
     ],
   },
@@ -235,7 +265,7 @@ export const CATALOG_SECTIONS = {
           "A single center stone in a refined setting, timeless focus on the diamond you choose.",
         shopifyHandle: "solitaire-rings",
         image: {
-          src: editorialImages.engagement,
+          src: "/images/heroes/solitaire.png",
           alt: "Solitaire engagement ring with a single center diamond",
         },
       },
@@ -246,7 +276,7 @@ export const CATALOG_SECTIONS = {
           "A center stone framed by a delicate halo of accent diamonds for gentle brilliance.",
         shopifyHandle: "halo-rings",
         image: {
-          src: editorialImages.diamond,
+          src: "/images/heroes/halo.png",
           alt: "Halo engagement ring with accent diamonds surrounding the center stone",
         },
       },
@@ -257,7 +287,7 @@ export const CATALOG_SECTIONS = {
           "Past, present, and future represented in a balanced trilogy of stones.",
         shopifyHandle: "three-stone-rings",
         image: {
-          src: editorialImages.engagement,
+          src: "/images/heroes/three-stone.png",
           alt: "Three-stone engagement ring",
         },
       },
@@ -268,7 +298,7 @@ export const CATALOG_SECTIONS = {
           "Heritage details and milgrain finishes with the comfort of modern craftsmanship.",
         shopifyHandle: "vintage-inspired-rings",
         image: {
-          src: editorialImages.engagement,
+          src: "/images/heroes/vintage-inspired.png",
           alt: "Vintage-inspired engagement ring with intricate metalwork",
         },
       },
@@ -278,8 +308,25 @@ export const CATALOG_SECTIONS = {
         description:
           "Bands in precious metals, plain, pavé, or engraved, to complement your engagement ring.",
         shopifyHandle: "wedding-bands",
-        image: RING_CATEGORY_IMAGE,
+        image: WEDDING_BANDS_HERO,
+        children: metalCategoryChildren(
+          "/engagement-wedding/wedding-bands",
+          "wedding-bands",
+        ),
       },
+      ...metalCategoryChildren("/engagement-wedding", "engagement-wedding", {
+        metals: metalsBySlug(BRIDAL_METAL_SLUGS),
+      }).map((entry) => ({
+        ...entry,
+        sourceHandles: [
+          "solitaire-rings",
+          "halo-rings",
+          "three-stone-rings",
+          "vintage-inspired-rings",
+          "engagement-wedding",
+        ],
+        description: `${entry.description} Browse engagement styles in ${entry.title.toLowerCase()}.`,
+      })),
     ],
   },
   diamonds: {
@@ -298,7 +345,7 @@ export const CATALOG_SECTIONS = {
           "Earth-formed diamonds selected for beauty, proportion, and integrity of origin. Browse by shape to compare cuts and pricing.",
         shopifyHandle: "natural-diamonds",
         image: {
-          src: editorialImages.diamond,
+          src: "/images/heroes/natural-diamonds.png",
           alt: "Natural diamond displayed for inspection",
         },
         children: diamondShapeLinksForOrigin("natural-diamonds").map((shape) => ({
@@ -316,7 +363,7 @@ export const CATALOG_SECTIONS = {
           "Laboratory-grown diamonds with the same optical properties, offered with transparent guidance. Browse by shape to compare cuts and pricing.",
         shopifyHandle: "lab-grown-diamonds",
         image: {
-          src: editorialImages.diamond,
+          src: "/images/heroes/lab-grown.png",
           alt: "Lab-grown diamond in a refined setting",
         },
         children: diamondShapeLinksForOrigin("lab-grown-diamonds").map((shape) => ({
@@ -335,6 +382,7 @@ export const CATALOG_SECTIONS = {
     description:
       "Collaborative design for pieces that carry personal meaning, guided by experienced bench jewelers.",
     shopifyHandle: "custom-jewelry",
+    presentation: "service",
     intro:
       "Whether starting from a sketch or reimagining a family heirloom, we work beside you at every step.",
     children: [
@@ -388,6 +436,7 @@ export const CATALOG_SECTIONS = {
         description: "Stackable bands, statement rings, and everyday gold and gemstone styles.",
         shopifyHandle: "fine-rings",
         image: RING_CATEGORY_IMAGE,
+        children: metalCategoryChildren("/fine-jewelry/rings", "fine-rings"),
       },
       {
         slug: "necklaces",
@@ -395,6 +444,7 @@ export const CATALOG_SECTIONS = {
         description: "Chains and necklaces in gold and platinum with thoughtful proportion.",
         shopifyHandle: "necklaces",
         image: { src: editorialImages.fine, alt: "Fine jewelry necklace" },
+        children: metalCategoryChildren("/fine-jewelry/necklaces", "necklaces"),
       },
       {
         slug: "pendants",
@@ -409,6 +459,7 @@ export const CATALOG_SECTIONS = {
         description: "Studs, drops, and hoops in balanced scale for daily wear.",
         shopifyHandle: "earrings",
         image: { src: editorialImages.fine, alt: "Fine jewelry earrings" },
+        children: metalCategoryChildren("/fine-jewelry/earrings", "earrings"),
       },
       {
         slug: "bracelets",
@@ -416,6 +467,7 @@ export const CATALOG_SECTIONS = {
         description: "Bracelets and bangles with secure clasps and lasting finish.",
         shopifyHandle: "bracelets",
         image: { src: editorialImages.fine, alt: "Fine jewelry bracelet" },
+        children: metalCategoryChildren("/fine-jewelry/bracelets", "bracelets"),
       },
     ],
   },
@@ -527,6 +579,7 @@ export const CATALOG_SECTIONS = {
     description:
       "Repairs, sizing, cleaning, and appraisals performed by bench jewelers who respect your pieces.",
     shopifyHandle: "services",
+    presentation: "service",
     intro:
       "Your relationship with us continues long after a purchase. We inspect, restore, and maintain jewelry with the same care we bring to new designs.",
     children: [
@@ -585,6 +638,17 @@ export function getCatalogSection(sectionKey) {
 /** @param {string} sectionKey */
 export function isAudienceCatalogSection(sectionKey) {
   return getCatalogSection(sectionKey)?.hub === "audience";
+}
+
+/**
+ * @param {string | CatalogSection | null | undefined} sectionOrKey
+ */
+export function isServiceCatalogSection(sectionOrKey) {
+  const section =
+    typeof sectionOrKey === "string"
+      ? getCatalogSection(sectionOrKey)
+      : sectionOrKey;
+  return section?.presentation === "service";
 }
 
 /**
@@ -736,8 +800,8 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Engagement",
     href: "/engagement-wedding",
     description: "Solitaires, halos, vintage-inspired settings, and custom design.",
-    image: editorialImages.engagement,
-    alt: "Engagement ring with diamond center stone",
+    image: ENGAGEMENT_RINGS_HERO.src,
+    alt: ENGAGEMENT_RINGS_HERO.alt,
   },
   {
     title: "Rings",

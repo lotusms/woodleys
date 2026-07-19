@@ -32,11 +32,13 @@
 html {
   scroll-behavior: auto;
   scroll-padding-top: 4.5rem;
+  --site-header-total-height: 4.5rem;
 }
 
 @media (min-width: 1280px) {
   html {
-    scroll-padding-top: 8rem;
+    scroll-padding-top: 9rem;
+    --site-header-total-height: 9rem;
   }
 }
 

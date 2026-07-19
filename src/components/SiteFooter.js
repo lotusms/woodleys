@@ -6,6 +6,8 @@ import {
   orgEstablished,
   orgPhone,
   orgEmail,
+  orgAddress,
+  orgAddressMapsUrl,
   orgSocialLinks,
 } from "@/config";
 import { footerPageLinks } from "@/config";
@@ -46,7 +48,16 @@ export default function SiteFooter() {
             Visit
           </h2>
           <address className="mt-4 space-y-2 text-sm not-italic leading-relaxed text-site-fg">
-            <p>{orgLocation}</p>
+            <p>
+              <a
+                href={orgAddressMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition hover:text-warm-gold-dark"
+              >
+                {orgAddress}
+              </a>
+            </p>
             <p>
               <a
                 href={`tel:${orgPhone.replace(/\D/g, "")}`}

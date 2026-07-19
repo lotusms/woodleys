@@ -6,8 +6,8 @@ import { desktopNavItemClass } from "@/config";
 import { formatUsd } from "@/lib/money";
 
 /**
- * Cart control for the main shop navigation — visible only when the cart has items.
- * @param {{ onNavigate?: () => void, variant?: "desktop" | "mobile", className?: string }} props
+ * Cart control — always available; quantity announced accessibly.
+ * @param {{ onNavigate?: () => void, variant?: "desktop" | "mobile" | "icon", className?: string }} props
  */
 export default function NavCartLink({
   onNavigate,
@@ -15,10 +15,11 @@ export default function NavCartLink({
   className = "",
 }) {
   const { ready, itemCount, subtotalUsd, openCart } = useCart();
-
-  if (!ready || itemCount === 0) return null;
-
-  const ariaLabel = `Open cart, ${itemCount} item${itemCount === 1 ? "" : "s"}, ${formatUsd(subtotalUsd)} total`;
+  const count = ready ? itemCount : 0;
+  const ariaLabel =
+    count === 0
+      ? "Cart, empty"
+      : `Cart, ${count} item${count === 1 ? "" : "s"}, ${formatUsd(subtotalUsd)} total`;
 
   function handleClick() {
     onNavigate?.();
@@ -37,7 +38,30 @@ export default function NavCartLink({
           <ShoppingBagIcon className="h-6 w-6 shrink-0" aria-hidden />
           Cart
         </span>
-        <span className="font-serif text-lg tabular-nums">{formatUsd(subtotalUsd)}</span>
+        <span className="font-serif text-lg tabular-nums">
+          {count === 0 ? "Empty" : formatUsd(subtotalUsd)}
+        </span>
+      </button>
+    );
+  }
+
+  if (variant === "icon") {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label={ariaLabel}
+        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-300/80 bg-white text-site-fg transition hover:border-warm-gold hover:bg-champagne focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark ${className}`.trim()}
+      >
+        <ShoppingBagIcon className="h-4 w-4" aria-hidden />
+        {count > 0 ? (
+          <span
+            className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-warm-gold px-1 text-[0.6rem] font-semibold text-white"
+            aria-hidden
+          >
+            {count > 99 ? "99+" : count}
+          </span>
+        ) : null}
       </button>
     );
   }
@@ -50,7 +74,14 @@ export default function NavCartLink({
       className={`${desktopNavItemClass} shrink-0 text-site-secondary hover:border-b-stone-300 hover:text-site-fg ${className}`.trim()}
     >
       <ShoppingBagIcon className="h-4 w-4 shrink-0" aria-hidden />
-      <span className="whitespace-nowrap tabular-nums">{formatUsd(subtotalUsd)}</span>
+      <span className="whitespace-nowrap">
+        Cart
+        {count > 0 ? (
+          <span className="ml-1 tabular-nums" aria-hidden>
+            ({count})
+          </span>
+        ) : null}
+      </span>
     </button>
   );
 }

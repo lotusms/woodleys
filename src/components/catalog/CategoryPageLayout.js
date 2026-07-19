@@ -44,10 +44,6 @@ export default function CategoryPageLayout({
             className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/35 to-stone-950/10"
             aria-hidden
           />
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-stone-950/60 via-stone-950/15 to-transparent"
-            aria-hidden
-          />
 
           <div className="relative z-10 mx-auto flex min-h-[min(72vh,36rem)] max-w-7xl flex-col justify-end px-6 pb-10 pt-28 sm:min-h-[min(68vh,40rem)] sm:px-10 sm:pb-12 lg:px-12">
             {breadcrumbs.length > 0 ? (

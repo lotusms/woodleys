@@ -1,68 +1,156 @@
 import { diamondShapeLinksForOrigin } from "./diamond-shapes";
+import {
+  BRIDAL_METAL_SLUGS,
+  JEWELRY_METALS,
+  metalNavSection,
+  metalsBySlug,
+} from "./metals";
 
 /**
- * Soft mega-menu atmosphere images (decorative only).
- * Prefer local product assets when available.
- */
-const navPanelImages = {
-  engagement: "/images/hero-engagement.jpg",
-  wedding: "/images/products/rings/austin.webp",
-  rings: "/images/products/rings/festivity.webp",
-  necklaces:
-    "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_1200x.jpg?v=1639025505",
-  earrings:
-    "https://woodleyjewelers.com/cdn/shop/files/QE16475--2_1024x1024@2x.jpg?v=1730595415",
-  bracelets:
-    "https://woodleyjewelers.com/cdn/shop/files/129D2D0B-124A-47E7-9AAD-754D6F1BA1BB_1200x.jpg?v=1639025505",
-  watches: "/images/products/watches/bulova.webp",
-  diamonds:
-    "https://woodleyjewelers.com/cdn/shop/files/FA6CB512-0FF4-43DE-A784-70382EBDA5AD_1200x.jpg?v=1639025505",
-  custom:
-    "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800@2x.jpg?v=1639027342",
-  services:
-    "https://woodleyjewelers.com/cdn/shop/files/4DC717D9-AFDD-4A66-90A3-F442E4225EDF_800x800@2x.jpg?v=1639025504",
-};
-
-/**
- * Primary site navigation — Kay-style type-first browse.
- * Gender sits inside mega menus (Women's / Men's columns), not as top-level items.
- *
  * @typedef {{
+ *   id: string;
  *   label: string;
  *   href: string;
  *   description?: string;
  *   icon?: { src: string; alt: string };
+ *   symbol?: string;
+ *   symbolClass?: string;
+ *   visuallyHiddenContext?: string;
+ *   external?: boolean;
  * }} NavLink
+ *
  * @typedef {{
+ *   id: string;
+ *   heading: string;
+ *   headingHref?: string;
+ *   layout?: "list" | "iconGrid";
+ *   seeAllHref?: string;
+ *   seeAllLabel?: string;
+ *   links: NavLink[];
+ * }} NavSection
+ *
+ * @typedef {{
+ *   id: string;
  *   label: string;
  *   href: string;
  *   prefix?: boolean;
- *   children?: NavLink[];
- *   groups?: {
- *     heading?: string;
- *     layout?: "list" | "iconGrid";
- *     seeAllHref?: string;
- *     links: NavLink[];
- *   }[];
- *   panelWide?: boolean;
+ *   menuType?: "mega" | "compact" | "none";
  *   exploreLabel?: string;
  *   activeMatch?: string[];
- *   panelImage?: string;
+ *   sections?: NavSection[];
+ *   groups?: NavSection[];
+ *   children?: NavLink[];
+ *   footerAction?: NavLink;
  * }} NavItem
  */
 
 /** Shared desktop nav link / dropdown trigger styles */
 export const desktopNavItemClass =
-  "inline-flex h-8 shrink-0 items-center gap-1 border-b-2 border-transparent bg-transparent p-0 pb-0.5 text-[0.65rem] font-medium uppercase leading-none tracking-[0.16em] transition-colors";
+  "inline-flex items-center gap-1.5 border-b-2 border-transparent px-1 py-2 text-[0.68rem] font-medium uppercase tracking-[0.16em] transition focus:outline-none focus-visible:text-warm-gold-dark";
 
-/** @type {NavItem[]} */
+function link(id, label, href, extras = {}) {
+  return { id, label, href, ...extras };
+}
+
+/**
+ * Watches-style shop column: All / Women's / Men's (+ optional extras).
+ * @param {{
+ *   id: string;
+ *   heading: string;
+ *   allHref: string;
+ *   allLabel: string;
+ *   womenHref: string;
+ *   womenLabel: string;
+ *   menHref: string;
+ *   menLabel: string;
+ *   extraLinks?: { id: string; label: string; href: string; visuallyHiddenContext?: string }[];
+ * }} opts
+ */
+function shopAudienceSection({
+  id,
+  heading,
+  allHref,
+  allLabel,
+  womenHref,
+  womenLabel,
+  menHref,
+  menLabel,
+  extraLinks = [],
+}) {
+  return {
+    id,
+    heading,
+    links: [
+      link(`${id}-all`, allLabel, allHref),
+      link(`${id}-women`, womenLabel, womenHref),
+      link(`${id}-men`, menLabel, menHref),
+      ...extraLinks,
+    ],
+  };
+}
+
+/** Shop by Shape — natural origin; lab-grown shapes live on the lab-grown landing. */
+function shopByShapeSection() {
+  const shapes = diamondShapeLinksForOrigin("natural-diamonds");
+  return {
+    id: "shop-by-shape",
+    heading: "Natural by Shape",
+    layout: /** @type {"iconGrid"} */ ("iconGrid"),
+    links: shapes.map((shape) =>
+      link(`shape-${shape.slug}`, shape.label, shape.href, {
+        icon: shape.icon,
+        visuallyHiddenContext: `Natural diamonds, ${shape.label}`,
+      }),
+    ),
+  };
+}
+
+/**
+ * Primary site navigation — product discovery with calm mega menus.
+ * Gender, style, and brand live inside menus; top level stays scannable.
+ *
+ * @type {NavItem[]}
+ */
 export const mainNav = [
-  { label: "Shop All", href: "/shop-all", prefix: true },
   {
+    id: "shop",
+    label: "Shop",
+    href: "/shop-all",
+    menuType: "mega",
+    exploreLabel: "Shop All Jewelry",
+    footerAction: link("shop-footer", "Shop All Jewelry", "/shop-all"),
+    sections: [
+      {
+        id: "shop-jewelry",
+        heading: "Shop Jewelry",
+        links: [
+          link("shop-rings", "Rings", "/fine-jewelry/rings"),
+          link("shop-necklaces", "Necklaces", "/fine-jewelry/necklaces"),
+          link("shop-earrings", "Earrings", "/fine-jewelry/earrings"),
+          link("shop-bracelets", "Bracelets", "/fine-jewelry/bracelets"),
+        ],
+      },
+      {
+        id: "shop-recipient",
+        heading: "Shop by Recipient",
+        links: [
+          link("shop-women", "Women", "/women"),
+          link("shop-men", "Men", "/men"),
+          link("shop-bridal", "Engagement Rings", "/engagement-wedding"),
+          link(
+            "shop-wedding-bands",
+            "Wedding Bands",
+            "/engagement-wedding/wedding-bands",
+          ),
+        ],
+      },
+    ],
+  },
+  {
+    id: "engagement",
     label: "Engagement",
     href: "/engagement-wedding",
-    panelWide: true,
-    panelImage: navPanelImages.engagement,
+    menuType: "mega",
     exploreLabel: "Explore Engagement Rings",
     activeMatch: [
       "/engagement-wedding/solitaire",
@@ -70,129 +158,109 @@ export const mainNav = [
       "/engagement-wedding/three-stone",
       "/engagement-wedding/vintage-inspired",
       "/women/engagement-rings",
+      ...metalsBySlug(BRIDAL_METAL_SLUGS).map(
+        (metal) => `/engagement-wedding/${metal.slug}`,
+      ),
     ],
-    groups: [
+    footerAction: link(
+      "engagement-footer",
+      "Explore Engagement Rings",
+      "/engagement-wedding",
+    ),
+    sections: [
       {
+        id: "engagement-style",
         heading: "Shop by Style",
         links: [
-          { label: "Solitaire", href: "/engagement-wedding/solitaire" },
-          { label: "Halo", href: "/engagement-wedding/halo" },
-          { label: "Three-Stone", href: "/engagement-wedding/three-stone" },
-          {
-            label: "Vintage-Inspired",
-            href: "/engagement-wedding/vintage-inspired",
-          },
-          {
-            label: "All Engagement Rings",
-            href: "/women/engagement-rings",
-          },
+          link(
+            "eng-all",
+            "All Engagement Rings",
+            "/engagement-wedding",
+            { visuallyHiddenContext: "All engagement rings" },
+          ),
+          link("eng-solitaire", "Solitaire", "/engagement-wedding/solitaire"),
+          link("eng-halo", "Halo", "/engagement-wedding/halo"),
+          link("eng-three", "Three-Stone", "/engagement-wedding/three-stone"),
+          link(
+            "eng-vintage",
+            "Vintage-Inspired",
+            "/engagement-wedding/vintage-inspired",
+          ),
         ],
       },
-      {
-        heading: "Diamonds",
-        links: [
-          { label: "Natural Diamonds", href: "/diamonds/natural-diamonds" },
-          {
-            label: "Lab-Grown Diamonds",
-            href: "/diamonds/lab-grown-diamonds",
-          },
-          { label: "Shop by Shape", href: "/diamonds" },
-        ],
-      },
-      {
-        heading: "Custom",
-        links: [
-          { label: "Custom Design", href: "/custom-jewelry/custom-design" },
-          { label: "Book a Visit", href: "/contact" },
-        ],
-      },
+      metalNavSection("/engagement-wedding", "Engagement rings", {
+        metals: metalsBySlug(BRIDAL_METAL_SLUGS),
+      }),
     ],
   },
   {
+    id: "wedding",
     label: "Wedding",
     href: "/engagement-wedding/wedding-bands",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.wedding,
+    menuType: "mega",
     exploreLabel: "Explore Wedding Bands",
     activeMatch: [
       "/engagement-wedding/wedding-bands",
       "/women/wedding-bands",
       "/men/wedding-bands",
+      ...JEWELRY_METALS.map(
+        (metal) => `/engagement-wedding/wedding-bands/${metal.slug}`,
+      ),
     ],
-    groups: [
-      {
-        heading: "Women's",
-        links: [
-          {
-            label: "All Women's Wedding Bands",
-            href: "/women/wedding-bands",
-          },
-          {
-            label: "Engagement Rings",
-            href: "/women/engagement-rings",
-          },
-        ],
-      },
-      {
-        heading: "Men's",
-        links: [
-          {
-            label: "All Men's Wedding Bands",
-            href: "/men/wedding-bands",
-          },
-        ],
-      },
-      {
-        heading: "Shop All Bridal",
-        links: [
-          {
-            label: "Engagement & Wedding",
-            href: "/engagement-wedding",
-          },
-          {
-            label: "All Wedding Bands",
-            href: "/engagement-wedding/wedding-bands",
-          },
-        ],
-      },
+    footerAction: link(
+      "wedding-footer",
+      "Explore Wedding Bands",
+      "/engagement-wedding/wedding-bands",
+    ),
+    sections: [
+      shopAudienceSection({
+        id: "wedding-shop",
+        heading: "Shop Wedding Bands",
+        allHref: "/engagement-wedding/wedding-bands",
+        allLabel: "All Wedding Bands",
+        womenHref: "/women/wedding-bands",
+        womenLabel: "Women's Wedding Bands",
+        menHref: "/men/wedding-bands",
+        menLabel: "Men's Wedding Bands",
+      }),
+      metalNavSection("/engagement-wedding/wedding-bands", "Wedding bands"),
     ],
   },
   {
+    id: "rings",
     label: "Rings",
     href: "/fine-jewelry/rings",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.rings,
+    menuType: "mega",
     exploreLabel: "Explore Rings",
-    activeMatch: ["/fine-jewelry/rings", "/women/rings", "/men/rings"],
-    groups: [
-      {
-        heading: "Women's",
-        links: [
-          { label: "All Women's Rings", href: "/women/rings" },
-          {
-            label: "Engagement Rings",
-            href: "/women/engagement-rings",
-          },
-          { label: "Wedding Bands", href: "/women/wedding-bands" },
-        ],
-      },
-      {
-        heading: "Men's",
-        links: [
-          { label: "All Men's Rings", href: "/men/rings" },
-          { label: "Wedding Bands", href: "/men/wedding-bands" },
-        ],
-      },
+    activeMatch: [
+      "/fine-jewelry/rings",
+      "/women/rings",
+      "/men/rings",
+      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/rings/${metal.slug}`),
+    ],
+    footerAction: link("rings-footer", "Explore Rings", "/fine-jewelry/rings"),
+    sections: [
+      shopAudienceSection({
+        id: "rings-shop",
+        heading: "Shop Rings",
+        allHref: "/fine-jewelry/rings",
+        allLabel: "All Rings",
+        womenHref: "/women/rings",
+        womenLabel: "Women's Rings",
+        menHref: "/men/rings",
+        menLabel: "Men's Rings",
+      }),
+      metalNavSection("/fine-jewelry/rings", "Rings"),
     ],
   },
   {
+    id: "necklaces",
     label: "Necklaces",
     href: "/fine-jewelry/necklaces",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.necklaces,
+    menuType: "mega",
     exploreLabel: "Explore Necklaces",
     activeMatch: [
       "/fine-jewelry/necklaces",
@@ -200,183 +268,251 @@ export const mainNav = [
       "/women/necklaces",
       "/women/pendants",
       "/men/necklaces",
+      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/necklaces/${metal.slug}`),
     ],
-    groups: [
-      {
-        heading: "Women's",
-        links: [
-          { label: "All Women's Necklaces", href: "/women/necklaces" },
-          { label: "Pendants", href: "/women/pendants" },
+    footerAction: link(
+      "necklaces-footer",
+      "Explore Necklaces",
+      "/fine-jewelry/necklaces",
+    ),
+    sections: [
+      shopAudienceSection({
+        id: "necklaces-shop",
+        heading: "Shop Necklaces",
+        allHref: "/fine-jewelry/necklaces",
+        allLabel: "All Necklaces",
+        womenHref: "/women/necklaces",
+        womenLabel: "Women's Necklaces",
+        menHref: "/men/necklaces",
+        menLabel: "Men's Necklaces",
+        extraLinks: [
+          link("neck-pendants", "Pendants", "/fine-jewelry/pendants"),
         ],
-      },
-      {
-        heading: "Men's",
-        links: [
-          { label: "All Men's Necklaces", href: "/men/necklaces" },
-        ],
-      },
+      }),
+      metalNavSection("/fine-jewelry/necklaces", "Necklaces"),
     ],
   },
   {
+    id: "earrings",
     label: "Earrings",
     href: "/fine-jewelry/earrings",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.earrings,
+    menuType: "mega",
     exploreLabel: "Explore Earrings",
     activeMatch: [
       "/fine-jewelry/earrings",
       "/women/earrings",
       "/men/earrings",
+      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/earrings/${metal.slug}`),
     ],
-    groups: [
-      {
-        heading: "Women's",
-        links: [
-          { label: "All Women's Earrings", href: "/women/earrings" },
-        ],
-      },
-      {
-        heading: "Men's",
-        links: [
-          { label: "All Men's Earrings", href: "/men/earrings" },
-        ],
-      },
+    footerAction: link(
+      "earrings-footer",
+      "Explore Earrings",
+      "/fine-jewelry/earrings",
+    ),
+    sections: [
+      shopAudienceSection({
+        id: "earrings-shop",
+        heading: "Shop Earrings",
+        allHref: "/fine-jewelry/earrings",
+        allLabel: "All Earrings",
+        womenHref: "/women/earrings",
+        womenLabel: "Women's Earrings",
+        menHref: "/men/earrings",
+        menLabel: "Men's Earrings",
+      }),
+      metalNavSection("/fine-jewelry/earrings", "Earrings"),
     ],
   },
   {
+    id: "bracelets",
     label: "Bracelets",
     href: "/fine-jewelry/bracelets",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.bracelets,
+    menuType: "mega",
     exploreLabel: "Explore Bracelets",
     activeMatch: [
       "/fine-jewelry/bracelets",
       "/women/bracelets",
       "/men/bracelets",
+      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/bracelets/${metal.slug}`),
     ],
-    groups: [
-      {
-        heading: "Women's",
-        links: [
-          { label: "All Women's Bracelets", href: "/women/bracelets" },
-        ],
-      },
-      {
-        heading: "Men's",
-        links: [
-          { label: "All Men's Bracelets", href: "/men/bracelets" },
-        ],
-      },
+    footerAction: link(
+      "bracelets-footer",
+      "Explore Bracelets",
+      "/fine-jewelry/bracelets",
+    ),
+    sections: [
+      shopAudienceSection({
+        id: "bracelets-shop",
+        heading: "Shop Bracelets",
+        allHref: "/fine-jewelry/bracelets",
+        allLabel: "All Bracelets",
+        womenHref: "/women/bracelets",
+        womenLabel: "Women's Bracelets",
+        menHref: "/men/bracelets",
+        menLabel: "Men's Bracelets",
+      }),
+      metalNavSection("/fine-jewelry/bracelets", "Bracelets"),
     ],
   },
   {
+    id: "watches",
     label: "Watches",
     href: "/watches",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.watches,
+    menuType: "mega",
     exploreLabel: "Explore Watches",
     activeMatch: ["/watches", "/women/watches", "/men/watches"],
-    groups: [
+    footerAction: link("watches-footer", "Explore Watches", "/watches"),
+    sections: [
       {
-        heading: "Women's",
+        id: "watches-shop",
+        heading: "Shop Watches",
         links: [
-          { label: "All Women's Watches", href: "/women/watches" },
+          link("w-all", "All Watches", "/watches"),
+          link("w-women", "Women's Watches", "/women/watches"),
+          link("w-men", "Men's Watches", "/men/watches"),
         ],
       },
       {
-        heading: "Men's",
+        id: "watches-brands",
+        heading: "Current Watch Brands",
         links: [
-          { label: "All Men's Watches", href: "/men/watches" },
+          link("w-bulova", "Bulova", "/watches/bulova"),
+          link("w-citizen", "Citizen", "/watches/citizen"),
+          link("w-seiko", "Seiko", "/watches/seiko"),
         ],
       },
       {
-        heading: "Shop by Brand",
-        links: [
-          { label: "Bulova", href: "/watches/bulova" },
-          { label: "Citizen", href: "/watches/citizen" },
-          { label: "Seiko", href: "/watches/seiko" },
-        ],
-      },
-      {
-        heading: "Vintage Watches",
+        id: "watches-vintage",
+        heading: "Vintage Watch Brands",
         seeAllHref: "/watches/vintage-watches",
+        seeAllLabel: "View all vintage watches",
         links: [
-          { label: "Rolex", href: "/watches/vintage-watches/rolex" },
-          { label: "Omega", href: "/watches/vintage-watches/omega" },
-          { label: "Movado", href: "/watches/vintage-watches/movado" },
-          { label: "Bulova", href: "/watches/vintage-watches/bulova" },
-          { label: "Accutron", href: "/watches/vintage-watches/accutron" },
-          { label: "Other", href: "/watches/vintage-watches/other" },
+          link("wv-rolex", "Rolex", "/watches/vintage-watches/rolex"),
+          link("wv-omega", "Omega", "/watches/vintage-watches/omega"),
+          link("wv-movado", "Movado", "/watches/vintage-watches/movado"),
+          link("wv-bulova", "Bulova", "/watches/vintage-watches/bulova", {
+            visuallyHiddenContext: "Vintage Bulova watches",
+          }),
+          link("wv-accutron", "Accutron", "/watches/vintage-watches/accutron"),
+          link("wv-other", "Other", "/watches/vintage-watches/other", {
+            visuallyHiddenContext: "Other vintage watches",
+          }),
         ],
       },
     ],
   },
   {
+    id: "diamonds",
     label: "Diamonds",
     href: "/diamonds",
     prefix: true,
-    panelWide: true,
-    panelImage: navPanelImages.diamonds,
+    menuType: "mega",
     exploreLabel: "Explore Diamonds",
-    groups: [
+    footerAction: link("diamonds-footer", "Explore Diamonds", "/diamonds"),
+    sections: [
       {
-        heading: "Natural Diamonds",
-        layout: "iconGrid",
-        seeAllHref: "/diamonds/natural-diamonds",
-        links: diamondShapeLinksForOrigin("natural-diamonds").map((shape) => ({
-          label: shape.label,
-          href: shape.href,
-          icon: shape.icon,
-        })),
+        id: "diamonds-shop",
+        heading: "Shop Diamonds",
+        links: [
+          link("d-all", "All Diamonds", "/diamonds"),
+          link("d-natural", "Natural Diamonds", "/diamonds/natural-diamonds"),
+          link(
+            "d-lab",
+            "Lab-Grown Diamonds",
+            "/diamonds/lab-grown-diamonds",
+          ),
+        ],
       },
-      {
-        heading: "Lab-Grown Diamonds",
-        layout: "iconGrid",
-        seeAllHref: "/diamonds/lab-grown-diamonds",
-        links: diamondShapeLinksForOrigin("lab-grown-diamonds").map((shape) => ({
-          label: shape.label,
-          href: shape.href,
-          icon: shape.icon,
-        })),
-      },
+      shopByShapeSection(),
     ],
   },
   {
+    id: "custom",
     label: "Custom",
     href: "/custom-jewelry",
     prefix: true,
-    panelImage: navPanelImages.custom,
+    menuType: "compact",
     exploreLabel: "Explore Custom Jewelry",
-    children: [
-      { label: "Custom Design", href: "/custom-jewelry/custom-design" },
+    footerAction: link(
+      "custom-footer",
+      "Explore Custom Jewelry",
+      "/custom-jewelry",
+    ),
+    sections: [
       {
-        label: "Redesign Existing Jewelry",
-        href: "/custom-jewelry/redesign",
+        id: "custom-services",
+        heading: "Custom Jewelry",
+        links: [
+          link("c-design", "Custom Design", "/custom-jewelry/custom-design"),
+          link(
+            "c-redesign",
+            "Redesign Existing Jewelry",
+            "/custom-jewelry/redesign",
+          ),
+          link(
+            "c-consult",
+            "Book a Consultation",
+            "/custom-jewelry/consultation",
+          ),
+        ],
       },
-      { label: "Consultation", href: "/custom-jewelry/consultation" },
     ],
   },
   {
+    id: "services",
     label: "Services",
     href: "/services",
     prefix: true,
-    panelImage: navPanelImages.services,
+    menuType: "compact",
     exploreLabel: "Explore Services",
-    children: [
-      { label: "Jewelry Repairs", href: "/services/jewelry-repairs" },
-      { label: "Ring Sizing", href: "/services/ring-sizing" },
-      { label: "Rhodium Plating", href: "/services/rhodium-plating" },
-      { label: "Jewelry Cleaning", href: "/services/jewelry-cleaning" },
-      { label: "Watch Services", href: "/services/watch-services" },
-      { label: "Appraisals", href: "/services/appraisals" },
+    footerAction: link("services-footer", "Explore Services", "/services"),
+    sections: [
+      {
+        id: "services-jewelry",
+        heading: "Jewelry Services",
+        links: [
+          link("s-repairs", "Jewelry Repairs", "/services/jewelry-repairs"),
+          link("s-sizing", "Ring Sizing", "/services/ring-sizing"),
+          link("s-rhodium", "Rhodium Plating", "/services/rhodium-plating"),
+          link("s-cleaning", "Jewelry Cleaning", "/services/jewelry-cleaning"),
+          link("s-appraisals", "Appraisals", "/services/appraisals"),
+        ],
+      },
+      {
+        id: "services-watch",
+        heading: "Watch Services",
+        links: [
+          link("s-watch", "Watch Services", "/services/watch-services"),
+        ],
+      },
     ],
   },
 ];
 
-/** Footer “Other links” column — About, Contact, FAQs, Testimonials. */
+/** Normalize sections from sections or legacy groups. */
+export function getNavSections(item) {
+  if (Array.isArray(item.sections) && item.sections.length > 0) {
+    return item.sections;
+  }
+  if (Array.isArray(item.groups) && item.groups.length > 0) {
+    return item.groups;
+  }
+  if (Array.isArray(item.children) && item.children.length > 0) {
+    return [
+      {
+        id: `${item.id || item.label}-links`,
+        heading: item.label,
+        links: item.children,
+      },
+    ];
+  }
+  return [];
+}
+
+/** Footer “Other links” column. */
 export const footerPageLinks = [
   { label: "About", href: "/about" },
   { label: "Contact us", href: "/contact" },
@@ -390,19 +526,25 @@ export function flattenNavLinks(items = mainNav) {
   const links = [];
 
   for (const item of items) {
-    links.push({ label: item.label, href: item.href });
+    links.push({
+      id: item.id || item.href,
+      label: item.label,
+      href: item.href,
+    });
 
-    if (item.children) {
-      links.push(...item.children);
+    for (const section of getNavSections(item)) {
+      if (section.seeAllHref) {
+        links.push({
+          id: `${section.id}-see-all`,
+          label: section.seeAllLabel || section.heading,
+          href: section.seeAllHref,
+        });
+      }
+      links.push(...section.links);
     }
 
-    if (item.groups) {
-      for (const group of item.groups) {
-        if (group.seeAllHref && group.heading) {
-          links.push({ label: group.heading, href: group.seeAllHref });
-        }
-        links.push(...group.links);
-      }
+    if (item.footerAction) {
+      links.push(item.footerAction);
     }
   }
 

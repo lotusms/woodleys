@@ -3,9 +3,21 @@ import CollectionCard from "@/components/catalog/CollectionCard";
 /**
  * Grid layout for {@link CollectionCard} items.
  *
- * @param {{ title: string; description: string; href: string; image?: string; alt?: string }[]} items
+ * @param {{
+ *   items: {
+ *     title: string;
+ *     description: string;
+ *     href: string;
+ *     image?: string;
+ *     alt?: string;
+ *     symbol?: string;
+ *     symbolClass?: string;
+ *     ctaLabel?: string;
+ *   }[];
+ *   ctaLabel?: string;
+ * }} props
  */
-export default function CategoryGrid({ items }) {
+export default function CategoryGrid({ items, ctaLabel }) {
   return (
     <ul className="grid gap-7 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3" role="list">
       {items.map((item) => (
@@ -16,6 +28,9 @@ export default function CategoryGrid({ items }) {
             href={item.href}
             image={item.image}
             alt={item.alt}
+            symbol={item.symbol}
+            symbolClass={item.symbolClass}
+            ctaLabel={item.ctaLabel || ctaLabel}
           />
         </li>
       ))}

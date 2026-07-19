@@ -3,18 +3,30 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { isNavItemActive, desktopNavItemClass } from "@/config";
+import { isNavItemActive, desktopNavItemClass, getNavSections } from "@/config";
 import { useDismissOnOutsidePress } from "@/hooks/useDismissOnOutsidePress";
 import { usePrefersFineHover } from "@/hooks/usePrefersFineHover";
-
-const HOVER_CLOSE_MS = 160;
+import {
+  NAV_HOVER_CLOSE_MS,
+  NAV_HOVER_OPEN_MS,
+  navCompactPanelClass,
+  navIconLinkClass,
+  navIconTileClass,
+  navLinkClass,
+  navMegaPanelClass,
+  navPanelSurfaceClass,
+  navSectionHeadingClass,
+  navTriggerCurrentClass,
+  navTriggerIdleClass,
+  navTriggerOpenClass,
+} from "@/lib/navigation-tokens";
 
 /**
  * @param {{
@@ -22,11 +34,12 @@ const HOVER_CLOSE_MS = 160;
  *   children: import("react").ReactNode;
  *   className?: string;
  *   close: () => void;
+ *   "aria-label"?: string;
  * }} props
  */
-function DropdownLink({ href, children, className = "", close }) {
+function DropdownLink({ href, children, className = "", close, ...rest }) {
   return (
-    <Link href={href} onClick={() => close()} className={className}>
+    <Link href={href} onClick={() => close()} className={className} {...rest}>
       {children}
     </Link>
   );
@@ -36,24 +49,38 @@ function DropdownLink({ href, children, className = "", close }) {
  * @param {{
  *   link: import("@/config/navigation").NavLink;
  *   close: () => void;
- *   className: string;
  * }} props
  */
-function IconGridLink({ link, close, className }) {
+function IconGridLink({ link, close }) {
+  const accessibleName =
+    link.visuallyHiddenContext || link.label;
+
   return (
-    <DropdownLink href={link.href} close={close} className={className}>
-      {link.icon?.src ? (
-        <span className="relative mb-1.5 inline-flex h-10 w-10 items-center justify-center">
+    <DropdownLink
+      href={link.href}
+      close={close}
+      className={navIconLinkClass}
+      aria-label={accessibleName}
+    >
+      {link.symbol ? (
+        <span
+          className={`${navIconTileClass} mb-1.5 h-10 w-10 font-serif text-lg font-semibold tracking-tight ${link.symbolClass || "text-site-fg"}`}
+          aria-hidden
+        >
+          {link.symbol}
+        </span>
+      ) : link.icon?.src ? (
+        <span className={`relative ${navIconTileClass} mb-1.5 h-10 w-10`} aria-hidden>
           <Image
             src={link.icon.src}
-            alt={link.icon.alt ?? ""}
-            width={40}
-            height={40}
-            className="h-10 w-10 object-contain"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
           />
         </span>
       ) : null}
-      <span>{link.label}</span>
+      <span aria-hidden={Boolean(link.visuallyHiddenContext)}>{link.label}</span>
     </DropdownLink>
   );
 }
@@ -69,21 +96,21 @@ function DesktopNavDropdownPanel({ item, open, close }) {
   const pathname = usePathname();
   const buttonRef = useRef(/** @type {HTMLButtonElement | null} */ (null));
   const panelRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+  const openTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
   const closeTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
   const headingId = useId();
+  const panelId = useId();
   const prefersFineHover = usePrefersFineHover();
   const active = isNavItemActive(pathname, item);
-  const hasGroups = Array.isArray(item.groups) && item.groups.length > 0;
-  const links = item.children ?? [];
+  const sections = getNavSections(item);
   const pathnameRef = useRef(pathname);
-  const groupCount = item.groups?.length ?? 0;
-  const hasIconGrid = item.groups?.some((group) => group.layout === "iconGrid");
-  const dualIconGrids =
-    groupCount === 2 &&
-    Boolean(item.groups?.every((group) => group.layout === "iconGrid"));
+  const sectionCount = sections.length;
+  const hasIconGrid = sections.some((section) => section.layout === "iconGrid");
+  const menuType = item.menuType || (sectionCount >= 3 || hasIconGrid ? "mega" : "compact");
+  const isMega = menuType === "mega";
 
-  const containerRefs = useRef([buttonRef, panelRef]);
-  useDismissOnOutsidePress(open, close, containerRefs.current);
+  const dismissRefs = useMemo(() => [buttonRef, panelRef], []);
+  useDismissOnOutsidePress(open, close, dismissRefs);
 
   useEffect(() => {
     if (pathnameRef.current !== pathname) {
@@ -94,11 +121,16 @@ function DesktopNavDropdownPanel({ item, open, close }) {
 
   useEffect(() => {
     return () => {
+      if (openTimerRef.current) clearTimeout(openTimerRef.current);
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, []);
 
-  const cancelHoverClose = () => {
+  const cancelTimers = () => {
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
@@ -107,46 +139,49 @@ function DesktopNavDropdownPanel({ item, open, close }) {
 
   const scheduleHoverClose = () => {
     if (!prefersFineHover) return;
-    cancelHoverClose();
+    cancelTimers();
     closeTimerRef.current = setTimeout(() => {
       close();
       closeTimerRef.current = null;
-    }, HOVER_CLOSE_MS);
+    }, NAV_HOVER_CLOSE_MS);
   };
 
   const openOnHover = () => {
     if (!prefersFineHover) return;
-    cancelHoverClose();
-    if (!open) {
+    cancelTimers();
+    if (open) return;
+    openTimerRef.current = setTimeout(() => {
       buttonRef.current?.click();
-    }
+      openTimerRef.current = null;
+    }, NAV_HOVER_OPEN_MS);
   };
 
+  const footerAction =
+    item.footerAction ||
+    (item.href
+      ? {
+          id: `${item.id}-footer`,
+          label: item.exploreLabel || `Explore ${item.label}`,
+          href: item.href,
+        }
+      : null);
+
+  /** Subgrid keeps headings and first items aligned; columns size to content. */
+  const gridClassName =
+    "grid auto-cols-max grid-flow-col grid-rows-[auto_auto] items-start gap-x-10 gap-y-0";
+
   const panelClassName = [
-    "relative overflow-hidden",
-    item.panelWide || hasIconGrid
-      ? dualIconGrids
-        ? "z-[120] w-[min(96vw,58rem)] rounded-sm border border-stone-200/80 bg-white p-5 shadow-lg shadow-stone-900/8 transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
-        : "z-[120] w-[min(94vw,48rem)] rounded-sm border border-stone-200/80 bg-white p-5 shadow-lg shadow-stone-900/8 transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
-      : "z-[120] w-max min-w-[14rem] max-w-[min(90vw,28rem)] rounded-sm border border-stone-200/80 bg-white p-4 shadow-lg shadow-stone-900/8 transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in",
+    "relative z-[120]",
+    navPanelSurfaceClass,
+    "p-5 transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-180 data-enter:ease-out data-leave:duration-150 data-leave:ease-in",
+    isMega ? navMegaPanelClass : navCompactPanelClass,
   ].join(" ");
 
-  const linkClassName =
-    "block rounded px-1 py-1.5 text-sm text-site-fg transition hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-1";
-
-  const iconLinkClassName =
-    "flex flex-col items-center rounded-sm px-2 py-2 text-center text-xs font-medium text-site-fg transition hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-1";
-
-  const groupsClassName =
-    dualIconGrids
-      ? "grid gap-8 sm:grid-cols-2"
-      : groupCount >= 3
-        ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        : groupCount === 2
-          ? "grid gap-8 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]"
-          : "grid gap-4 sm:grid-cols-2";
-
-  const exploreLabel = item.exploreLabel ?? `Explore ${item.label}`;
+  const triggerStateClass = open
+    ? navTriggerOpenClass
+    : active
+      ? navTriggerCurrentClass
+      : navTriggerIdleClass;
 
   return (
     <>
@@ -154,14 +189,12 @@ function DesktopNavDropdownPanel({ item, open, close }) {
         <PopoverButton
           ref={buttonRef}
           type="button"
-          aria-haspopup="menu"
+          id={`${panelId}-trigger`}
           aria-expanded={open}
-          aria-current={active ? "page" : undefined}
-          className={`${desktopNavItemClass} cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-site-bg ${
-            active || open
-              ? "border-warm-gold text-site-fg"
-              : "text-site-secondary hover:border-stone-300 hover:text-site-fg"
-          }`}
+          aria-controls={panelId}
+          aria-haspopup="true"
+          aria-current={active && !open ? "page" : undefined}
+          className={`${desktopNavItemClass} cursor-pointer ${triggerStateClass}`}
         >
           <span className="whitespace-nowrap">{item.label}</span>
           <ChevronDownIcon
@@ -173,127 +206,136 @@ function DesktopNavDropdownPanel({ item, open, close }) {
 
       <PopoverPanel
         ref={panelRef}
+        id={panelId}
         transition
         anchor={{ to: "bottom start", gap: 12, padding: 16 }}
         className={panelClassName}
-        onMouseEnter={cancelHoverClose}
+        onMouseEnter={cancelTimers}
         onMouseLeave={scheduleHoverClose}
       >
         {({ close: closePanel }) => (
           <>
-            {item.panelImage ? (
-              <div className="pointer-events-none absolute inset-0" aria-hidden>
-                <div className="absolute inset-y-0 right-0 w-[58%]">
-                  <Image
-                    src={item.panelImage}
-                    alt=""
-                    fill
-                    sizes="320px"
-                    className="object-cover object-center opacity-[0.14]"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-white from-40% via-white/92 via-62% to-white/55" />
-              </div>
-            ) : null}
-
-            <nav aria-label={`${item.label} menu`} className="relative z-10">
-              {hasGroups ? (
-                <div className={groupsClassName}>
-                  {item.groups.map((group, index) => {
+            <div className="relative z-10">
+              <nav aria-labelledby={`${panelId}-trigger`}>
+                <div className={gridClassName}>
+                  {sections.map((section, index) => {
                     const groupHeadingId = `${headingId}-g${index}`;
-                    const isIconGrid = group.layout === "iconGrid";
+                    const isIconGrid = section.layout === "iconGrid";
 
                     return (
                       <div
-                        key={group.heading ?? group.links[0]?.href}
-                        className={isIconGrid ? "sm:col-span-1 lg:col-span-1" : undefined}
+                        key={section.id || section.heading}
+                        className="row-span-2 grid min-w-0 grid-rows-subgrid gap-y-3"
                       >
-                        {group.heading ? (
+                        {section.heading ? (
                           <p
                             id={groupHeadingId}
-                            className="mb-3 text-sm font-semibold text-site-fg"
+                            className={navSectionHeadingClass}
                           >
-                            {group.heading}
+                            {section.heading}
                           </p>
-                        ) : null}
-                        {group.seeAllHref ? (
-                          <DropdownLink
-                            href={group.seeAllHref}
-                            close={closePanel}
-                            className={`${linkClassName} mb-2`}
-                          >
-                            View all
-                          </DropdownLink>
-                        ) : null}
-                        {isIconGrid ? (
-                          <ul
-                            className="grid grid-cols-3 gap-1 sm:grid-cols-3"
-                            role="list"
-                            aria-labelledby={
-                              group.heading ? groupHeadingId : undefined
-                            }
-                          >
-                            {group.links.map((link) => (
-                              <li key={link.href}>
-                                <IconGridLink
-                                  link={link}
-                                  close={closePanel}
-                                  className={iconLinkClassName}
-                                />
-                              </li>
-                            ))}
-                          </ul>
                         ) : (
-                          <ul
-                            className="space-y-0.5"
-                            role="list"
-                            aria-labelledby={
-                              group.heading ? groupHeadingId : undefined
-                            }
-                          >
-                            {group.links.map((link) => (
-                              <li key={link.href}>
-                                <DropdownLink
-                                  href={link.href}
-                                  close={closePanel}
-                                  className={linkClassName}
-                                >
-                                  {link.label}
-                                </DropdownLink>
-                              </li>
-                            ))}
-                          </ul>
+                          <span aria-hidden className="block" />
                         )}
+
+                        <div className="min-w-0">
+                          {isIconGrid ? (
+                            <>
+                              {section.seeAllHref ? (
+                                <DropdownLink
+                                  href={section.seeAllHref}
+                                  close={closePanel}
+                                  className={`${navLinkClass} mb-2 font-medium`}
+                                >
+                                  {section.seeAllLabel || "View all"}
+                                  {section.seeAllLabel ? null : (
+                                    <span className="sr-only">
+                                      {" "}
+                                      {section.heading}
+                                    </span>
+                                  )}
+                                </DropdownLink>
+                              ) : null}
+                            <ul
+                              className="grid w-max max-w-full grid-rows-2 gap-x-1 gap-y-2"
+                              style={{
+                                gridTemplateColumns: `repeat(${Math.ceil(section.links.length / 2)}, 5.25rem)`,
+                              }}
+                              role="list"
+                              aria-labelledby={
+                                section.heading ? groupHeadingId : undefined
+                              }
+                            >
+                              {section.links.map((navLink) => (
+                                <li key={navLink.id || navLink.href}>
+                                  <IconGridLink
+                                    link={navLink}
+                                    close={closePanel}
+                                  />
+                                </li>
+                              ))}
+                            </ul>
+                            </>
+                          ) : (
+                            <ul
+                              className="space-y-0.5"
+                              role="list"
+                              aria-labelledby={
+                                section.heading ? groupHeadingId : undefined
+                              }
+                            >
+                              {section.seeAllHref ? (
+                                <li>
+                                  <DropdownLink
+                                    href={section.seeAllHref}
+                                    close={closePanel}
+                                    className={`${navLinkClass} font-medium`}
+                                  >
+                                    {section.seeAllLabel || "View all"}
+                                    {section.seeAllLabel ? null : (
+                                      <span className="sr-only">
+                                        {" "}
+                                        {section.heading}
+                                      </span>
+                                    )}
+                                  </DropdownLink>
+                                </li>
+                              ) : null}
+                              {section.links.map((navLink) => (
+                                <li key={navLink.id || navLink.href}>
+                                  <DropdownLink
+                                    href={navLink.href}
+                                    close={closePanel}
+                                    className={navLinkClass}
+                                    aria-label={
+                                      navLink.visuallyHiddenContext || undefined
+                                    }
+                                  >
+                                    {navLink.label}
+                                  </DropdownLink>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-              ) : (
-                <ul className="space-y-0.5" role="list">
-                  {links.map((link) => (
-                    <li key={link.href}>
-                      <DropdownLink
-                        href={link.href}
-                        close={closePanel}
-                        className={linkClassName}
-                      >
-                        {link.label}
-                      </DropdownLink>
-                    </li>
-                  ))}
-                </ul>
-              )}
 
-              <div className="mt-5 flex justify-center border-t border-stone-100 pt-4">
-                <DropdownLink
-                  href={item.href}
-                  close={closePanel}
-                  className="inline-flex items-center justify-center rounded-sm border border-stone-300 bg-white/80 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-site-fg backdrop-blur-[2px] transition hover:border-warm-gold-dark hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2"
-                >
-                  {exploreLabel}
-                </DropdownLink>
-              </div>
-            </nav>
+                {footerAction ? (
+                  <div className="mt-5 flex justify-center border-t border-stone-100 pt-4">
+                    <DropdownLink
+                      href={footerAction.href}
+                      close={closePanel}
+                      className="inline-flex items-center justify-center rounded-sm border border-stone-300 bg-white/90 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-site-fg transition hover:border-warm-gold-dark hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2"
+                    >
+                      {footerAction.label}
+                    </DropdownLink>
+                  </div>
+                ) : null}
+              </nav>
+            </div>
           </>
         )}
       </PopoverPanel>

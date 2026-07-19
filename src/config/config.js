@@ -10,7 +10,9 @@ export const orgEstablished = 1948;
 export const orgPhone = "(951) 845-1395";
 export const orgPhoneTel = orgPhone.replace(/\D/g, "");
 export const orgEmail = "info@woodleyjewelers.com";
-export const orgAddress = "Beaumont, California";
+export const orgAddress = "975 Beaumont Ave, Beaumont, CA 92223";
+export const orgAddressMapsUrl =
+  "https://maps.google.com/?q=975+Beaumont+Ave,+Beaumont,+CA+92223";
 
 /** Footer Visit column social profiles. */
 export const orgSocialLinks = [
@@ -27,18 +29,18 @@ export const orgSocialLinks = [
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://woodleyjewelers.com";
 
-/** Fixed header — top bar (logo + CTAs). */
+/** Fixed header — mobile / compact brand row. */
 export const siteHeaderTopOffset = "4.5rem";
-/** Additional secondary nav row on xl+ viewports. */
-export const siteHeaderNavOffset = "3rem";
+/** Additional secondary nav + utility on xl+ viewports (~utility + brand + nav). */
+export const siteHeaderNavOffset = "4.5rem";
 
 /** Tailwind classes — clear fixed header on main-site pages. */
-export const siteHeaderClearanceClass = "pt-[4.5rem] xl:pt-[8rem]";
+export const siteHeaderClearanceClass = "pt-[4.5rem] xl:pt-[9rem]";
 /** Fixed hero slide progress — sits flush under the header. */
-export const siteHeaderProgressBarTopClass = "top-[4.5rem] xl:top-[8rem]";
+export const siteHeaderProgressBarTopClass = "top-[4.5rem] xl:top-[9rem]";
 /** Full-height content area below the fixed header. */
 export const siteBelowHeaderMinHeightClass =
-  "min-h-[calc(100dvh-4.5rem)] xl:min-h-[calc(100dvh-8rem)]";
+  "min-h-[calc(100dvh-4.5rem)] xl:min-h-[calc(100dvh-9rem)]";
 
 /**
  * Page shell layout — main content has no default horizontal inset.

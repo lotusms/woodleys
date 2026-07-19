@@ -9,9 +9,11 @@ import {
   getCatalogSection,
   resolveCatalogEntry,
   walkCategoryEntries,
+  isServiceCatalogSection,
 } from "@/lib/catalog/categories";
 import { getCollectionProducts } from "@/lib/catalog/products";
 import { filterProductsByAudience } from "@/lib/catalog/product-audience";
+import { productMatchesMetal } from "@/config/metals";
 
 export const revalidate = 60;
 
@@ -63,7 +65,13 @@ async function loadEntryProducts(entry) {
     }
   }
 
-  return filterProductsByAudience(merged, entry.audience);
+  let products = filterProductsByAudience(merged, entry.audience);
+  if (entry.metalFilter) {
+    products = products.filter((product) =>
+      productMatchesMetal(product, entry.metalFilter),
+    );
+  }
+  return products;
 }
 
 export async function generateStaticParams() {
@@ -108,7 +116,9 @@ export default async function CatalogSectionPage({ params }) {
   const resolved = resolveCatalogEntry(sectionKey, slugParts);
   if (!resolved) notFound();
 
-  const products = await loadEntryProducts(resolved.entry);
+  const products = isServiceCatalogSection(section)
+    ? []
+    : await loadEntryProducts(resolved.entry);
 
   return (
     <CategoryDetailPage

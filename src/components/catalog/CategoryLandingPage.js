@@ -3,6 +3,7 @@ import CategoryPageLayout from "@/components/catalog/CategoryPageLayout";
 import CategoryGrid from "@/components/catalog/CategoryGrid";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { sitePageTitle } from "@/config";
+import { isServiceCatalogSection } from "@/lib/catalog/categories";
 
 /**
  * @param {{
@@ -21,6 +22,7 @@ export default function CategoryLandingPage({ sectionKey, section }) {
 
   const heroImage = section.children[0]?.image;
   const isAudienceHub = section.hub === "audience";
+  const isService = isServiceCatalogSection(section);
 
   return (
     <CategoryPageLayout
@@ -28,10 +30,18 @@ export default function CategoryLandingPage({ sectionKey, section }) {
       title={section.title}
       subtitle={section.description}
       heroImage={heroImage}
-      breadcrumbs={[{ label: "Shop All", href: "/shop-all" }, { label: section.title }]}
+      breadcrumbs={
+        isService
+          ? [{ label: section.title }]
+          : [{ label: "Shop All", href: "/shop-all" }, { label: section.title }]
+      }
       actions={
         <>
-          <PrimaryButton href="/shop-all">Shop All</PrimaryButton>
+          {isService ? (
+            <PrimaryButton href="/contact">Book a visit</PrimaryButton>
+          ) : (
+            <PrimaryButton href="/shop-all">Shop All</PrimaryButton>
+          )}
           {isAudienceHub ? (
             <Link
               href={sectionKey === "women" ? "/men" : "/women"}
@@ -50,7 +60,13 @@ export default function CategoryLandingPage({ sectionKey, section }) {
       <div className="mt-16">
         <div className="border-b border-stone-200/80 pb-8">
           <h2 className="font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
-            {isAudienceHub ? `Shop ${section.title}` : `Within ${section.title}`}
+            {isService
+              ? sectionKey === "custom-jewelry"
+                ? "Ways to begin"
+                : "How we can help"
+              : isAudienceHub
+                ? `Shop ${section.title}`
+                : `Within ${section.title}`}
           </h2>
           {isAudienceHub ? (
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
@@ -58,9 +74,18 @@ export default function CategoryLandingPage({ sectionKey, section }) {
               Women and Men; bridal and service paths remain available in the main menu.
             </p>
           ) : null}
+          {isService ? (
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
+              These are appointments and bench work, not products. Choose a path
+              below, then book a visit or call the showroom.
+            </p>
+          ) : null}
         </div>
         <div className="mt-10">
-          <CategoryGrid items={items} />
+          <CategoryGrid
+            items={items}
+            ctaLabel={isService ? "Learn more" : undefined}
+          />
         </div>
       </div>
     </CategoryPageLayout>
