@@ -1,10 +1,8 @@
-import { BULOVA_CATEGORY_IMAGE } from "@/lib/catalog/bulova-sample-products.js";
-
 /** @type {readonly { id: string; image: string; imageAlt: string; heading: string; body: string; primaryLabel: string; primaryHref: string; secondaryLabel: string; secondaryHref: string; sectionBg: string; sectionGlow: string }[]} */
 export const HOME_HERO_SLIDES = [
   {
     id: "engagement",
-    image: "/images/heroes/solitaire.png",
+    image: "/images/hero-solitaire2.png",
     imageAlt:
       "Solitaire engagement rings in yellow gold, white gold, and rose gold with round, oval, and pear diamonds",
     heading: "A ring worthy of the moment you say yes",
@@ -20,8 +18,9 @@ export const HOME_HERO_SLIDES = [
   },
   {
     id: "watches",
-    image: BULOVA_CATEGORY_IMAGE.src,
-    imageAlt: BULOVA_CATEGORY_IMAGE.alt,
+    image: "/images/hero-bulova.png",
+    imageAlt:
+      "Bulova Performance Snorkel Sea Turtle model 98B446 at Woodley's Jewelers",
     heading: "Precision you feel on your wrist every day",
     body: `From Bulova classics to sport and dress styles, a fine watch balances craftsmanship with everyday wear. Explore authorized timepieces chosen for reliability, design, and the quiet confidence of a name trusted for generations.`,
     primaryLabel: "Shop watches",
@@ -35,9 +34,9 @@ export const HOME_HERO_SLIDES = [
   },
   {
     id: "custom",
-    image:
-      "https://woodleyjewelers.com/cdn/shop/files/blowtorch-shaping-ring_800x800.jpg?v=1639027342",
-    imageAlt: "Jeweler shaping a custom ring at the bench",
+    image: "/images/hero-custom jewelry2.png",
+    imageAlt:
+      "Diamond ring held in jeweler's tweezers on a custom workbench",
     heading: "Jewelry shaped around you alone",
     body: `Some stories deserve a piece that exists nowhere else. Work with our bench jewelers to design jewelry made for your taste, your milestones, and the moments only you can name, from first sketch to finished heirloom.`,
     primaryLabel: "Custom jewelry",

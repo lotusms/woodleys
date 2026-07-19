@@ -27,7 +27,7 @@ export default function HomeHeroStatic() {
 
       <section
         aria-label="Featured collections"
-        className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-6 pb-12 pt-8 sm:px-10 sm:pb-16 sm:pt-10 lg:grid-cols-2 lg:gap-12 lg:px-12 lg:pb-16 lg:pt-12 xl:min-h-[calc(100vh-8rem)]"
+        className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-6 pb-12 pt-8 sm:px-10 sm:pb-16 sm:pt-10 lg:grid-cols-2 lg:items-stretch lg:gap-12 lg:px-12 lg:pb-16 lg:pt-12 xl:min-h-[calc(100vh-8rem)]"
       >
         <div className="max-w-xl lg:col-start-1 lg:row-start-1 lg:self-center">
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-site-secondary">
@@ -59,15 +59,15 @@ export default function HomeHeroStatic() {
           </div>
         </div>
 
-        <div className="relative lg:col-start-2 lg:row-start-1 lg:self-center">
-          <div className="relative aspect-[4/5] max-h-[26rem] overflow-hidden rounded-sm bg-champagne shadow-lg shadow-stone-900/8 lg:max-h-none">
+        <div className="relative min-h-[22rem] lg:col-start-2 lg:row-start-1 lg:min-h-0">
+          <div className="relative aspect-[4/5] max-h-[26rem] overflow-hidden rounded-sm bg-champagne shadow-lg shadow-stone-900/8 sm:max-h-[30rem] lg:absolute lg:inset-0 lg:aspect-auto lg:h-full lg:max-h-none">
             <CatalogImage
               src={slide.image}
               alt={slide.imageAlt}
               fill
               sizes="(max-width: 1024px) 100vw, 42vw"
               priority
-              className="object-cover"
+              className="object-cover object-center"
             />
           </div>
         </div>

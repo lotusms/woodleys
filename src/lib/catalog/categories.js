@@ -5,7 +5,6 @@ import {
   metalsBySlug,
 } from "../../config/metals.js";
 import { BULOVA_CATEGORY_IMAGE } from "./bulova-sample-products.js";
-import { RING_CATEGORY_IMAGE } from "./ring-sample-products.js";
 
 /** Local category hero for Women's Engagement Rings. */
 const ENGAGEMENT_RINGS_HERO = {
@@ -23,6 +22,18 @@ const WOMEN_WEDDING_BANDS_HERO = {
 const MEN_WEDDING_BANDS_HERO = {
   src: "/images/heroes/mens-wedding-bands.png",
   alt: "Men's wedding bands in yellow gold, white gold, and alternative metals",
+};
+
+/** Local category hero for Men's Rings. */
+const MEN_RINGS_HERO = {
+  src: "/images/heroes/mens-rings.png",
+  alt: "Men's rings in gold, silver, and black finishes arranged on marble",
+};
+
+/** Local category hero for Rings (fine jewelry / all rings). */
+const ALL_RINGS_HERO = {
+  src: "/images/heroes/all-rings.png",
+  alt: "Assorted fine jewelry rings in gold and gemstone styles",
 };
 
 /** Local category hero for Wedding Bands (bridal hub). */
@@ -107,7 +118,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "fine-rings",
         audience: "women",
         derived: true,
-        image: RING_CATEGORY_IMAGE,
+        image: ALL_RINGS_HERO,
       },
       {
         slug: "necklaces",
@@ -199,7 +210,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "fine-rings",
         audience: "men",
         derived: true,
-        image: RING_CATEGORY_IMAGE,
+        image: MEN_RINGS_HERO,
       },
       {
         slug: "bracelets",
@@ -265,7 +276,7 @@ export const CATALOG_SECTIONS = {
           "A single center stone in a refined setting, timeless focus on the diamond you choose.",
         shopifyHandle: "solitaire-rings",
         image: {
-          src: "/images/heroes/solitaire.png",
+          src: "/images/hero-solitaire2.png",
           alt: "Solitaire engagement ring with a single center diamond",
         },
       },
@@ -435,7 +446,7 @@ export const CATALOG_SECTIONS = {
         title: "Rings",
         description: "Stackable bands, statement rings, and everyday gold and gemstone styles.",
         shopifyHandle: "fine-rings",
-        image: RING_CATEGORY_IMAGE,
+        image: ALL_RINGS_HERO,
         children: metalCategoryChildren("/fine-jewelry/rings", "fine-rings"),
       },
       {
@@ -791,8 +802,8 @@ export function getCatalogPathForShopifyHandle(shopifyHandle) {
 
 /** Hero and shared copy for the Shop All catalog landing page. */
 export const SHOP_ALL_HERO = {
-  src: RING_CATEGORY_IMAGE.src,
-  alt: RING_CATEGORY_IMAGE.alt,
+  src: ALL_RINGS_HERO.src,
+  alt: ALL_RINGS_HERO.alt,
 };
 
 export const HOME_FEATURED_CATEGORIES = [
@@ -807,8 +818,8 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Rings",
     href: "/fine-jewelry/rings",
     description: "Women's and men's rings, from everyday gold to statement styles.",
-    image: RING_CATEGORY_IMAGE.src,
-    alt: RING_CATEGORY_IMAGE.alt,
+    image: ALL_RINGS_HERO.src,
+    alt: ALL_RINGS_HERO.alt,
   },
   {
     title: "Necklaces",
