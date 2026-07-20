@@ -30,6 +30,12 @@ const MEN_RINGS_HERO = {
   alt: "Men's rings in gold, silver, and black finishes arranged on marble",
 };
 
+/** Local category hero for Men's Necklaces. */
+const MEN_NECKLACES_HERO = {
+  src: "/images/heroes/mens-necklaces.png",
+  alt: "Men's necklaces and chains",
+};
+
 /** Local category hero for Rings (fine jewelry / all rings). */
 const ALL_RINGS_HERO = {
   src: "/images/heroes/all-rings.png",
@@ -46,6 +52,12 @@ const WOMEN_RINGS_HERO = {
 const WOMEN_NECKLACES_HERO = {
   src: "/images/heroes/women-necklaces.png",
   alt: "Women's necklaces and chains in gold",
+};
+
+/** Local category hero for Necklaces (fine jewelry / all necklaces). */
+const ALL_NECKLACES_HERO = {
+  src: "/images/heroes/all-necklaces.png",
+  alt: "Assorted fine jewelry necklaces and chains",
 };
 
 /** Local category hero for Solitaire engagement rings. */
@@ -265,7 +277,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "necklaces",
         audience: "men",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Men's necklace" },
+        image: MEN_NECKLACES_HERO,
       },
       {
         slug: "earrings",
@@ -481,7 +493,7 @@ export const CATALOG_SECTIONS = {
         title: "Necklaces",
         description: "Chains and necklaces in gold and platinum with thoughtful proportion.",
         shopifyHandle: "necklaces",
-        image: { src: editorialImages.fine, alt: "Fine jewelry necklace" },
+        image: ALL_NECKLACES_HERO,
         children: metalCategoryChildren("/fine-jewelry/necklaces", "necklaces"),
       },
       {
@@ -852,8 +864,8 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Necklaces",
     href: "/fine-jewelry/necklaces",
     description: "Chains, pendants, and necklaces for her and for him.",
-    image: editorialImages.fine,
-    alt: "Fine jewelry necklace",
+    image: ALL_NECKLACES_HERO.src,
+    alt: ALL_NECKLACES_HERO.alt,
   },
   {
     title: "Watches",
