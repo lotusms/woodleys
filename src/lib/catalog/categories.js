@@ -42,10 +42,52 @@ const WOMEN_RINGS_HERO = {
   alt: "Women's rings in gold and gemstones",
 };
 
+/** Local category hero for Women's Earrings. */
+const WOMEN_EARRINGS_HERO = {
+  src: "/images/heroes/womens-earrings.png",
+  alt: "Women's earrings in gold and gemstones",
+};
+
 /** Local category hero for Women's Necklaces. */
 const WOMEN_NECKLACES_HERO = {
   src: "/images/heroes/women-necklaces.png",
   alt: "Women's necklaces and chains in gold",
+};
+
+/** Local category hero for Men's Necklaces. */
+const MEN_NECKLACES_HERO = {
+  src: "/images/heroes/mens-necklaces.png",
+  alt: "Men's necklaces and chains in gold and silver",
+};
+
+/** Local category hero for Necklaces (fine jewelry / all necklaces). */
+const ALL_NECKLACES_HERO = {
+  src: "/images/heroes/all-necklaces.png",
+  alt: "Assorted fine jewelry necklaces and chains in gold",
+};
+
+/** Local category hero for Women's Watches. */
+const WOMEN_WATCHES_HERO = {
+  src: "/images/heroes/women-watches.png",
+  alt: "Women's watches from Bulova, Citizen, and Seiko",
+};
+
+/** Local category hero for Men's Watches. */
+const MEN_WATCHES_HERO = {
+  src: "/images/heroes/mens-watches.png",
+  alt: "Men's watches from Bulova, Citizen, and Seiko",
+};
+
+/** Local category hero for Watches (all watches). */
+const ALL_WATCHES_HERO = {
+  src: "/images/heroes/all-watches.png",
+  alt: "Assorted watches from Bulova, Citizen, and Seiko",
+};
+
+/** Local category hero for Diamonds (all diamonds). */
+const ALL_DIAMONDS_HERO = {
+  src: "/images/heroes/all-diamonds.png",
+  alt: "Assorted natural and lab-grown diamonds",
 };
 
 /** Local category hero for Solitaire engagement rings. */
@@ -182,7 +224,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "earrings",
         audience: "women",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Fine jewelry earrings" },
+        image: WOMEN_EARRINGS_HERO,
       },
       {
         slug: "bracelets",
@@ -201,7 +243,7 @@ export const CATALOG_SECTIONS = {
         sourceHandles: ["bulova", "citizen", "seiko"],
         audience: "women",
         derived: true,
-        image: BULOVA_CATEGORY_IMAGE,
+        image: WOMEN_WATCHES_HERO,
       },
       {
         slug: "engagement-rings",
@@ -265,7 +307,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "necklaces",
         audience: "men",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Men's necklace" },
+        image: MEN_NECKLACES_HERO,
       },
       {
         slug: "earrings",
@@ -284,7 +326,7 @@ export const CATALOG_SECTIONS = {
         sourceHandles: ["bulova", "citizen", "seiko"],
         audience: "men",
         derived: true,
-        image: BULOVA_CATEGORY_IMAGE,
+        image: MEN_WATCHES_HERO,
       },
       {
         slug: "wedding-bands",
@@ -372,6 +414,7 @@ export const CATALOG_SECTIONS = {
     description:
       "Natural and lab-grown diamonds, presented clearly so you can choose with confidence. Browse by origin, then by shape to compare cuts and pricing.",
     shopifyHandle: "diamonds",
+    image: ALL_DIAMONDS_HERO,
     intro:
       "Start with natural or lab-grown, then choose a shape. Each cut has its own collection so pricing stays clear and specific.",
     children: [
@@ -481,7 +524,7 @@ export const CATALOG_SECTIONS = {
         title: "Necklaces",
         description: "Chains and necklaces in gold and platinum with thoughtful proportion.",
         shopifyHandle: "necklaces",
-        image: { src: editorialImages.fine, alt: "Fine jewelry necklace" },
+        image: ALL_NECKLACES_HERO,
         children: metalCategoryChildren("/fine-jewelry/necklaces", "necklaces"),
       },
       {
@@ -515,6 +558,7 @@ export const CATALOG_SECTIONS = {
     description:
       "Authorized styles from Bulova, Citizen, and Seiko, plus carefully selected vintage watches.",
     shopifyHandle: "watches",
+    image: ALL_WATCHES_HERO,
     intro:
       "A watch is both instrument and personal statement. Browse new authorized brands or explore our vintage selection by maker.",
     children: [
@@ -859,8 +903,8 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Watches",
     href: "/watches",
     description: "Bulova, Citizen, and Seiko timepieces for women and men.",
-    image: BULOVA_CATEGORY_IMAGE.src,
-    alt: BULOVA_CATEGORY_IMAGE.alt,
+    image: ALL_WATCHES_HERO.src,
+    alt: ALL_WATCHES_HERO.alt,
   },
   {
     title: "Custom Jewelry",
