@@ -2,10 +2,33 @@ import {
   CATALOG_SECTIONS,
   walkCategoryEntries,
 } from "./categories.js";
+import { diamondShapeLinksForOrigin } from "@/config/diamond-shapes";
 
 /**
  * @typedef {{ shopifyHandle: string; title: string; sectionKey: string; slug?: string }} CatalogCollectionOption
  */
+
+/** Shape-specific diamond collections (query-filtered on the origin PLP). */
+function diamondShapeCollectionOptions() {
+  /** @type {CatalogCollectionOption[]} */
+  const options = [];
+  for (const origin of /** @type {const} */ ([
+    "natural-diamonds",
+    "lab-grown-diamonds",
+  ])) {
+    const originLabel =
+      origin === "lab-grown-diamonds" ? "Lab-Grown Diamonds" : "Natural Diamonds";
+    for (const shape of diamondShapeLinksForOrigin(origin)) {
+      options.push({
+        shopifyHandle: shape.shopifyHandle,
+        title: `${originLabel} · ${shape.title}`,
+        sectionKey: "diamonds",
+        slug: `${origin}?shape=${shape.slug}`,
+      });
+    }
+  }
+  return options;
+}
 
 /** @param {string} shopifyHandle */
 export function isParentCatalogSectionHandle(shopifyHandle) {
@@ -17,7 +40,8 @@ export function isParentCatalogSectionHandle(shopifyHandle) {
 /**
  * Leaf collections only — products cannot be assigned to a parent section handle.
  * Parent diamond origins (`natural-diamonds`, `lab-grown-diamonds`) remain assignable
- * for “all stones of this origin”; shape children are also assignable for pricing.
+ * for “all stones of this origin”; origin+shape Shopify handles are also assignable
+ * (browsed via `?shape=` on the origin page).
  * @param {string[]} handles
  */
 export function filterAssignableCollectionHandles(handles) {
@@ -57,6 +81,12 @@ export function listAssignableCatalogCollectionOptions() {
     });
   }
 
+  for (const shapeOption of diamondShapeCollectionOptions()) {
+    if (seen.has(shapeOption.shopifyHandle)) continue;
+    seen.add(shapeOption.shopifyHandle);
+    options.push(shapeOption);
+  }
+
   return options;
 }
 
@@ -87,6 +117,12 @@ export function listAllCatalogCollectionOptions() {
         slug: slugPath.join("/"),
       });
     });
+  }
+
+  for (const shapeOption of diamondShapeCollectionOptions()) {
+    if (seen.has(shapeOption.shopifyHandle)) continue;
+    seen.add(shapeOption.shopifyHandle);
+    options.push(shapeOption);
   }
 
   return options;
@@ -121,6 +157,20 @@ export function getCatalogCollectionMeta(shopifyHandle) {
     });
     if (found) return found;
   }
+
+  const shapeMeta = diamondShapeCollectionOptions().find(
+    (option) => option.shopifyHandle === shopifyHandle,
+  );
+  if (shapeMeta) {
+    return {
+      shopifyHandle,
+      title: shapeMeta.title,
+      sectionKey: shapeMeta.sectionKey,
+      slug: shapeMeta.slug,
+      description: "",
+    };
+  }
+
   return {
     shopifyHandle,
     title: shopifyHandle,

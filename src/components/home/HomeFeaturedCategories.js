@@ -6,6 +6,12 @@ import {
   HOME_FEATURED_CATEGORIES,
 } from "@/lib/catalog/categories";
 
+/** First path segment for catalog section eyebrow lookup. */
+function sectionKeyFromHref(href) {
+  const segment = href.replace(/^\//, "").split("/")[0];
+  return segment || href.replace(/^\//, "");
+}
+
 export default function HomeFeaturedCategories() {
   return (
     <section
@@ -23,32 +29,70 @@ export default function HomeFeaturedCategories() {
         />
 
         <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-end lg:gap-16">
-            <div>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start lg:gap-14 xl:gap-20">
+            <div className="max-w-xl">
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.34em] text-stone-600">
                 Collections
               </p>
               <h2
                 id="home-collections-heading"
-                className="mt-4 font-serif text-4xl font-medium tracking-[-0.03em] text-site-fg sm:text-5xl"
+                className="mt-4 text-balance font-serif text-4xl font-medium tracking-[-0.03em] text-site-fg sm:text-5xl"
               >
-                Fine jewelry, thoughtfully presented
+                From engagement to everyday
               </h2>
-            </div>
-
-            <div className="max-w-xl space-y-5 text-base leading-relaxed text-stone-700 sm:text-lg sm:leading-8">
-              <p>
-                Browse by jewelry type, then choose Women&apos;s or Men&apos;s
-                where it matters. Engagement, diamonds, custom design, and care
-                stay easy to find at your pace.
+              <p className="mt-5 text-base leading-relaxed text-stone-700 sm:text-lg sm:leading-8">
+                Six starting points — bridal, rings, necklaces, watches, custom
+                design, and in-store care. Each opens a curated selection; shop
+                Women&apos;s or Men&apos;s where the collection offers both.
               </p>
               <Link
                 href="/shop-all"
-                className="inline-flex text-sm font-medium text-warm-gold-dark underline-offset-4 transition hover:underline"
+                className="mt-6 inline-flex text-sm font-medium text-warm-gold-dark underline-offset-4 transition hover:underline"
               >
                 Explore all collections
               </Link>
             </div>
+
+            <nav
+              aria-label="Featured collections"
+              className="rounded-sm border border-stone-300/50 bg-white/35 px-5 py-6 backdrop-blur-sm sm:px-7 sm:py-7 lg:mt-2"
+            >
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-stone-500">
+                Browse by collection
+              </p>
+              <ol className="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-4" role="list">
+                {HOME_FEATURED_CATEGORIES.map((category, index) => {
+                  const sectionKey = sectionKeyFromHref(category.href);
+                  const eyebrow =
+                    CATALOG_SECTIONS[sectionKey]?.eyebrow ?? "Collection";
+                  const indexLabel = String(index + 1).padStart(2, "0");
+
+                  return (
+                    <li key={category.href}>
+                      <Link
+                        href={category.href}
+                        className="group flex items-start gap-3 rounded-sm py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-[#e2dbd0]"
+                      >
+                        <span
+                          className="mt-0.5 shrink-0 tabular-nums text-[0.62rem] font-semibold tracking-[0.2em] text-stone-400 transition group-hover:text-warm-gold-dark"
+                          aria-hidden
+                        >
+                          {indexLabel}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block font-serif text-lg font-medium tracking-[-0.02em] text-site-fg transition group-hover:text-warm-gold-dark sm:text-xl">
+                            {category.title}
+                          </span>
+                          <span className="mt-0.5 block text-[0.68rem] font-medium uppercase tracking-[0.16em] text-stone-500">
+                            {eyebrow}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
           </div>
 
           <ul
@@ -56,7 +100,7 @@ export default function HomeFeaturedCategories() {
             role="list"
           >
             {HOME_FEATURED_CATEGORIES.map((category, index) => {
-              const sectionKey = category.href.replace(/^\//, "");
+              const sectionKey = sectionKeyFromHref(category.href);
               const eyebrow = CATALOG_SECTIONS[sectionKey]?.eyebrow ?? "Collection";
               const indexLabel = String(index + 1).padStart(2, "0");
               const isFeatured = index === 0;

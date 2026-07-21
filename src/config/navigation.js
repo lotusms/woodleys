@@ -1,7 +1,6 @@
 import { diamondShapeLinksForOrigin } from "./diamond-shapes";
 import {
   BRIDAL_METAL_SLUGS,
-  JEWELRY_METALS,
   metalNavSection,
   metalsBySlug,
 } from "./metals";
@@ -158,9 +157,6 @@ export const mainNav = [
       "/engagement-wedding/three-stone",
       "/engagement-wedding/vintage-inspired",
       "/women/engagement-rings",
-      ...metalsBySlug(BRIDAL_METAL_SLUGS).map(
-        (metal) => `/engagement-wedding/${metal.slug}`,
-      ),
     ],
     footerAction: link(
       "engagement-footer",
@@ -188,7 +184,7 @@ export const mainNav = [
           ),
         ],
       },
-      metalNavSection("/engagement-wedding", "Engagement rings", {
+      metalNavSection("/women/engagement-rings", "Engagement rings", {
         metals: metalsBySlug(BRIDAL_METAL_SLUGS),
       }),
     ],
@@ -204,9 +200,6 @@ export const mainNav = [
       "/engagement-wedding/wedding-bands",
       "/women/wedding-bands",
       "/men/wedding-bands",
-      ...JEWELRY_METALS.map(
-        (metal) => `/engagement-wedding/wedding-bands/${metal.slug}`,
-      ),
     ],
     footerAction: link(
       "wedding-footer",
@@ -234,12 +227,7 @@ export const mainNav = [
     prefix: true,
     menuType: "mega",
     exploreLabel: "Explore Rings",
-    activeMatch: [
-      "/fine-jewelry/rings",
-      "/women/rings",
-      "/men/rings",
-      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/rings/${metal.slug}`),
-    ],
+    activeMatch: ["/fine-jewelry/rings", "/women/rings", "/men/rings"],
     footerAction: link("rings-footer", "Explore Rings", "/fine-jewelry/rings"),
     sections: [
       shopAudienceSection({
@@ -268,7 +256,6 @@ export const mainNav = [
       "/women/necklaces",
       "/women/pendants",
       "/men/necklaces",
-      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/necklaces/${metal.slug}`),
     ],
     footerAction: link(
       "necklaces-footer",
@@ -303,7 +290,6 @@ export const mainNav = [
       "/fine-jewelry/earrings",
       "/women/earrings",
       "/men/earrings",
-      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/earrings/${metal.slug}`),
     ],
     footerAction: link(
       "earrings-footer",
@@ -335,7 +321,6 @@ export const mainNav = [
       "/fine-jewelry/bracelets",
       "/women/bracelets",
       "/men/bracelets",
-      ...JEWELRY_METALS.map((metal) => `/fine-jewelry/bracelets/${metal.slug}`),
     ],
     footerAction: link(
       "bracelets-footer",

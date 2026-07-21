@@ -60,6 +60,47 @@ const nextConfig = {
       { source: "/diamonds/radiant", destination: "/diamonds", permanent: true },
       { source: "/diamonds/marquise", destination: "/diamonds", permanent: true },
       { source: "/diamonds/heart", destination: "/diamonds", permanent: true },
+      // Nested metal/shape routes → query-param filters on the parent page
+      {
+        source: "/fine-jewelry/rings/:metal",
+        destination: "/fine-jewelry/rings?metal=:metal",
+        permanent: true,
+      },
+      {
+        source: "/fine-jewelry/necklaces/:metal",
+        destination: "/fine-jewelry/necklaces?metal=:metal",
+        permanent: true,
+      },
+      {
+        source: "/fine-jewelry/earrings/:metal",
+        destination: "/fine-jewelry/earrings?metal=:metal",
+        permanent: true,
+      },
+      {
+        source: "/fine-jewelry/bracelets/:metal",
+        destination: "/fine-jewelry/bracelets?metal=:metal",
+        permanent: true,
+      },
+      {
+        source: "/engagement-wedding/wedding-bands/:metal",
+        destination: "/engagement-wedding/wedding-bands?metal=:metal",
+        permanent: true,
+      },
+      {
+        source: "/engagement-wedding/:metal(yellow-gold|white-gold|rose-gold|platinum)",
+        destination: "/women/engagement-rings?metal=:metal",
+        permanent: true,
+      },
+      {
+        source: "/diamonds/natural-diamonds/:shape",
+        destination: "/diamonds/natural-diamonds?shape=:shape",
+        permanent: true,
+      },
+      {
+        source: "/diamonds/lab-grown-diamonds/:shape",
+        destination: "/diamonds/lab-grown-diamonds?shape=:shape",
+        permanent: true,
+      },
     ];
   },
 };

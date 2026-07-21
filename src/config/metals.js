@@ -2,6 +2,9 @@
  * Jewelry metals for navigation and category browse.
  * Symbols use chemical notation; gold color variants share Au with distinct styling.
  * Stainless steel uses Fe (iron) as the primary element in the alloy.
+ *
+ * Shop by Metal stays on the current category page via `?metal=` — it does not
+ * create nested metal routes.
  */
 
 /**
@@ -102,11 +105,49 @@ export const JEWELRY_METALS = [
 ];
 
 /**
+ * Precious metals common for engagement rings.
+ * Wedding bands and fashion jewelry keep the full metal list.
+ */
+export const BRIDAL_METAL_SLUGS = [
+  "yellow-gold",
+  "white-gold",
+  "rose-gold",
+  "platinum",
+];
+
+/**
  * @param {string} metalSlug
  * @returns {JewelryMetal | undefined}
  */
 export function getJewelryMetal(metalSlug) {
   return JEWELRY_METALS.find((metal) => metal.slug === metalSlug);
+}
+
+/**
+ * @param {string[]} slugs
+ */
+export function metalsBySlug(slugs) {
+  return JEWELRY_METALS.filter((metal) => slugs.includes(metal.slug));
+}
+
+/**
+ * @param {string | null | undefined} value
+ * @returns {JewelryMetal | undefined}
+ */
+export function parseMetalParam(value) {
+  if (!value) return undefined;
+  return getJewelryMetal(String(value));
+}
+
+/**
+ * Build a category URL with an optional metal filter query.
+ * @param {string} basePath — absolute path without trailing slash
+ * @param {string | null | undefined} metalSlug
+ */
+export function buildMetalFilterHref(basePath, metalSlug) {
+  const path = basePath.replace(/\/$/, "") || "/";
+  if (!metalSlug) return path;
+  return `${path}?metal=${encodeURIComponent(metalSlug)}`;
 }
 
 /**
@@ -135,45 +176,23 @@ export function productMatchesMetal(product, metalSlug) {
 }
 
 /**
- * Precious metals common for engagement rings.
- * Wedding bands and fashion jewelry keep the full metal list.
- */
-export const BRIDAL_METAL_SLUGS = [
-  "yellow-gold",
-  "white-gold",
-  "rose-gold",
-  "platinum",
-];
-
-/**
- * @param {string[]} slugs
- */
-export function metalsBySlug(slugs) {
-  return JEWELRY_METALS.filter((metal) => slugs.includes(metal.slug));
-}
-
-/**
- * Category children for a parent path (e.g. /fine-jewelry/rings).
- * @param {string} parentPath — absolute path without trailing slash
- * @param {string} handlePrefix — collection handle prefix, e.g. fine-rings
+ * Filter option list for on-page metal controls.
+ * @param {string} basePath
  * @param {{ metals?: readonly JewelryMetal[] }} [options]
  */
-export function metalCategoryChildren(parentPath, handlePrefix, options = {}) {
+export function metalFilterOptions(basePath, options = {}) {
   const metals = options.metals ?? JEWELRY_METALS;
   return metals.map((metal) => ({
-    slug: metal.slug,
     title: metal.label,
-    description: metal.description,
-    shopifyHandle: `${handlePrefix}-${metal.shopifyHandle}`,
-    metalFilter: metal.slug,
-    sourceHandles: [handlePrefix],
+    href: buildMetalFilterHref(basePath, metal.slug),
     symbol: metal.symbol,
     symbolClass: metal.symbolClass,
+    slug: metal.slug,
   }));
 }
 
 /**
- * Nav icon-grid section for Shop by Metal.
+ * Nav icon-grid section for Shop by Metal (query-param filters on parent path).
  * @param {string} parentPath
  * @param {string} contextLabel — e.g. "Rings" for accessible names
  * @param {{ metals?: readonly JewelryMetal[] }} [options]
@@ -187,10 +206,60 @@ export function metalNavSection(parentPath, contextLabel, options = {}) {
     links: metals.map((metal) => ({
       id: `${parentPath}-${metal.slug}`,
       label: metal.label,
-      href: `${parentPath}/${metal.slug}`,
+      href: buildMetalFilterHref(parentPath, metal.slug),
       symbol: metal.symbol,
       symbolClass: metal.symbolClass,
       visuallyHiddenContext: `${contextLabel}, ${metal.label}`,
     })),
   };
+}
+
+/**
+ * Categories that support on-page metal filtering.
+ * @param {string} sectionKey
+ * @param {string} entrySlug
+ */
+export function entrySupportsMetalFilter(sectionKey, entrySlug) {
+  if (sectionKey === "fine-jewelry") {
+    return ["rings", "necklaces", "earrings", "bracelets"].includes(entrySlug);
+  }
+  if (sectionKey === "women" || sectionKey === "men") {
+    return [
+      "rings",
+      "necklaces",
+      "earrings",
+      "bracelets",
+      "wedding-bands",
+      "engagement-rings",
+      "pendants",
+    ].includes(entrySlug);
+  }
+  if (sectionKey === "engagement-wedding") {
+    return [
+      "solitaire",
+      "halo",
+      "three-stone",
+      "vintage-inspired",
+      "wedding-bands",
+    ].includes(entrySlug);
+  }
+  return false;
+}
+
+/**
+ * Which metal list to offer for a category.
+ * @param {string} sectionKey
+ * @param {string} entrySlug
+ */
+export function metalsForEntry(sectionKey, entrySlug) {
+  if (
+    sectionKey === "engagement-wedding" &&
+    entrySlug !== "wedding-bands"
+  ) {
+    return metalsBySlug(BRIDAL_METAL_SLUGS);
+  }
+  if (sectionKey === "women" && entrySlug === "engagement-rings") {
+    return metalsBySlug(BRIDAL_METAL_SLUGS);
+  }
+  return JEWELRY_METALS;
 }

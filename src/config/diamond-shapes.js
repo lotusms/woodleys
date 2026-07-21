@@ -2,8 +2,8 @@
  * Diamond shape icons for navigation and category pages.
  * Assets live in /public/images/products/diamond-shapes.
  *
- * Shape browse lives under each origin so pricing can differ:
- * `/diamonds/natural-diamonds/{shape}` and `/diamonds/lab-grown-diamonds/{shape}`.
+ * Shape browse filters the origin page via `?shape=` so natural and lab-grown
+ * keep separate pricing collections without nested shape routes.
  */
 
 const DIR = "/images/products/diamond-shapes";
@@ -14,7 +14,6 @@ const DIR = "/images/products/diamond-shapes";
  * @typedef {{
  *   slug: string;
  *   label: string;
- *   href: string;
  *   shopifyHandle: string;
  *   description: string;
  *   icon: { src: string; alt: string };
@@ -26,7 +25,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "round",
     label: "Round",
-    href: "/diamonds/natural-diamonds/round",
     shopifyHandle: "round-diamonds",
     description: "Classic round brilliant cuts prized for even sparkle.",
     icon: { src: `${DIR}/round.webp`, alt: "" },
@@ -34,7 +32,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "oval",
     label: "Oval",
-    href: "/diamonds/natural-diamonds/oval",
     shopifyHandle: "oval-diamonds",
     description: "Elongated silhouette with generous surface area and soft presence.",
     icon: { src: `${DIR}/oval.png`, alt: "" },
@@ -42,7 +39,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "emerald",
     label: "Emerald",
-    href: "/diamonds/natural-diamonds/emerald",
     shopifyHandle: "emerald-cut-diamonds",
     description: "Step-cut facets and a quiet, architectural elegance.",
     icon: { src: `${DIR}/emerald.webp`, alt: "" },
@@ -50,7 +46,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "pear",
     label: "Pear",
-    href: "/diamonds/natural-diamonds/pear",
     shopifyHandle: "pear-diamonds",
     description: "Teardrop form that reads both romantic and distinctive.",
     icon: { src: `${DIR}/pear.png`, alt: "" },
@@ -58,7 +53,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "cushion",
     label: "Cushion",
-    href: "/diamonds/natural-diamonds/cushion",
     shopifyHandle: "cushion-diamonds",
     description: "Soft corners with a pillow-like facet pattern.",
     icon: { src: `${DIR}/cushion.webp`, alt: "" },
@@ -66,7 +60,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "princess",
     label: "Princess",
-    href: "/diamonds/natural-diamonds/princess",
     shopifyHandle: "princess-diamonds",
     description: "Square outline with brilliant faceting for lively reflection.",
     icon: { src: `${DIR}/princess.webp`, alt: "" },
@@ -74,7 +67,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "radiant",
     label: "Radiant",
-    href: "/diamonds/natural-diamonds/radiant",
     shopifyHandle: "radiant-diamonds",
     description: "Brilliant-cut sparkle with a rectangular outline and cropped corners.",
     icon: { src: `${DIR}/radiant.webp`, alt: "" },
@@ -82,7 +74,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "marquise",
     label: "Marquise",
-    href: "/diamonds/natural-diamonds/marquise",
     shopifyHandle: "marquise-diamonds",
     description: "Elongated boat shape that maximizes apparent size and finger length.",
     icon: { src: `${DIR}/marquise.webp`, alt: "" },
@@ -90,7 +81,6 @@ export const DIAMOND_SHAPE_NAV = [
   {
     slug: "heart",
     label: "Heart",
-    href: "/diamonds/natural-diamonds/heart",
     shopifyHandle: "heart-diamonds",
     description: "A romantic silhouette with distinctive cleft and pointed tip.",
     icon: { src: `${DIR}/heart.webp`, alt: "" },
@@ -98,6 +88,17 @@ export const DIAMOND_SHAPE_NAV = [
 ];
 
 /**
+ * @param {DiamondOriginSlug} originSlug
+ * @param {string | null | undefined} shapeSlug
+ */
+export function buildShapeFilterHref(originSlug, shapeSlug) {
+  const path = `/diamonds/${originSlug}`;
+  if (!shapeSlug) return path;
+  return `${path}?shape=${encodeURIComponent(shapeSlug)}`;
+}
+
+/**
+ * Legacy nested path (kept for redirects).
  * @param {DiamondOriginSlug} originSlug
  * @param {string} shapeSlug
  */
@@ -117,7 +118,15 @@ export function diamondOriginShapeHandle(originPrefix, shapeShopifyHandle) {
 }
 
 /**
- * Nav / category links for shapes under one diamond origin.
+ * @param {string | null | undefined} value
+ */
+export function parseShapeParam(value) {
+  if (!value) return undefined;
+  return DIAMOND_SHAPE_NAV.find((shape) => shape.slug === String(value));
+}
+
+/**
+ * Nav / category links for shapes under one diamond origin (`?shape=` filters).
  * @param {DiamondOriginSlug} originSlug
  */
 export function diamondShapeLinksForOrigin(originSlug) {
@@ -128,7 +137,7 @@ export function diamondShapeLinksForOrigin(originSlug) {
     slug: shape.slug,
     label: shape.label,
     title: shape.slug === "emerald" ? "Emerald Cut" : shape.label,
-    href: diamondShapePath(originSlug, shape.slug),
+    href: buildShapeFilterHref(originSlug, shape.slug),
     shopifyHandle: diamondOriginShapeHandle(originPrefix, shape.shopifyHandle),
     description: shape.description,
     icon: shape.icon,

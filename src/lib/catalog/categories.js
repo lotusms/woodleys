@@ -1,9 +1,3 @@
-import { diamondShapeLinksForOrigin } from "../../config/diamond-shapes.js";
-import {
-  BRIDAL_METAL_SLUGS,
-  metalCategoryChildren,
-  metalsBySlug,
-} from "../../config/metals.js";
 import { BULOVA_CATEGORY_IMAGE } from "./bulova-sample-products.js";
 
 /** Local category hero for Women's Engagement Rings. */
@@ -46,6 +40,30 @@ const WOMEN_RINGS_HERO = {
 const WOMEN_EARRINGS_HERO = {
   src: "/images/heroes/womens-earrings.png",
   alt: "Women's earrings in gold and gemstones",
+};
+
+/** Local category hero for Women's Bracelets. */
+const WOMEN_BRACELETS_HERO = {
+  src: "/images/heroes/women-bracelets.png",
+  alt: "Women's bracelets and bangles in gold",
+};
+
+/** Local category hero for Men's Earrings. */
+const MEN_EARRINGS_HERO = {
+  src: "/images/heroes/mens-earrings.png",
+  alt: "Men's earrings in gold and silver",
+};
+
+/** Local category hero for Men's Bracelets. */
+const MEN_BRACELETS_HERO = {
+  src: "/images/heroes/mens-bracelets.png",
+  alt: "Men's bracelets and cuffs in gold and silver",
+};
+
+/** Local category hero for Earrings (fine jewelry / all earrings). */
+const ALL_EARRINGS_HERO = {
+  src: "/images/heroes/all-earrings.png",
+  alt: "Assorted fine jewelry earrings in gold and gemstones",
 };
 
 /** Local category hero for Women's Necklaces. */
@@ -127,8 +145,8 @@ const WEDDING_BANDS_HERO = {
  * product `audience`. Their children are `derived` so they are not duplicated
  * in the admin collection checklist.
  *
- * Diamond origins nest shape children so natural vs lab-grown can be priced
- * separately per cut (`natural-round-diamonds`, `lab-grown-round-diamonds`, …).
+ * Diamond origins stay as landing pages; shape-specific pricing collections are
+ * reached via query-param filters (`?shape=round`, `?shape=oval`, …).
  */
 
 /**
@@ -141,9 +159,6 @@ const WEDDING_BANDS_HERO = {
  *   audience?: import("./product-audience").ProductAudience;
  *   sourceHandles?: string[];
  *   derived?: boolean;
- *   metalFilter?: string;
- *   symbol?: string;
- *   symbolClass?: string;
  *   children?: CategoryEntry[];
  * }} CategoryEntry
  */
@@ -233,7 +248,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "bracelets",
         audience: "women",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Fine jewelry bracelet" },
+        image: WOMEN_BRACELETS_HERO,
       },
       {
         slug: "watches",
@@ -298,7 +313,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "bracelets",
         audience: "men",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Men's bracelet" },
+        image: MEN_BRACELETS_HERO,
       },
       {
         slug: "necklaces",
@@ -316,7 +331,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "earrings",
         audience: "men",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Men's earrings" },
+        image: MEN_EARRINGS_HERO,
       },
       {
         slug: "watches",
@@ -388,71 +403,40 @@ export const CATALOG_SECTIONS = {
           "Bands in precious metals, plain, pavé, or engraved, to complement your engagement ring.",
         shopifyHandle: "wedding-bands",
         image: WEDDING_BANDS_HERO,
-        children: metalCategoryChildren(
-          "/engagement-wedding/wedding-bands",
-          "wedding-bands",
-        ),
       },
-      ...metalCategoryChildren("/engagement-wedding", "engagement-wedding", {
-        metals: metalsBySlug(BRIDAL_METAL_SLUGS),
-      }).map((entry) => ({
-        ...entry,
-        sourceHandles: [
-          "solitaire-rings",
-          "halo-rings",
-          "three-stone-rings",
-          "vintage-inspired-rings",
-          "engagement-wedding",
-        ],
-        description: `${entry.description} Browse engagement styles in ${entry.title.toLowerCase()}.`,
-      })),
     ],
   },
   diamonds: {
     title: "Diamonds",
     eyebrow: "Stones",
     description:
-      "Natural and lab-grown diamonds, presented clearly so you can choose with confidence. Browse by origin, then by shape to compare cuts and pricing.",
+      "Natural and lab-grown diamonds, presented clearly so you can choose with confidence. Start with an origin, then filter by shape.",
     shopifyHandle: "diamonds",
     image: ALL_DIAMONDS_HERO,
     intro:
-      "Start with natural or lab-grown, then choose a shape. Each cut has its own collection so pricing stays clear and specific.",
+      "Start with natural or lab-grown, then use the shape filter to compare cuts without leaving the page.",
     children: [
       {
         slug: "natural-diamonds",
         title: "Natural Diamonds",
         description:
-          "Earth-formed diamonds selected for beauty, proportion, and integrity of origin. Browse by shape to compare cuts and pricing.",
+          "Earth-formed diamonds selected for beauty, proportion, and integrity of origin. Filter by shape to compare cuts and pricing.",
         shopifyHandle: "natural-diamonds",
         image: {
           src: "/images/heroes/natural-diamonds.png",
           alt: "Natural diamond displayed for inspection",
         },
-        children: diamondShapeLinksForOrigin("natural-diamonds").map((shape) => ({
-          slug: shape.slug,
-          title: shape.title,
-          description: shape.description,
-          shopifyHandle: shape.shopifyHandle,
-          image: shape.image,
-        })),
       },
       {
         slug: "lab-grown-diamonds",
         title: "Lab-Grown Diamonds",
         description:
-          "Laboratory-grown diamonds with the same optical properties, offered with transparent guidance. Browse by shape to compare cuts and pricing.",
+          "Laboratory-grown diamonds with the same optical properties, offered with transparent guidance. Filter by shape to compare cuts and pricing.",
         shopifyHandle: "lab-grown-diamonds",
         image: {
           src: "/images/heroes/lab-grown.png",
           alt: "Lab-grown diamond in a refined setting",
         },
-        children: diamondShapeLinksForOrigin("lab-grown-diamonds").map((shape) => ({
-          slug: shape.slug,
-          title: shape.title,
-          description: shape.description,
-          shopifyHandle: shape.shopifyHandle,
-          image: shape.image,
-        })),
       },
     ],
   },
@@ -517,7 +501,6 @@ export const CATALOG_SECTIONS = {
         description: "Stackable bands, statement rings, and everyday gold and gemstone styles.",
         shopifyHandle: "fine-rings",
         image: ALL_RINGS_HERO,
-        children: metalCategoryChildren("/fine-jewelry/rings", "fine-rings"),
       },
       {
         slug: "necklaces",
@@ -525,7 +508,6 @@ export const CATALOG_SECTIONS = {
         description: "Chains and necklaces in gold and platinum with thoughtful proportion.",
         shopifyHandle: "necklaces",
         image: ALL_NECKLACES_HERO,
-        children: metalCategoryChildren("/fine-jewelry/necklaces", "necklaces"),
       },
       {
         slug: "pendants",
@@ -539,8 +521,7 @@ export const CATALOG_SECTIONS = {
         title: "Earrings",
         description: "Studs, drops, and hoops in balanced scale for daily wear.",
         shopifyHandle: "earrings",
-        image: { src: editorialImages.fine, alt: "Fine jewelry earrings" },
-        children: metalCategoryChildren("/fine-jewelry/earrings", "earrings"),
+        image: ALL_EARRINGS_HERO,
       },
       {
         slug: "bracelets",
@@ -548,7 +529,6 @@ export const CATALOG_SECTIONS = {
         description: "Bracelets and bangles with secure clasps and lasting finish.",
         shopifyHandle: "bracelets",
         image: { src: editorialImages.fine, alt: "Fine jewelry bracelet" },
-        children: metalCategoryChildren("/fine-jewelry/bracelets", "bracelets"),
       },
     ],
   },
@@ -896,8 +876,8 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Necklaces",
     href: "/fine-jewelry/necklaces",
     description: "Chains, pendants, and necklaces for her and for him.",
-    image: editorialImages.fine,
-    alt: "Fine jewelry necklace",
+    image: ALL_NECKLACES_HERO.src,
+    alt: ALL_NECKLACES_HERO.alt,
   },
   {
     title: "Watches",

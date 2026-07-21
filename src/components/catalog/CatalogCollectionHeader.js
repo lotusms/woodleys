@@ -1,6 +1,7 @@
 "use client";
 
 import CatalogMetalFilter from "@/components/catalog/CatalogMetalFilter";
+import CatalogShapeFilter from "@/components/catalog/CatalogShapeFilter";
 import CatalogSortSelect from "@/components/catalog/CatalogSortSelect";
 
 /**
@@ -10,10 +11,16 @@ import CatalogSortSelect from "@/components/catalog/CatalogSortSelect";
  *   sort: string;
  *   onSortChange: (value: string) => void;
  *   metalFilter?: {
- *     allHref: string;
  *     allLabel?: string;
- *     activeHref: string;
- *     items: { title: string; href: string; symbol?: string; symbolClass?: string }[];
+ *     activeMetalSlug?: string | null;
+ *     onMetalChange: (slug: string | null) => void;
+ *     items: { title: string; slug: string; symbol?: string; symbolClass?: string }[];
+ *   } | null;
+ *   shapeFilter?: {
+ *     allLabel?: string;
+ *     activeShapeSlug?: string | null;
+ *     onShapeChange: (slug: string | null) => void;
+ *     items: { title: string; slug: string }[];
  *   } | null;
  * }} props
  */
@@ -23,6 +30,7 @@ export default function CatalogCollectionHeader({
   sort,
   onSortChange,
   metalFilter = null,
+  shapeFilter = null,
 }) {
   const showCount = typeof count === "number" && count > 0;
 
@@ -53,10 +61,19 @@ export default function CatalogCollectionHeader({
           />
           {metalFilter?.items?.length ? (
             <CatalogMetalFilter
-              allHref={metalFilter.allHref}
               allLabel={metalFilter.allLabel}
-              activeHref={metalFilter.activeHref}
+              activeMetalSlug={metalFilter.activeMetalSlug}
+              onMetalChange={metalFilter.onMetalChange}
               items={metalFilter.items}
+              className="shrink-0"
+            />
+          ) : null}
+          {shapeFilter?.items?.length ? (
+            <CatalogShapeFilter
+              allLabel={shapeFilter.allLabel}
+              activeShapeSlug={shapeFilter.activeShapeSlug}
+              onShapeChange={shapeFilter.onShapeChange}
+              items={shapeFilter.items}
               className="shrink-0"
             />
           ) : null}

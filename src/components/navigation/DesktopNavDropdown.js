@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useMemo, useRef } from "react";
+import CatalogFilterLink from "@/components/catalog/CatalogFilterLink";
 import {
   Popover,
   PopoverButton,
@@ -39,9 +39,9 @@ import {
  */
 function DropdownLink({ href, children, className = "", close, ...rest }) {
   return (
-    <Link href={href} onClick={() => close()} className={className} {...rest}>
+    <CatalogFilterLink href={href} close={close} className={className} {...rest}>
       {children}
-    </Link>
+    </CatalogFilterLink>
   );
 }
 

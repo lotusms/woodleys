@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
+import CatalogFilterLink from "@/components/catalog/CatalogFilterLink";
 import SkipLink from "@/components/a11y/SkipLink";
 import SiteLogo from "@/components/brand/SiteLogo";
 import HeaderSearch from "@/components/navigation/HeaderSearch";
@@ -157,7 +158,7 @@ function MobileAccordionItem({
                 >
                   {section.links.map((navLink) => (
                     <li key={navLink.id || navLink.href}>
-                      <Link
+                      <CatalogFilterLink
                         href={navLink.href}
                         onClick={onNavigate}
                         aria-label={
@@ -189,7 +190,7 @@ function MobileAccordionItem({
                         <span aria-hidden={Boolean(navLink.visuallyHiddenContext)}>
                           {navLink.label}
                         </span>
-                      </Link>
+                      </CatalogFilterLink>
                     </li>
                   ))}
                 </ul>
@@ -197,7 +198,7 @@ function MobileAccordionItem({
                 <ul className="mb-3 space-y-1.5" role="list">
                   {section.links.map((navLink) => (
                     <li key={navLink.id || navLink.href}>
-                      <Link
+                      <CatalogFilterLink
                         href={navLink.href}
                         onClick={onNavigate}
                         aria-label={
@@ -206,7 +207,7 @@ function MobileAccordionItem({
                         className="block py-1 text-sm text-site-fg hover:text-warm-gold-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark"
                       >
                         {navLink.label}
-                      </Link>
+                      </CatalogFilterLink>
                     </li>
                   ))}
                 </ul>

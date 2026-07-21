@@ -1,10 +1,16 @@
 import Link from "next/link";
 import CategoryPageLayout from "@/components/catalog/CategoryPageLayout";
 import CategoryGrid from "@/components/catalog/CategoryGrid";
-import CatalogProductSection from "@/components/catalog/CatalogProductSection";
+import CategoryCatalogSection from "@/components/catalog/CategoryCatalogSection";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { orgPhone, orgPhoneTel, sitePageTitle } from "@/config";
 import { isServiceCatalogSection } from "@/lib/catalog/categories";
+import {
+  entrySupportsMetalFilter,
+  metalFilterOptions,
+  metalsForEntry,
+} from "@/config/metals";
+import { diamondShapeLinksForOrigin } from "@/config/diamond-shapes";
 
 const heroSecondaryClass =
   "inline-flex items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/70 hover:bg-white/20";
@@ -76,6 +82,8 @@ function ServiceDetailPanel({ sectionKey, entry }) {
  *   ancestors?: import("@/lib/catalog/categories").CategoryEntry[];
  *   slugPath?: string[];
  *   products: import("@/lib/catalog/product-types").CatalogProduct[];
+ *   activeMetalSlug?: string;
+ *   activeShapeSlug?: string;
  * }} props
  */
 export default function CategoryDetailPage({
@@ -85,6 +93,8 @@ export default function CategoryDetailPage({
   ancestors = [],
   slugPath = [entry.slug],
   products,
+  activeMetalSlug,
+  activeShapeSlug,
 }) {
   const isService = isServiceCatalogSection(section);
   const emptyMessage = `No products in ${entry.title} yet.`;
@@ -94,6 +104,8 @@ export default function CategoryDetailPage({
       : `/${sectionKey}`;
   const parentLabel =
     ancestors.length > 0 ? ancestors[ancestors.length - 1].title : section.title;
+
+  const currentHref = `/${sectionKey}/${slugPath.join("/")}`;
 
   const breadcrumbs = [
     { label: section.title, href: `/${sectionKey}` },
@@ -115,38 +127,8 @@ export default function CategoryDetailPage({
           href: `/${sectionKey}/${[...slugPath, child.slug].join("/")}`,
           image: child.image?.src,
           alt: child.image?.alt,
-          symbol: child.symbol,
-          symbolClass: child.symbolClass,
         }))
       : [];
-
-  const metalItems = childItems.filter((item) => item.symbol);
-  const otherItems = childItems.filter((item) => !item.symbol);
-
-  const currentHref = `/${sectionKey}/${slugPath.join("/")}`;
-  const parentEntry =
-    ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
-  const metalSource =
-    metalItems.length > 0
-      ? {
-          items: metalItems,
-          allHref: currentHref,
-          allLabel: "All metals",
-        }
-      : entry.metalFilter && parentEntry?.children?.length
-        ? {
-            items: parentEntry.children
-              .filter((child) => child.symbol)
-              .map((child) => ({
-                title: child.title,
-                href: `/${sectionKey}/${[...ancestors.map((a) => a.slug), child.slug].join("/")}`,
-                symbol: child.symbol,
-                symbolClass: child.symbolClass,
-              })),
-            allHref: parentHref,
-            allLabel: "All metals",
-          }
-        : null;
 
   const isDiamondOrigin =
     sectionKey === "diamonds" &&
@@ -154,13 +136,30 @@ export default function CategoryDetailPage({
   const isVintageWatches =
     sectionKey === "watches" && entry.slug === "vintage-watches";
 
-  const otherHeading = isDiamondOrigin
-    ? "Browse by shape"
-    : isVintageWatches
-      ? "Browse by brand"
-      : `Within ${entry.title}`;
+  const shapeOptions = isDiamondOrigin
+    ? diamondShapeLinksForOrigin(
+        /** @type {"natural-diamonds" | "lab-grown-diamonds"} */ (entry.slug),
+      ).map((shape) => ({
+        title: shape.title,
+        slug: shape.slug,
+      }))
+    : [];
+
+  const browseItems = childItems;
+
+  const supportsMetal = entrySupportsMetalFilter(sectionKey, entry.slug);
+  const metalOptions = supportsMetal
+    ? metalFilterOptions(currentHref, {
+        metals: metalsForEntry(sectionKey, entry.slug),
+      })
+    : [];
+
+  const otherHeading = isVintageWatches
+    ? "Browse by brand"
+    : `Within ${entry.title}`;
 
   const serviceCta = servicePrimaryCta({ sectionKey, entry });
+  const showAllLabel = isDiamondOrigin || browseItems.length > 0;
 
   return (
     <CategoryPageLayout
@@ -189,17 +188,12 @@ export default function CategoryDetailPage({
     >
       {isService ? <ServiceDetailPanel sectionKey={sectionKey} entry={entry} /> : null}
 
-      {otherItems.length > 0 ? (
+      {browseItems.length > 0 ? (
         <div className="mb-16">
           <div className="border-b border-stone-200/80 pb-8">
             <h2 className="font-serif text-3xl font-medium tracking-[-0.02em] text-site-fg sm:text-4xl">
               {otherHeading}
             </h2>
-            {isDiamondOrigin ? (
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
-                Choose a cut to compare stones and pricing for this origin.
-              </p>
-            ) : null}
             {isVintageWatches ? (
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-site-secondary">
                 Choose a maker to explore our vintage selection.
@@ -207,26 +201,23 @@ export default function CategoryDetailPage({
             ) : null}
           </div>
           <div className="mt-10">
-            <CategoryGrid items={otherItems} />
+            <CategoryGrid items={browseItems} />
           </div>
         </div>
       ) : null}
 
       {!isService ? (
-        <CatalogProductSection
-          label={childItems.length > 0 ? `All ${entry.title}` : entry.title}
+        <CategoryCatalogSection
+          key={currentHref}
+          basePath={currentHref}
+          entryTitle={entry.title}
           products={products}
           emptyMessage={emptyMessage}
-          metalFilter={
-            metalSource?.items.length
-              ? {
-                  allHref: metalSource.allHref,
-                  allLabel: metalSource.allLabel,
-                  activeHref: currentHref,
-                  items: metalSource.items,
-                }
-              : null
-          }
+          initialMetalSlug={supportsMetal ? activeMetalSlug : undefined}
+          initialShapeSlug={isDiamondOrigin ? activeShapeSlug : undefined}
+          metalOptions={metalOptions}
+          shapeOptions={shapeOptions}
+          showAllLabel={showAllLabel}
         />
       ) : null}
     </CategoryPageLayout>

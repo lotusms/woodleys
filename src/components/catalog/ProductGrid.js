@@ -48,6 +48,7 @@ export default function ProductGrid({ products, emptyMessage }) {
             product={product}
             onPreview={openPreview}
             itemRef={setFlipRef(product.id)}
+            className="transition-opacity duration-300 ease-out"
           />
         ))}
       </ul>

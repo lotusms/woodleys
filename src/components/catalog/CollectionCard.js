@@ -12,6 +12,7 @@ import Link from "next/link";
  *   symbol?: string;
  *   symbolClass?: string;
  *   ctaLabel?: string;
+ *   linkless?: boolean;
  * }} props
  */
 export default function CollectionCard({
@@ -23,12 +24,13 @@ export default function CollectionCard({
   symbol,
   symbolClass,
   ctaLabel = "Explore collection",
+  linkless = false,
 }) {
-  return (
-    <Link
-      href={href}
-      className="group flex h-full flex-col overflow-hidden rounded-sm border border-stone-200/75 bg-gradient-to-b from-ivory via-white to-champagne/35 shadow-[0_1px_2px_rgba(41,37,36,0.04),0_14px_36px_rgba(41,37,36,0.08)] ring-1 ring-stone-200/40 transition duration-500 hover:-translate-y-1 hover:border-stone-300/80 hover:shadow-[0_2px_4px_rgba(41,37,36,0.05),0_22px_44px_rgba(41,37,36,0.11)] focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-ivory"
-    >
+  const cardClassName =
+    "group flex h-full flex-col overflow-hidden rounded-sm border border-stone-200/75 bg-gradient-to-b from-ivory via-white to-champagne/35 shadow-[0_1px_2px_rgba(41,37,36,0.04),0_14px_36px_rgba(41,37,36,0.08)] ring-1 ring-stone-200/40 transition duration-500 hover:-translate-y-1 hover:border-stone-300/80 hover:shadow-[0_2px_4px_rgba(41,37,36,0.05),0_22px_44px_rgba(41,37,36,0.11)] focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-dark focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
+
+  const inner = (
+    <>
       {symbol ? (
         <div className="p-4 sm:p-5">
           <div className="flex aspect-[4/3] items-center justify-center rounded-sm bg-gradient-to-br from-champagne/90 via-ivory to-white shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_24px_rgba(41,37,36,0.08)] ring-1 ring-stone-200/60">
@@ -86,6 +88,16 @@ export default function CollectionCard({
           </span>
         </span>
       </div>
+    </>
+  );
+
+  if (linkless) {
+    return <div className={cardClassName}>{inner}</div>;
+  }
+
+  return (
+    <Link href={href} className={cardClassName}>
+      {inner}
     </Link>
   );
 }

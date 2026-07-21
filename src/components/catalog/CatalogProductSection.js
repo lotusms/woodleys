@@ -16,10 +16,16 @@ import {
  *   products: import("@/lib/catalog/product-types").CatalogProduct[];
  *   emptyMessage?: string;
  *   metalFilter?: {
- *     allHref: string;
  *     allLabel?: string;
- *     activeHref: string;
- *     items: { title: string; href: string; symbol?: string; symbolClass?: string }[];
+ *     activeMetalSlug?: string | null;
+ *     onMetalChange: (slug: string | null) => void;
+ *     items: { title: string; slug: string; symbol?: string; symbolClass?: string }[];
+ *   } | null;
+ *   shapeFilter?: {
+ *     allLabel?: string;
+ *     activeShapeSlug?: string | null;
+ *     onShapeChange: (slug: string | null) => void;
+ *     items: { title: string; slug: string }[];
  *   } | null;
  * }} props
  */
@@ -28,6 +34,7 @@ export default function CatalogProductSection({
   products,
   emptyMessage,
   metalFilter = null,
+  shapeFilter = null,
 }) {
   const [sort, setSort] = useState(DEFAULT_CATALOG_SORT);
 
@@ -44,6 +51,7 @@ export default function CatalogProductSection({
         sort={sort}
         onSortChange={setSort}
         metalFilter={metalFilter}
+        shapeFilter={shapeFilter}
       />
       <div className="mt-10">
         <ProductGrid products={sortedProducts} emptyMessage={emptyMessage} />

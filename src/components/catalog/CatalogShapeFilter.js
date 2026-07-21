@@ -16,12 +16,12 @@ const CHECK_CLASS =
   "absolute inset-y-0 right-0 flex items-center pr-3 text-warm-gold-dark group-[:not([data-selected])]:hidden group-data-focus:text-warm-gold-dark";
 
 /**
- * Compact metal filter — updates in place without a full page navigation.
+ * Compact shape filter — updates in place without a full page navigation.
  *
  * @param {{
  *   allLabel?: string;
- *   activeMetalSlug?: string | null;
- *   onMetalChange: (slug: string | null) => void;
+ *   activeShapeSlug?: string | null;
+ *   onShapeChange: (slug: string | null) => void;
  *   items: {
  *     title: string;
  *     slug: string;
@@ -29,10 +29,10 @@ const CHECK_CLASS =
  *   className?: string;
  * }} props
  */
-export default function CatalogMetalFilter({
-  allLabel = "All metals",
-  activeMetalSlug = null,
-  onMetalChange,
+export default function CatalogShapeFilter({
+  allLabel = "All shapes",
+  activeShapeSlug = null,
+  onShapeChange,
   items,
   className = "",
 }) {
@@ -46,20 +46,20 @@ export default function CatalogMetalFilter({
 
   if (!items.length) return null;
 
-  const selected = activeMetalSlug || "";
+  const selected = activeShapeSlug || "";
 
   return (
     <div className={`w-fit ${className}`.trim()}>
       <SelectListbox
-        label="Metal"
+        label="Shape"
         showLabel={false}
-        placeholder="Metal"
+        placeholder="Shape"
         options={options}
         value={selected}
         onChange={(nextSlug) => {
           const slug = nextSlug || null;
-          if (slug !== (activeMetalSlug || "")) {
-            onMetalChange(slug);
+          if (slug !== (activeShapeSlug || "")) {
+            onShapeChange(slug);
           }
         }}
         compact
@@ -68,10 +68,10 @@ export default function CatalogMetalFilter({
         optionClassName={OPTION_CLASS}
         checkIconClassName={CHECK_CLASS}
         anchor={{ to: "bottom end", gap: 6, padding: 12 }}
-        ariaDescribedBy="catalog-metal-filter-hint"
+        ariaDescribedBy="catalog-shape-filter-hint"
       />
-      <span id="catalog-metal-filter-hint" className="sr-only">
-        Filter this collection by metal
+      <span id="catalog-shape-filter-hint" className="sr-only">
+        Filter this collection by shape
       </span>
     </div>
   );
