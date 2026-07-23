@@ -236,6 +236,14 @@ function paymentSummaryCustomerHtml(payment) {
 
 function paymentBlockText(payment) {
   if (!payment || typeof payment !== "object") return "Payment: (not recorded)";
+  if (payment.provider === "clover") {
+    return [
+      "Payment: Card (Clover)",
+      payment.cloverChargeId && `  Charge id: ${payment.cloverChargeId}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
   if (payment.provider === "paypal") {
     return [
       "Payment: PayPal",
@@ -251,6 +259,9 @@ function paymentBlockText(payment) {
 function paymentBlockHtml(payment) {
   if (!payment || typeof payment !== "object") {
     return "<p><em>Payment details not recorded.</em></p>";
+  }
+  if (payment.provider === "clover") {
+    return `<p><strong>Card (Clover)</strong><br/>Charge: ${escapeHtml(payment.cloverChargeId || "—")}</p>`;
   }
   if (payment.provider === "paypal") {
     return `<p><strong>PayPal</strong><br/>Order: ${escapeHtml(payment.paypalOrderId || "—")}<br/>Capture: ${escapeHtml(payment.paypalCaptureId || "—")}</p>`;

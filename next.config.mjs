@@ -5,7 +5,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: [
       "firebase",
-      "@paypal/react-paypal-js",
       "@headlessui/react",
       "@heroicons/react/24/outline",
       "@heroicons/react/24/solid",

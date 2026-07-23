@@ -87,9 +87,11 @@ function fulfillmentLabel(f) {
 /** @param {unknown} payment */
 function paymentHint(payment) {
   if (!payment || typeof payment !== "object") return null;
+  if (payment.provider === "clover") return "Card";
   if (payment.provider === "paypal") return "PayPal";
   if (typeof payment.provider === "string" && payment.provider)
     return payment.provider;
+  if ("cloverChargeId" in payment) return "Card";
   if ("paypalCaptureId" in payment || "paypalOrderId" in payment) return "PayPal";
   return null;
 }
@@ -140,7 +142,12 @@ function orderMatchesSearch(order, q) {
   const payment = order.payment;
   if (payment && typeof payment === "object") {
     const p = /** @type {Record<string, unknown>} */ (payment);
-    for (const k of ["provider", "paypalOrderId", "paypalCaptureId"]) {
+    for (const k of [
+      "provider",
+      "cloverChargeId",
+      "paypalOrderId",
+      "paypalCaptureId",
+    ]) {
       const v = p[k];
       if (v != null) haystacks.push(String(v));
     }

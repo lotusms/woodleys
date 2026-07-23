@@ -3,11 +3,16 @@
  */
 
 /**
- * @param {{ id?: string; payment?: { paypalCaptureId?: string; paypalOrderId?: string } | null }} order
+ * @param {{ id?: string; payment?: {
+ *   cloverChargeId?: string;
+ *   paypalCaptureId?: string;
+ *   paypalOrderId?: string;
+ * } | null }} order
  */
 export function getOrderTransactionId(order) {
   const payment = order?.payment;
   if (payment && typeof payment === "object") {
+    if (payment.cloverChargeId) return String(payment.cloverChargeId);
     if (payment.paypalCaptureId) return String(payment.paypalCaptureId);
     if (payment.paypalOrderId) return String(payment.paypalOrderId);
   }
@@ -19,6 +24,7 @@ export function getOrderTransactionId(order) {
  */
 export function getPaymentMethodLabel(payment) {
   if (!payment || typeof payment !== "object") return "Payment received";
+  if (payment.provider === "clover") return "Card";
   if (payment.provider === "paypal") return "PayPal";
   return String(payment.provider || "Payment received");
 }

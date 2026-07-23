@@ -41,10 +41,11 @@ export default function DashboardProductsCategoryNav({ light }) {
   const activeCollection = searchParams.get("collection") || PRODUCTS_FILTER_ALL;
   const searchQuery = searchParams.get("q") || "";
   const sortKey = searchParams.get("sort") || undefined;
+  const perPage = searchParams.get("per") || undefined;
 
   const filterExtras = useMemo(
-    () => ({ q: searchQuery, sort: sortKey }),
-    [searchQuery, sortKey],
+    () => ({ q: searchQuery, sort: sortKey, per: perPage }),
+    [searchQuery, sortKey, perPage],
   );
 
   const sectionCounts = useMemo(

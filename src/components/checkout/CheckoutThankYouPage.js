@@ -291,6 +291,12 @@ function ThankYouContent() {
               <span className="text-site-secondary">Payment method:</span>{" "}
               {getPaymentMethodLabel(order.payment)}
             </p>
+            {order.payment?.cloverChargeId ? (
+              <p>
+                <span className="text-site-secondary">Clover charge:</span>{" "}
+                <span className="break-all">{order.payment.cloverChargeId}</span>
+              </p>
+            ) : null}
             {order.payment?.paypalOrderId ? (
               <p>
                 <span className="text-site-secondary">PayPal order:</span>{" "}

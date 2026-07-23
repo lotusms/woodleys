@@ -147,7 +147,7 @@ const BULOVA_SAMPLE_PRODUCT_DEFINITIONS = [
     title: "Marine Star C",
     description:
       "Silver-tone stainless steel case, yellow luminous dial, black silicone strap, HPQ Precisionist movement, sapphire crystal, 200M water resistance.",
-    priceUsd: 695,
+    priceUsd: 70,
     condition: "New",
     seoTitle: "Bulova Marine Star Series C 96B431 | Woodley's Jewelers",
     metaDescription:

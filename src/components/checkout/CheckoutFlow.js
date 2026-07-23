@@ -35,8 +35,8 @@ const CheckoutAuthSection = dynamic(
   { ssr: false },
 );
 
-const CheckoutPayPalSection = dynamic(
-  () => import("@/components/checkout/CheckoutPayPalSection"),
+const CheckoutCloverSection = dynamic(
+  () => import("@/components/checkout/CheckoutCloverSection"),
   { ssr: false },
 );
 
@@ -124,7 +124,11 @@ export default function CheckoutFlow({
     () => Object.keys(validateCheckoutForm(form)).length > 0,
     [form],
   );
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID?.trim();
+  const cloverConfigured = Boolean(
+    (process.env.NEXT_PUBLIC_CLOVER_PAKMS_KEY?.trim() ||
+      process.env.NEXT_PUBLIC_CLOVER_PUBLIC_KEY?.trim()) &&
+      process.env.NEXT_PUBLIC_CLOVER_MERCHANT_ID?.trim(),
+  );
 
   const patchForm = useCallback((patch) => {
     setForm((prev) => ({ ...prev, ...patch }));
@@ -492,8 +496,8 @@ export default function CheckoutFlow({
               </p>
             ) : null}
 
-            {paypalClientId ? (
-              <CheckoutPayPalSection
+            {cloverConfigured ? (
+              <CheckoutCloverSection
                 disabled={payBusy || formInvalid}
                 buildOrder={buildOrder}
                 onBusy={setPayBusy}

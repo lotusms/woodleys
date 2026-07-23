@@ -75,8 +75,9 @@ function priceFor(collectionHandle, index, service) {
   if (service) {
     return [45, 75, 95, 125, 150, 200][index] ?? 99;
   }
-  const base = 1200 + (hashString(collectionHandle) % 800);
-  return base + index * 725;
+  // Keep mock preview prices under $500 for checkout / shipping testing.
+  const base = 99 + (hashString(collectionHandle) % 120);
+  return base + index * 55;
 }
 
 /**
@@ -116,7 +117,7 @@ export function buildMockProductsForCollection({
         : `${style} ${collectionTitle}`,
       description: desc,
       priceUsd: price,
-      maxPriceUsd: service ? price : price + (index % 2 === 0 ? 400 : 0),
+      maxPriceUsd: service ? price : Math.min(499, price + (index % 2 === 0 ? 40 : 0)),
       availableForSale: index < names.length - 1,
       createdAt: new Date(Date.UTC(2024, 5, 1 + index * 9)).toISOString(),
       popularity: names.length - index,

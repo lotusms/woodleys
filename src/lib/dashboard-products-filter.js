@@ -161,7 +161,7 @@ export function normalizeProductsSort(sortKey) {
 /**
  * @param {string | null | undefined} sectionKey
  * @param {string | null | undefined} collectionHandle
- * @param {{ q?: string | null; sort?: string | null }} [extras]
+ * @param {{ q?: string | null; sort?: string | null; per?: string | number | null }} [extras]
  */
 export function buildProductsFilterHref(sectionKey, collectionHandle, extras = {}) {
   const params = new URLSearchParams();
@@ -176,6 +176,10 @@ export function buildProductsFilterHref(sectionKey, collectionHandle, extras = {
   }
   if (extras.sort && extras.sort !== PRODUCTS_SORT_TITLE_ASC) {
     params.set("sort", extras.sort);
+  }
+  const per = Number(extras.per);
+  if (Number.isFinite(per) && per > 0 && per !== 25) {
+    params.set("per", String(per));
   }
   const query = params.toString();
   return query ? `/dashboard/products?${query}` : "/dashboard/products";

@@ -24,6 +24,24 @@ import {
 import * as dash from "@/lib/dashboardChrome";
 import { isLightThemeId } from "@/theme";
 
+const PRODUCTS_PER_PAGE_OPTIONS = [
+  { value: "10", label: "10 per page" },
+  { value: "25", label: "25 per page" },
+  { value: "50", label: "50 per page" },
+  { value: "100", label: "100 per page" },
+];
+const DEFAULT_PRODUCTS_PER_PAGE = 25;
+
+/**
+ * @param {unknown} raw
+ * @returns {number}
+ */
+function normalizeProductsPerPage(raw) {
+  const n = Number(raw);
+  if (PRODUCTS_PER_PAGE_OPTIONS.some((opt) => Number(opt.value) === n)) return n;
+  return DEFAULT_PRODUCTS_PER_PAGE;
+}
+
 const collectionTitleByHandle = Object.fromEntries(
   listAllCatalogCollectionOptions().map((c) => [c.shopifyHandle, c.title]),
 );
@@ -66,22 +84,52 @@ function StatusBadge({ light, label, tone = "neutral" }) {
  * @param {{
  *   product: Record<string, unknown>;
  *   light: boolean;
+ *   selected?: boolean;
+ *   onSelectChange?: (handle: string, selected: boolean) => void;
  *   onToggle: (handle: string, patch: Record<string, unknown>) => Promise<void>;
  *   onRequestDelete?: (product: Record<string, unknown>) => void;
  *   busy: boolean;
  * }} props
  */
-function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
+function ProductRow({
+  product,
+  light,
+  selected = false,
+  onSelectChange,
+  onToggle,
+  onRequestDelete,
+  busy,
+}) {
   const handle = String(product.handle);
   const collections = Array.isArray(product.collectionHandles)
     ? product.collectionHandles
     : [];
   const isActive = Boolean(product.active);
+  const checkboxId = `product-select-${handle}`;
 
   return (
     <div className={dash.ordersListRow(light)}>
       <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="flex min-w-0 items-start gap-4">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+          {onSelectChange ? (
+            <div className="flex shrink-0 items-center pt-5">
+              <input
+                id={checkboxId}
+                type="checkbox"
+                checked={selected}
+                disabled={busy}
+                onChange={(event) =>
+                  onSelectChange(handle, event.target.checked)
+                }
+                className={
+                  light
+                    ? "size-4 rounded border-stone-400 text-amber-600 focus:ring-amber-500/40"
+                    : "size-4 rounded border-slate-600 bg-slate-900 text-amber-400 focus:ring-amber-400/30"
+                }
+                aria-label={`Select ${String(product.title)}`}
+              />
+            </div>
+          ) : null}
           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-stone-200/70">
             {product.image?.src ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -196,7 +244,7 @@ function ProductRow({ product, light, onToggle, onRequestDelete, busy }) {
   );
 }
 
-function buildProductsPageHref({ section, collection, query, sort }) {
+function buildProductsPageHref({ section, collection, query, sort, page, perPage }) {
   const params = new URLSearchParams();
   if (section && section !== PRODUCTS_FILTER_ALL) {
     params.set("section", section);
@@ -211,8 +259,89 @@ function buildProductsPageHref({ section, collection, query, sort }) {
   if (normalizedSort !== PRODUCTS_SORT_TITLE_ASC) {
     params.set("sort", normalizedSort);
   }
+  const normalizedPerPage = normalizeProductsPerPage(perPage);
+  if (normalizedPerPage !== DEFAULT_PRODUCTS_PER_PAGE) {
+    params.set("per", String(normalizedPerPage));
+  }
+  const pageNum = Math.max(1, Number(page) || 1);
+  if (pageNum > 1) {
+    params.set("page", String(pageNum));
+  }
   const qs = params.toString();
   return qs ? `/dashboard/products?${qs}` : "/dashboard/products";
+}
+
+/**
+ * @param {{
+ *   light: boolean;
+ *   label: string;
+ *   page: number;
+ *   totalPages: number;
+ *   rangeStart: number;
+ *   rangeEnd: number;
+ *   total: number;
+ *   onPrevious: () => void;
+ *   onNext: () => void;
+ * }} props
+ */
+function ProductsPagination({
+  light,
+  label,
+  page,
+  totalPages,
+  rangeStart,
+  rangeEnd,
+  total,
+  onPrevious,
+  onNext,
+}) {
+  if (total <= 0) return null;
+  return (
+    <nav
+      className={`mt-6 flex flex-col items-stretch gap-4 border-t pt-5 sm:flex-row sm:items-center sm:justify-between ${light ? "border-stone-300/55" : "border-slate-700/40"}`}
+      aria-label={label}
+    >
+      <p
+        className={`text-center text-sm sm:text-left ${light ? "text-stone-600" : "text-slate-500"}`}
+      >
+        Showing{" "}
+        <span
+          className={`tabular-nums ${light ? "text-stone-800" : "text-stone-400"}`}
+        >
+          {rangeStart} to {rangeEnd}
+        </span>{" "}
+        of{" "}
+        <span
+          className={`tabular-nums ${light ? "text-stone-800" : "text-stone-400"}`}
+        >
+          {total}
+        </span>
+      </p>
+      <div className="flex items-center justify-center gap-2 sm:justify-end">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={onPrevious}
+          className={dash.ordersPaginationButton(light)}
+        >
+          Previous
+        </button>
+        <span
+          className={`min-w-28 text-center text-sm ${light ? "text-stone-700" : "text-stone-400"}`}
+        >
+          Page {page} of {totalPages}
+        </span>
+        <button
+          type="button"
+          disabled={page >= totalPages}
+          onClick={onNext}
+          className={dash.ordersPaginationButton(light)}
+        >
+          Next
+        </button>
+      </div>
+    </nav>
+  );
 }
 
 function DashboardProductsPageContent() {
@@ -226,21 +355,43 @@ function DashboardProductsPageContent() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [busyHandle, setBusyHandle] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [selectedHandles, setSelectedHandles] = useState(() => new Set());
+  const [deleteTargets, setDeleteTargets] = useState(
+    /** @type {Record<string, unknown>[]} */ ([]),
+  );
   const [deleting, setDeleting] = useState(false);
 
   const activeSection = searchParams.get("section") || PRODUCTS_FILTER_ALL;
   const activeCollection = searchParams.get("collection") || PRODUCTS_FILTER_ALL;
   const searchQuery = searchParams.get("q") || "";
   const sortKey = normalizeProductsSort(searchParams.get("sort"));
+  const perPage = normalizeProductsPerPage(searchParams.get("per"));
+  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const [inactivePage, setInactivePage] = useState(1);
 
   useEffect(() => {
     if (searchParams.get("created") !== "1") return;
     setSuccess("Product created. It will appear on the storefront shortly.");
-    router.replace(buildProductsPageHref({ section: activeSection, collection: activeCollection, query: searchQuery, sort: sortKey }), {
-      scroll: false,
-    });
-  }, [searchParams, router, activeSection, activeCollection, searchQuery, sortKey]);
+    router.replace(
+      buildProductsPageHref({
+        section: activeSection,
+        collection: activeCollection,
+        query: searchQuery,
+        sort: sortKey,
+        page: 1,
+        perPage,
+      }),
+      { scroll: false },
+    );
+  }, [
+    searchParams,
+    router,
+    activeSection,
+    activeCollection,
+    searchQuery,
+    sortKey,
+    perPage,
+  ]);
 
   const handleToggle = useCallback(
     async (handle, patch) => {
@@ -260,26 +411,60 @@ function DashboardProductsPageContent() {
     [replaceProduct],
   );
 
+  const handleSelectChange = useCallback((handle, selected) => {
+    setSelectedHandles((prev) => {
+      const next = new Set(prev);
+      if (selected) next.add(handle);
+      else next.delete(handle);
+      return next;
+    });
+  }, []);
+
   const handleConfirmDelete = useCallback(async () => {
-    if (!deleteTarget?.handle) return;
-    const handle = String(deleteTarget.handle);
+    if (!deleteTargets.length) return;
     setDeleting(true);
-    setBusyHandle(handle);
     setError("");
     setSuccess("");
+    const handles = deleteTargets.map((product) => String(product.handle));
+    const failed = [];
     try {
-      await deleteAdminProduct(handle);
-      removeProduct(handle);
-      setDeleteTarget(null);
-      setSuccess("Product deleted permanently.");
+      for (const handle of handles) {
+        setBusyHandle(handle);
+        try {
+          await deleteAdminProduct(handle);
+          removeProduct(handle);
+        } catch {
+          failed.push(handle);
+        }
+      }
+      setDeleteTargets([]);
+      setSelectedHandles((prev) => {
+        const next = new Set(prev);
+        for (const handle of handles) {
+          if (!failed.includes(handle)) next.delete(handle);
+        }
+        return next;
+      });
+      if (failed.length === 0) {
+        setSuccess(
+          handles.length === 1
+            ? "Product deleted permanently."
+            : `${handles.length} products deleted permanently.`,
+        );
+      } else if (failed.length === handles.length) {
+        setError("Could not delete the selected products.");
+      } else {
+        setError(
+          `Deleted ${handles.length - failed.length} of ${handles.length} products. Some could not be deleted.`,
+        );
+        setSuccess("");
+      }
       void refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not delete product.");
     } finally {
       setDeleting(false);
       setBusyHandle("");
     }
-  }, [deleteTarget, removeProduct, refresh]);
+  }, [deleteTargets, removeProduct, refresh]);
 
   const filtered = useMemo(() => {
     const matched = filterDashboardProducts(products, {
@@ -290,25 +475,175 @@ function DashboardProductsPageContent() {
     return sortDashboardProducts(matched, sortKey);
   }, [products, activeSection, activeCollection, searchQuery, sortKey]);
 
+  const activeProducts = useMemo(
+    () => filtered.filter((p) => p.active),
+    [filtered],
+  );
+  const inactiveProducts = useMemo(
+    () => filtered.filter((p) => !p.active),
+    [filtered],
+  );
+
+  const activeTotalPages = Math.max(
+    1,
+    Math.ceil(activeProducts.length / perPage),
+  );
+  const safeActivePage = Math.min(page, activeTotalPages);
+  const pagedActiveProducts = useMemo(() => {
+    const start = (safeActivePage - 1) * perPage;
+    return activeProducts.slice(start, start + perPage);
+  }, [activeProducts, safeActivePage, perPage]);
+  const activeRangeStart =
+    activeProducts.length === 0 ? 0 : (safeActivePage - 1) * perPage + 1;
+  const activeRangeEnd = Math.min(
+    safeActivePage * perPage,
+    activeProducts.length,
+  );
+
+  const inactiveTotalPages = Math.max(
+    1,
+    Math.ceil(inactiveProducts.length / perPage),
+  );
+  const safeInactivePage = Math.min(inactivePage, inactiveTotalPages);
+  const pagedInactiveProducts = useMemo(() => {
+    const start = (safeInactivePage - 1) * perPage;
+    return inactiveProducts.slice(start, start + perPage);
+  }, [inactiveProducts, safeInactivePage, perPage]);
+  const inactiveRangeStart =
+    inactiveProducts.length === 0 ? 0 : (safeInactivePage - 1) * perPage + 1;
+  const inactiveRangeEnd = Math.min(
+    safeInactivePage * perPage,
+    inactiveProducts.length,
+  );
+
+  useEffect(() => {
+    setInactivePage(1);
+  }, [activeSection, activeCollection, searchQuery, sortKey, perPage]);
+
+  useEffect(() => {
+    if (page === safeActivePage) return;
+    router.replace(
+      buildProductsPageHref({
+        section: activeSection,
+        collection: activeCollection,
+        query: searchQuery,
+        sort: sortKey,
+        page: safeActivePage,
+        perPage,
+      }),
+      { scroll: false },
+    );
+  }, [
+    page,
+    safeActivePage,
+    router,
+    activeSection,
+    activeCollection,
+    searchQuery,
+    sortKey,
+    perPage,
+  ]);
+
+  const selectableHandles = useMemo(
+    () => filtered.map((product) => String(product.handle)),
+    [filtered],
+  );
+
+  useEffect(() => {
+    setSelectedHandles((prev) => {
+      if (prev.size === 0) return prev;
+      const allowed = new Set(selectableHandles);
+      let changed = false;
+      const next = new Set();
+      for (const handle of prev) {
+        if (allowed.has(handle)) next.add(handle);
+        else changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [selectableHandles]);
+
+  const selectedCount = selectedHandles.size;
+  const allFilteredSelected =
+    selectableHandles.length > 0 &&
+    selectableHandles.every((handle) => selectedHandles.has(handle));
+  const allActiveSelected =
+    activeProducts.length > 0 &&
+    activeProducts.every((product) =>
+      selectedHandles.has(String(product.handle)),
+    );
+  const allActivePageSelected =
+    pagedActiveProducts.length > 0 &&
+    pagedActiveProducts.every((product) =>
+      selectedHandles.has(String(product.handle)),
+    );
+
+  const selectedProducts = useMemo(
+    () =>
+      filtered.filter((product) =>
+        selectedHandles.has(String(product.handle)),
+      ),
+    [filtered, selectedHandles],
+  );
+
+  function selectAllMatching() {
+    setSelectedHandles(new Set(selectableHandles));
+  }
+
+  function selectAllActive() {
+    setSelectedHandles(
+      new Set(activeProducts.map((product) => String(product.handle))),
+    );
+  }
+
+  function selectActivePage() {
+    setSelectedHandles((prev) => {
+      const next = new Set(prev);
+      for (const product of pagedActiveProducts) {
+        next.add(String(product.handle));
+      }
+      return next;
+    });
+  }
+
+  function deselectActivePage() {
+    setSelectedHandles((prev) => {
+      const next = new Set(prev);
+      for (const product of pagedActiveProducts) {
+        next.delete(String(product.handle));
+      }
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedHandles(new Set());
+  }
+
+  function requestBulkDelete() {
+    if (selectedProducts.length === 0) return;
+    setDeleteTargets(selectedProducts);
+  }
+
   const activeCategoryLabel =
     activeCollection !== PRODUCTS_FILTER_ALL
       ? collectionLabel(activeCollection)
       : (PRODUCTS_CATEGORY_NAV.find((item) => item.key === activeSection)?.label ??
         "All products");
 
-  function updateFilters({ section, collection, query, sort }) {
+  function updateFilters({ section, collection, query, sort, page: nextPage, perPage: nextPerPage }) {
     router.push(
       buildProductsPageHref({
         section: section ?? activeSection,
         collection: collection ?? activeCollection,
         query: query ?? searchQuery,
         sort: sort ?? sortKey,
+        page: nextPage ?? 1,
+        perPage: nextPerPage ?? perPage,
       }),
     );
   }
 
-  const activeProducts = filtered.filter((p) => p.active);
-  const inactiveProducts = filtered.filter((p) => !p.active);
   const pageLoading = authLoading || accountLoading || loading;
 
   return (
@@ -345,8 +680,8 @@ function DashboardProductsPageContent() {
         </p>
       ) : null}
 
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="w-full sm:max-w-md">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="w-full lg:max-w-md">
           <label
             htmlFor="products-search"
             className={`mb-1.5 block text-xs font-medium uppercase tracking-wider ${light ? "text-stone-600" : "text-slate-500"}`}
@@ -374,19 +709,37 @@ function DashboardProductsPageContent() {
           </div>
         </div>
 
-        <div className="w-full sm:w-72">
-          <SearchableSelectListbox
-            id="products-sort"
-            label="Sort by"
-            inlineLabel
-            light={light}
-            value={sortKey}
-            onChange={(nextSort) => updateFilters({ sort: nextSort })}
-            options={PRODUCTS_SORT_OPTIONS}
-            searchPlaceholder="Search sort options…"
-            placeholder="A to Z"
-            anchor={{ to: "bottom end", gap: 8, padding: 12 }}
-          />
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-end lg:w-auto">
+          <div className="w-full sm:w-56">
+            <SearchableSelectListbox
+              id="products-per-page"
+              label="Per page"
+              inlineLabel
+              light={light}
+              value={String(perPage)}
+              onChange={(nextPerPage) =>
+                updateFilters({ perPage: normalizeProductsPerPage(nextPerPage), page: 1 })
+              }
+              options={PRODUCTS_PER_PAGE_OPTIONS}
+              searchPlaceholder="Search page sizes…"
+              placeholder="25 per page"
+              anchor={{ to: "bottom end", gap: 8, padding: 12 }}
+            />
+          </div>
+          <div className="w-full sm:w-64">
+            <SearchableSelectListbox
+              id="products-sort"
+              label="Sort by"
+              inlineLabel
+              light={light}
+              value={sortKey}
+              onChange={(nextSort) => updateFilters({ sort: nextSort })}
+              options={PRODUCTS_SORT_OPTIONS}
+              searchPlaceholder="Search sort options…"
+              placeholder="A to Z"
+              anchor={{ to: "bottom end", gap: 8, padding: 12 }}
+            />
+          </div>
         </div>
       </div>
 
@@ -416,15 +769,99 @@ function DashboardProductsPageContent() {
               <h2 className={dash.dashboardStatHeading(light)}>
                 Active products
               </h2>
+
+              {activeProducts.length > 0 || selectedCount > 0 ? (
+                <div
+                  className={`mt-4 flex flex-col gap-3 rounded-2xl border px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between ${
+                    light
+                      ? "border-stone-300/60 bg-white/80"
+                      : "border-slate-700/40 bg-slate-900/40"
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={allActivePageSelected}
+                        disabled={pagedActiveProducts.length === 0 || deleting}
+                        onChange={(event) => {
+                          if (event.target.checked) selectActivePage();
+                          else deselectActivePage();
+                        }}
+                        className={
+                          light
+                            ? "size-4 rounded border-stone-400 text-amber-600 focus:ring-amber-500/40"
+                            : "size-4 rounded border-slate-600 bg-slate-900 text-amber-400 focus:ring-amber-400/30"
+                        }
+                        aria-label="Select all products on this page"
+                      />
+                      <span className={light ? "text-stone-700" : "text-slate-300"}>
+                        {allActivePageSelected
+                          ? "Deselect page"
+                          : "Select page"}
+                      </span>
+                    </label>
+                    <span
+                      className={`text-sm ${light ? "text-stone-500" : "text-slate-500"}`}
+                    >
+                      {selectedCount > 0
+                        ? `${selectedCount} selected`
+                        : "None selected"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={allActiveSelected || activeProducts.length === 0 || deleting}
+                      onClick={selectAllActive}
+                      className={dash.ordersGhostButton(light)}
+                    >
+                      Select all active
+                    </button>
+                    <button
+                      type="button"
+                      disabled={allFilteredSelected || selectableHandles.length === 0 || deleting}
+                      onClick={selectAllMatching}
+                      className={dash.ordersGhostButton(light)}
+                    >
+                      Select all matching
+                    </button>
+                    <button
+                      type="button"
+                      disabled={selectedCount === 0 || deleting}
+                      onClick={clearSelection}
+                      className={dash.ordersGhostButton(light)}
+                    >
+                      Clear
+                    </button>
+                    <button
+                      type="button"
+                      disabled={selectedCount === 0 || deleting}
+                      onClick={requestBulkDelete}
+                      className={
+                        light
+                          ? "cursor-pointer rounded-xl border border-red-400/70 bg-white px-4 py-2.5 text-sm font-medium text-red-700 transition hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          : "cursor-pointer rounded-xl border border-red-500/45 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-60"
+                      }
+                    >
+                      Delete selected
+                      {selectedCount > 0 ? ` (${selectedCount})` : ""}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="mt-4 space-y-3">
-                {activeProducts.length > 0 ? (
-                  activeProducts.map((product) => (
+                {pagedActiveProducts.length > 0 ? (
+                  pagedActiveProducts.map((product) => (
                     <ProductRow
                       key={String(product.handle)}
                       product={product}
                       light={light}
+                      selected={selectedHandles.has(String(product.handle))}
+                      onSelectChange={handleSelectChange}
                       onToggle={handleToggle}
-                      busy={busyHandle === product.handle}
+                      busy={busyHandle === product.handle || deleting}
                     />
                   ))
                 ) : (
@@ -439,6 +876,24 @@ function DashboardProductsPageContent() {
                   </div>
                 )}
               </div>
+
+              <ProductsPagination
+                light={light}
+                label="Active products pagination"
+                page={safeActivePage}
+                totalPages={activeTotalPages}
+                rangeStart={activeRangeStart}
+                rangeEnd={activeRangeEnd}
+                total={activeProducts.length}
+                onPrevious={() =>
+                  updateFilters({ page: Math.max(1, safeActivePage - 1) })
+                }
+                onNext={() =>
+                  updateFilters({
+                    page: Math.min(activeTotalPages, safeActivePage + 1),
+                  })
+                }
+              />
             </section>
 
             <section className="mt-10">
@@ -452,15 +907,17 @@ function DashboardProductsPageContent() {
                 in Firestore so you can activate them again.
               </p>
               <div className="mt-4 space-y-3">
-                {inactiveProducts.length > 0 ? (
-                  inactiveProducts.map((product) => (
+                {pagedInactiveProducts.length > 0 ? (
+                  pagedInactiveProducts.map((product) => (
                     <ProductRow
                       key={String(product.handle)}
                       product={product}
                       light={light}
+                      selected={selectedHandles.has(String(product.handle))}
+                      onSelectChange={handleSelectChange}
                       onToggle={handleToggle}
-                      onRequestDelete={setDeleteTarget}
-                      busy={busyHandle === product.handle}
+                      onRequestDelete={(target) => setDeleteTargets([target])}
+                      busy={busyHandle === product.handle || deleting}
                     />
                   ))
                 ) : (
@@ -469,17 +926,39 @@ function DashboardProductsPageContent() {
                   </div>
                 )}
               </div>
+
+              <ProductsPagination
+                light={light}
+                label="Deactivated products pagination"
+                page={safeInactivePage}
+                totalPages={inactiveTotalPages}
+                rangeStart={inactiveRangeStart}
+                rangeEnd={inactiveRangeEnd}
+                total={inactiveProducts.length}
+                onPrevious={() =>
+                  setInactivePage((current) => Math.max(1, current - 1))
+                }
+                onNext={() =>
+                  setInactivePage((current) =>
+                    Math.min(inactiveTotalPages, current + 1),
+                  )
+                }
+              />
             </section>
           </div>
         </div>
       )}
 
       <DashboardDeleteProductDialog
-        open={Boolean(deleteTarget)}
-        productTitle={String(deleteTarget?.title ?? "")}
+        open={deleteTargets.length > 0}
+        productTitle={String(deleteTargets[0]?.title ?? "")}
+        productTitles={deleteTargets.map((product) =>
+          String(product.title ?? product.handle ?? "Untitled"),
+        )}
+        count={deleteTargets.length}
         busy={deleting}
         onClose={() => {
-          if (!deleting) setDeleteTarget(null);
+          if (!deleting) setDeleteTargets([]);
         }}
         onConfirm={handleConfirmDelete}
       />

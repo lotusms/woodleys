@@ -12,7 +12,7 @@ export function roundUsd2(amount) {
   return Math.round(n * 100) / 100;
 }
 
-/** Formats USD with cents — matches payment processors (e.g. PayPal) and avoids whole-dollar rounding. */
+/** Formats USD with cents — matches payment processors and avoids whole-dollar rounding. */
 export function formatUsd(amount) {
   return usd.format(Number(amount));
 }

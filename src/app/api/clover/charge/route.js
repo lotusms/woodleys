@@ -3,11 +3,13 @@ import { sendOrderConfirmationEmails } from "@/lib/email/order-emails.mjs";
 import { sanitizeOrder } from "@/lib/order-sanitize.mjs";
 import { roundUsd2 } from "@/lib/money";
 import {
-  isPayPalConfigured,
-  paypalCaptureCheckoutOrder,
-  paypalCaptureId,
-  paypalCapturedAmountUsd,
-} from "@/lib/paypal/server";
+  cloverChargeId,
+  cloverChargedAmountUsd,
+  cloverCreateCharge,
+  getCloverBrowserConfig,
+  isCloverConfigured,
+  usdToCloverCents,
+} from "@/lib/clover/server";
 
 function validateOrderPayload(order) {
   if (!order || typeof order !== "object") {
@@ -26,31 +28,69 @@ function validateOrderPayload(order) {
   return sanitizeOrder(order);
 }
 
+function clientIpFromRequest(request) {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+  return undefined;
+}
+
+export async function GET() {
+  const config = getCloverBrowserConfig();
+  if (!config.configured) {
+    return NextResponse.json(
+      { configured: false, error: "Clover is not configured on the server." },
+      { status: 503 },
+    );
+  }
+  return NextResponse.json({
+    configured: true,
+    environment: config.environment,
+    sdkUrl: config.sdkUrl,
+    publicKey: config.publicKey,
+    merchantId: config.merchantId,
+  });
+}
+
 export async function POST(request) {
   try {
-    if (!isPayPalConfigured()) {
+    if (!isCloverConfigured()) {
       return NextResponse.json(
-        { error: "PayPal is not configured on the server." },
+        { error: "Clover is not configured on the server." },
         { status: 503 },
       );
     }
 
     const body = await request.json().catch(() => ({}));
-    const paypalOrderID = body?.paypalOrderID;
-    if (!paypalOrderID || typeof paypalOrderID !== "string") {
+    const source = body?.source;
+    if (!source || typeof source !== "string") {
       return NextResponse.json(
-        { error: "PayPal order id is required." },
+        { error: "Clover card token is required." },
         { status: 400 },
       );
     }
 
     const order = validateOrderPayload(body?.order);
-    const capture = await paypalCaptureCheckoutOrder(paypalOrderID);
-    const capturedUsd = paypalCapturedAmountUsd(capture);
+    const amountCents = usdToCloverCents(order.totalUsd);
+    const charge = await cloverCreateCharge({
+      amountCents,
+      source,
+      currency: "usd",
+      description: `Woodley's Jewelers order ${order.id}`,
+      externalReferenceId: String(order.id),
+      receiptEmail: String(order.email),
+      clientIp: clientIpFromRequest(request),
+      idempotencyKey: `order-${order.id}`,
+    });
 
+    const chargedUsd = cloverChargedAmountUsd(charge);
     if (
-      capturedUsd !== null &&
-      Math.abs(roundUsd2(capturedUsd) - roundUsd2(order.totalUsd)) > 0.01
+      chargedUsd !== null &&
+      Math.abs(roundUsd2(chargedUsd) - roundUsd2(order.totalUsd)) > 0.01
     ) {
       return NextResponse.json(
         { error: "Payment amount does not match the order total." },
@@ -59,9 +99,8 @@ export async function POST(request) {
     }
 
     const payment = {
-      provider: "paypal",
-      paypalOrderId: paypalOrderID,
-      paypalCaptureId: paypalCaptureId(capture),
+      provider: "clover",
+      cloverChargeId: cloverChargeId(charge),
     };
     const fulfillment = {
       provider: "local",
@@ -78,7 +117,7 @@ export async function POST(request) {
     return NextResponse.json({
       ok: true,
       payment,
-      mode: "paypal",
+      mode: "clover",
       printfulOrderId: null,
       printfulStatus: null,
       email,

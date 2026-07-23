@@ -41,7 +41,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       "Austin Diamond 5.5mm Wedding Ring (1/5 ct. tw.) in 18K White Gold",
     description:
       "This contemporary ring features pavé diamonds that extend half of the way around the high polished band. The softened inside edges of the ring provide increased comfort.",
-    priceUsd: 2690,
+    priceUsd: 269,
     seoTitle:
       "Austin Diamond Wedding Ring BE2D371-18KW | Woodley's Jewelers",
     metaDescription:
@@ -73,7 +73,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       "Avalon Eternity Diamond 6mm Wedding Ring (2/5 ct. tw.) in 14K Yellow Gold",
     description:
       "Diamonds wrap around each side of this classic ring with a high polish finish. The interior has a rounded inside edge for increased comfort.",
-    priceUsd: 3490,
+    priceUsd: 349,
     seoTitle:
       "Avalon Eternity Diamond Wedding Ring BE2M2621-14KY | Woodley's Jewelers",
     metaDescription:
@@ -104,7 +104,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       "Festivity Prasiolite and Diamond Cocktail Ring in 14K Yellow Gold",
     description:
       "A prasiolite takes center stage in this cocktail ring while a diamond accented band, gallery, and prongs add extra glitz and glamour, creating a look reminiscent of spritely spring festivities (3/8 total diamond carat weight).",
-    priceUsd: 2250,
+    priceUsd: 225,
     seoTitle:
       "Festivity Prasiolite Cocktail Ring BE2GAM100-14KY | Woodley's Jewelers",
     metaDescription:
@@ -138,7 +138,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
     title: "Marina Diamond Ring in 14K White Gold",
     description:
       "This unique ring showcases a stunning cluster of sapphire, London Blue topaz, aquamarine, and diamond gemstones that emit a radiant aura of light.",
-    priceUsd: 1250,
+    priceUsd: 125,
     seoTitle:
       "Marina Diamond Ring BE2BS32-14KW | Woodley's Jewelers",
     metaDescription:
@@ -185,7 +185,7 @@ const RING_SAMPLE_PRODUCT_DEFINITIONS = [
       "Samba Lab Emerald and Diamond Cocktail Ring in 14K Yellow Gold",
     description:
       "This cocktail ring features a rich green lab emerald center stone and a diamond accented band, gallery, and prongs for a truly eye-catching, romantic look (1/3 total diamond carat weight).",
-    priceUsd: 2390,
+    priceUsd: 239,
     seoTitle:
       "Samba Lab Emerald Cocktail Ring BE2EM600LC-14KY | Woodley's Jewelers",
     metaDescription:
