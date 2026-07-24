@@ -861,9 +861,16 @@ export const HOME_FEATURED_CATEGORIES = [
   {
     title: "Engagement",
     href: "/engagement-wedding",
-    description: "Solitaires, halos, vintage-inspired settings, and custom design.",
+    description: "Solitaires, halos, vintage-inspired settings, and refined center-stone styles.",
     image: ENGAGEMENT_RINGS_HERO.src,
     alt: ENGAGEMENT_RINGS_HERO.alt,
+  },
+  {
+    title: "Wedding",
+    href: "/engagement-wedding/wedding-bands",
+    description: "Wedding bands for women and men, from classic gold to diamond-set profiles.",
+    image: WEDDING_BANDS_HERO.src,
+    alt: WEDDING_BANDS_HERO.alt,
   },
   {
     title: "Rings",
@@ -880,6 +887,20 @@ export const HOME_FEATURED_CATEGORIES = [
     alt: ALL_NECKLACES_HERO.alt,
   },
   {
+    title: "Earrings",
+    href: "/fine-jewelry/earrings",
+    description: "Studs, drops, and hoops in balanced proportions for everyday wear.",
+    image: ALL_EARRINGS_HERO.src,
+    alt: ALL_EARRINGS_HERO.alt,
+  },
+  {
+    title: "Bracelets",
+    href: "/fine-jewelry/bracelets",
+    description: "Bracelets and bangles with secure clasps and an easy, lasting finish.",
+    image: WOMEN_BRACELETS_HERO.src,
+    alt: WOMEN_BRACELETS_HERO.alt,
+  },
+  {
     title: "Watches",
     href: "/watches",
     description: "Bulova, Citizen, and Seiko timepieces for women and men.",
@@ -887,17 +908,10 @@ export const HOME_FEATURED_CATEGORIES = [
     alt: ALL_WATCHES_HERO.alt,
   },
   {
-    title: "Custom Jewelry",
-    href: "/custom-jewelry",
-    description: "Collaborative design with bench jewelers who listen first.",
-    image: editorialImages.custom,
-    alt: "Custom jewelry being crafted at the bench",
-  },
-  {
-    title: "Services",
-    href: "/services",
-    description: "Repairs, sizing, cleaning, watch service, and appraisals.",
-    image: editorialImages.service,
-    alt: "Jewelry service and care",
+    title: "Diamonds",
+    href: "/diamonds",
+    description: "Natural and lab-grown diamonds, with clear paths for comparing shape and origin.",
+    image: ALL_DIAMONDS_HERO.src,
+    alt: ALL_DIAMONDS_HERO.alt,
   },
 ];

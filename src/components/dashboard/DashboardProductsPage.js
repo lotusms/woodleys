@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useDashboardProducts } from "@/context/DashboardProductsContext";
 import DashboardDeleteProductDialog from "@/components/dashboard/DashboardDeleteProductDialog";
 import DashboardProductsCategoryNav from "@/components/dashboard/DashboardProductsCategoryNav";
+import Checkbox from "@/components/ui/Checkbox";
 import SearchableSelectListbox from "@/components/ui/SearchableSelectListbox";
 import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import {
@@ -113,19 +114,12 @@ function ProductRow({
         <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           {onSelectChange ? (
             <div className="flex shrink-0 items-center pt-5">
-              <input
+              <Checkbox
                 id={checkboxId}
-                type="checkbox"
                 checked={selected}
                 disabled={busy}
-                onChange={(event) =>
-                  onSelectChange(handle, event.target.checked)
-                }
-                className={
-                  light
-                    ? "size-4 rounded border-stone-400 text-amber-600 focus:ring-amber-500/40"
-                    : "size-4 rounded border-slate-600 bg-slate-900 text-amber-400 focus:ring-amber-400/30"
-                }
+                light={light}
+                onChange={(nextChecked) => onSelectChange(handle, nextChecked)}
                 aria-label={`Select ${String(product.title)}`}
               />
             </div>
@@ -779,28 +773,18 @@ function DashboardProductsPageContent() {
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-3">
-                    <label className="inline-flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={allActivePageSelected}
-                        disabled={pagedActiveProducts.length === 0 || deleting}
-                        onChange={(event) => {
-                          if (event.target.checked) selectActivePage();
-                          else deselectActivePage();
-                        }}
-                        className={
-                          light
-                            ? "size-4 rounded border-stone-400 text-amber-600 focus:ring-amber-500/40"
-                            : "size-4 rounded border-slate-600 bg-slate-900 text-amber-400 focus:ring-amber-400/30"
-                        }
-                        aria-label="Select all products on this page"
-                      />
-                      <span className={light ? "text-stone-700" : "text-slate-300"}>
-                        {allActivePageSelected
-                          ? "Deselect page"
-                          : "Select page"}
-                      </span>
-                    </label>
+                    <Checkbox
+                      checked={allActivePageSelected}
+                      disabled={pagedActiveProducts.length === 0 || deleting}
+                      light={light}
+                      onChange={(nextChecked) => {
+                        if (nextChecked) selectActivePage();
+                        else deselectActivePage();
+                      }}
+                      label={
+                        allActivePageSelected ? "Deselect page" : "Select page"
+                      }
+                    />
                     <span
                       className={`text-sm ${light ? "text-stone-500" : "text-slate-500"}`}
                     >

@@ -19,6 +19,7 @@ import * as checkboxChrome from "@/lib/checkboxChrome";
  *   light?: boolean;
  *   variant?: "default" | "card";
  *   className?: string;
+ *   "aria-label"?: string;
  * }} props
  */
 export default function Checkbox({
@@ -33,6 +34,7 @@ export default function Checkbox({
   light = true,
   variant = "default",
   className = "",
+  "aria-label": ariaLabel,
 }) {
   const fallbackId = useId();
   const inputId = id ?? `checkbox-${fallbackId}`;
@@ -47,6 +49,7 @@ export default function Checkbox({
           value={value}
           checked={checked}
           disabled={disabled}
+          aria-label={ariaLabel}
           onChange={(e) => onChange(e.target.checked)}
           className="peer sr-only"
         />
