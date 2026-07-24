@@ -60,6 +60,12 @@ const MEN_BRACELETS_HERO = {
   alt: "Men's bracelets and cuffs in gold and silver",
 };
 
+/** Local category hero for Bracelets (fine jewelry / all bracelets). */
+const ALL_BRACELETS_HERO = {
+  src: "/images/heroes/all-bracelets.png",
+  alt: "Assorted fine jewelry bracelets and bangles in gold",
+};
+
 /** Local category hero for Earrings (fine jewelry / all earrings). */
 const ALL_EARRINGS_HERO = {
   src: "/images/heroes/all-earrings.png",
@@ -528,7 +534,7 @@ export const CATALOG_SECTIONS = {
         title: "Bracelets",
         description: "Bracelets and bangles with secure clasps and lasting finish.",
         shopifyHandle: "bracelets",
-        image: { src: editorialImages.fine, alt: "Fine jewelry bracelet" },
+        image: ALL_BRACELETS_HERO,
       },
     ],
   },
@@ -897,8 +903,8 @@ export const HOME_FEATURED_CATEGORIES = [
     title: "Bracelets",
     href: "/fine-jewelry/bracelets",
     description: "Bracelets and bangles with secure clasps and an easy, lasting finish.",
-    image: WOMEN_BRACELETS_HERO.src,
-    alt: WOMEN_BRACELETS_HERO.alt,
+    image: ALL_BRACELETS_HERO.src,
+    alt: ALL_BRACELETS_HERO.alt,
   },
   {
     title: "Watches",
