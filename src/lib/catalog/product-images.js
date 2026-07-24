@@ -1,5 +1,9 @@
+import { normalizeCatalogImage } from "./normalize-image-src.js";
+
 /**
  * Gallery for product detail — main photo first, then additional photos (deduped).
+ * Local `/images/products/*.png` paths are rewritten to `.webp` when that is what
+ * ships in `public/` (Firestore often still stores legacy `.png` URLs).
  *
  * @param {import("./product-types").CatalogProduct | Record<string, unknown> | null | undefined} product
  * @returns {{ src: string; alt: string }[]}
@@ -16,12 +20,13 @@ export function getProductImages(product) {
    * @param {{ src?: string; alt?: string } | null | undefined} img
    */
   function pushImage(img) {
-    const src = img?.src?.trim();
+    const normalized = normalizeCatalogImage(img);
+    const src = normalized?.src?.trim();
     if (!src || seen.has(src)) return;
     seen.add(src);
     gallery.push({
       src,
-      alt: String(img?.alt ?? "").trim() || fallbackAlt,
+      alt: String(normalized?.alt ?? "").trim() || fallbackAlt,
     });
   }
 
