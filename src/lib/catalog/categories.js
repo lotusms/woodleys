@@ -66,6 +66,12 @@ const ALL_BRACELETS_HERO = {
   alt: "Assorted fine jewelry bracelets and bangles in gold",
 };
 
+/** Local category hero for Pendants. */
+const PENDANTS_HERO = {
+  src: "/images/heroes/pendants.png",
+  alt: "Fine jewelry pendants and charms in gold",
+};
+
 /** Local category hero for Earrings (fine jewelry / all earrings). */
 const ALL_EARRINGS_HERO = {
   src: "/images/heroes/all-earrings.png",
@@ -236,7 +242,7 @@ export const CATALOG_SECTIONS = {
         shopifyHandle: "pendants",
         audience: "women",
         derived: true,
-        image: { src: editorialImages.fine, alt: "Gold pendant on a chain" },
+        image: PENDANTS_HERO,
       },
       {
         slug: "earrings",
@@ -520,7 +526,7 @@ export const CATALOG_SECTIONS = {
         title: "Pendants",
         description: "Pendants and charms with room for personalization.",
         shopifyHandle: "pendants",
-        image: { src: editorialImages.fine, alt: "Gold pendant on a chain" },
+        image: PENDANTS_HERO,
       },
       {
         slug: "earrings",
